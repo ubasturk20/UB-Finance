@@ -558,6 +558,15 @@ export const accountDetails = sqliteTable('account_details', {
   loanBsmvRate: integer('loan_bsmv_rate'),
   /** KKDF on the interest, basis points (1500 = %15; konut kredisi 0) */
   loanKkdfRate: integer('loan_kkdf_rate'),
+  // Quantity-based assets (altın, döviz, fon, hisse, kripto), migration 0027
+  /** Miktar: decimal text, at most 8 decimals ("12.5"); services/assets.ts reads it exactly */
+  assetQuantity: text('asset_quantity'),
+  /** Birim: free text (≤20 characters), e.g. "gram altın", "adet", "lot" */
+  assetUnit: text('asset_unit'),
+  /** Birim fiyatı: one unit's last price, in the account's minor units */
+  assetUnitPrice: integer('asset_unit_price'),
+  /** The day of that price (yyyy-MM-dd) */
+  assetPriceDate: text('asset_price_date'),
   updatedAt: text('updated_at')
     .notNull()
     .default(sql`(datetime('now'))`),

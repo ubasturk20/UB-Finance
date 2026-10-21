@@ -34,6 +34,7 @@ import { dashboardsRouter } from './routes/dashboards.js';
 import { schedulesRouter } from './routes/schedules.js';
 import { goalsRouter } from './routes/goals.js';
 import { creditCardsRouter } from './routes/creditCards.js';
+import { assetsRouter } from './routes/assets.js';
 import { plaidRouter } from './routes/plaid.js';
 import { simplefinRouter } from './routes/simplefin.js';
 import { enableBankingCallback, enableBankingRouter } from './routes/enableBanking.js';
@@ -110,6 +111,8 @@ app.use('/api/schedules', schedulesRouter);
 app.use('/api/goals', goalsRouter);
 // Card details, statement summary and installments (/api/accounts/:id/…, /api/installments/:id)
 app.use('/api', creditCardsRouter);
+// Asset unit prices and net worth equivalents (/api/accounts/:id/asset-price, /api/net-worth/…)
+app.use('/api', assetsRouter);
 setRateDownloader({ download: fetchRates, checkUrl: assertSafeUrl, defaultUrl: DEFAULT_RATES_URL });
 app.use('/api/currency', currencyRouter);
 if (bankSyncEnabled) {

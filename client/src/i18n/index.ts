@@ -3,6 +3,7 @@
 // (one file per area, so they can be edited separately); the glossary in ./glossary.md keeps
 // the same English term translated the same way everywhere.
 import { accounts } from './messages/accounts';
+import { assets } from './messages/assets';
 import { budget } from './messages/budget';
 import { common } from './messages/common';
 import { creditCards } from './messages/creditCards';
@@ -27,6 +28,7 @@ const MESSAGES = {
   ...accounts,
   ...creditCards,
   ...loans,
+  ...assets,
   ...transactions,
   ...transactionDetail,
   ...importing,

@@ -960,7 +960,38 @@ export interface AccountDetails {
   /** Loans: BSMV and KKDF on the interest, basis points (null = the loan type's usual) */
   loanBsmvRate: number | null;
   loanKkdfRate: number | null;
+  /** Assets: how much is held, decimal text with a dot ("12.5", at most 8 decimals) */
+  assetQuantity: string | null;
+  /** Assets: the unit ("gram altın", "adet", "lot"…; at most 20 characters) */
+  assetUnit: string | null;
+  /** Assets: one unit's last price, in the account's minor units */
+  assetUnitPrice: number | null;
+  /** Assets: that price's day (yyyy-MM-dd) */
+  assetPriceDate: string | null;
   updatedAt: string;
+}
+
+/** What POST /accounts/:id/asset-price saved */
+export interface AssetPriceResult {
+  details: AccountDetails;
+  /** The account's value now: quantity × unit price */
+  value: number;
+  /** The correction added (0 when the balance already was the value) */
+  change: number;
+  transactionId: string | null;
+}
+
+/** Net worth today in other terms: each null when it can't be worked out */
+export interface NetWorthEquivalents {
+  /** In the budget's currency */
+  netWorth: number;
+  currency: string | null;
+  /** In US dollar / euro minor units, at the rate of `rateDate` */
+  usd: { value: number; rateDate: string } | null;
+  eur: { value: number; rateDate: string } | null;
+  /** In grams of gold (2 decimals), at the latest gram price entered on an account */
+  goldGram: { value: number; priceDate: string; accountName: string } | null;
+  unconverted: string[];
 }
 
 export interface CardSummary {

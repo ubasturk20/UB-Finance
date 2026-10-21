@@ -71,7 +71,10 @@ export interface DemoBudget {
   dashboardPages: Row<typeof dashboardPages>[];
   dashboardWidgets: Row<typeof dashboardWidgets>[];
   goals: Row<typeof goals>[];
-  /** The credit card's limit, statement and due days, and the car loan's payment plan */
+  /**
+   * The credit card's limit, statement and due days, the car loan's payment plan, and the
+   * brokerage's fund shares
+   */
   accountDetails: Row<typeof accountDetails>[];
 }
 
@@ -1154,6 +1157,7 @@ export function buildDemoBudget(today: Date): DemoBudget {
   // ─── Accounts that change value: 401(k), brokerage, car loan, the car ───────
   let retirement = 1_842_000;
   let brokerage = 615_000;
+  let brokerageUpdated: string | null = null;
   let loan = -1_795_000;
   monthStarts.forEach((m, mi) => {
     const date = dayIn(m, lastDayOfMonth(m).getDate());
@@ -1171,6 +1175,7 @@ export function buildDemoBudget(today: Date): DemoBudget {
     });
     const brokerageChange = 15_000 + Math.round(brokerage * (0.005 + (rand() - 0.45) * 0.05));
     brokerage += brokerageChange;
+    brokerageUpdated = date;
     add({
       account: 'brokerage',
       date,
@@ -1442,6 +1447,22 @@ export function buildDemoBudget(today: Date): DemoBudget {
     loanBsmvRate: 0,
     loanKkdfRate: 0,
   });
+
+  // The brokerage as a number of fund shares at the last update's price, which comes to its
+  // balance (the quantity has 8 decimals, so it rounds to exactly that)
+  if (brokerageUpdated) {
+    const unitPrice = 3_250;
+    const scaled = (BigInt(brokerage) * 100_000_000n) / BigInt(unitPrice);
+    const whole = scaled / 100_000_000n;
+    const frac = (scaled % 100_000_000n).toString().padStart(8, '0').replace(/0+$/, '');
+    result.accountDetails.push({
+      accountId: acct.brokerage,
+      assetQuantity: frac ? `${whole}.${frac}` : `${whole}`,
+      assetUnit: 'pay',
+      assetUnitPrice: unitPrice,
+      assetPriceDate: brokerageUpdated,
+    });
+  }
 
   // ─── Reports: two dashboards and three saved custom reports ─────────────────
   const range = (preset: string, months: number) => ({

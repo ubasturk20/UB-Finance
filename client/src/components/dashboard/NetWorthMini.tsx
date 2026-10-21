@@ -9,6 +9,7 @@ import { chartColors } from '../../utils/chartColors';
 import { formatDateAxisLabels, formatDateLabel } from '../../utils/chartTicks';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
 import { formatPercent, t } from '../../i18n';
+import { NetWorthEquivalents } from './NetWorthEquivalents';
 
 function MiniTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -125,7 +126,7 @@ export default function NetWorthMini() {
   return (
     <div>
       <div className="flex items-start justify-between max-md:flex-wrap max-md:gap-2">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide">
             {t('dash.netWorth.title')}
           </p>
@@ -134,6 +135,7 @@ export default function NetWorthMini() {
           >
             {formatCurrency(latest)}
           </p>
+          {!noAccounts && <NetWorthEquivalents className="mt-0.5" />}
           {noAccounts && (
             <p className="text-sm text-text-tertiary mt-1">{t('dash.netWorth.empty')}</p>
           )}

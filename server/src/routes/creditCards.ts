@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/index.js';
 import { accounts, transactions } from '../db/schema.js';
-import { isCardType, isLoanType } from '../utils/accountTypes.js';
+import { isAssetType, isCardType, isLoanType } from '../utils/accountTypes.js';
 import { isoDate, isoMonth } from '../utils/validation.js';
 import {
   cardSummaryFor,
@@ -15,9 +15,11 @@ import {
   saveDetails,
 } from '../services/creditCardService.js';
 import { loanScheduleFor } from '../services/loanService.js';
+import { normalizeQuantity, UNIT_MAX_LENGTH } from '../services/assets.js';
 
-// Credit card details, statement summary and installment purchases (Turkish cards), and loan
-// details with their payment plan (ihtiyaç/konut/taşıt/eğitim kredisi).
+// Credit card details, statement summary and installment purchases (Turkish cards), loan
+// details with their payment plan (ihtiyaç/konut/taşıt/eğitim kredisi), and the quantity and
+// unit price of assets (altın, döviz, fon, hisse, kripto; their price updates are in assets.ts).
 // Mounted at /api (paths under /accounts/:id and /installments/:id).
 
 export const creditCardsRouter = Router();
@@ -27,6 +29,11 @@ const NOT_A_CARD =
 
 const NOT_A_LOAN =
   'Kredi bilgileri yalnızca kredi hesaplarına (ihtiyaç, konut, taşıt, eğitim) girilebilir.';
+
+const NOT_AN_ASSET =
+  'Miktar bilgileri yalnızca yatırım, emeklilik, kripto, değerli eşya ve diğer varlık hesaplarına girilebilir.';
+
+const NO_DETAILS = 'Bu hesap türünde ek bilgi tutulmaz.';
 
 const day = z.number().int().min(1).max(31);
 const basisPoints = z.number().int().min(0).max(10_000);
@@ -45,6 +52,22 @@ const detailsSchema = z
     loanFirstPayment: isoDate.nullable(),
     loanBsmvRate: basisPoints.nullable(),
     loanKkdfRate: basisPoints.nullable(),
+    // A decimal with a dot and at most 8 decimals ("12.5"), stored as written without zeros
+    assetQuantity: z
+      .string()
+      .max(30)
+      .transform((text, ctx) => {
+        const quantity = normalizeQuantity(text);
+        if (quantity === null) {
+          ctx.addIssue({ code: 'custom', message: 'Expected a quantity such as 12.5' });
+          return z.NEVER;
+        }
+        return quantity;
+      })
+      .nullable(),
+    assetUnit: z.string().trim().min(1).max(UNIT_MAX_LENGTH).nullable(),
+    assetUnitPrice: z.number().int().min(0).max(1e13).nullable(),
+    assetPriceDate: isoDate.nullable(),
   })
   .partial();
 
@@ -57,6 +80,7 @@ const LOAN_FIELDS = [
   'loanBsmvRate',
   'loanKkdfRate',
 ];
+const ASSET_FIELDS = ['assetQuantity', 'assetUnit', 'assetUnitPrice', 'assetPriceDate'];
 
 const installmentSchema = z.object({
   description: z.string().trim().min(1).max(200),
@@ -87,17 +111,22 @@ creditCardsRouter.put('/accounts/:id/details', (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const account = findAccount(req.params.id);
   if (!account) return res.status(404).json({ error: 'Hesap bulunamadı' });
-  // Card fields only on cards, loan fields only on loans; other accounts have no details
+  // Card fields only on cards, loan fields only on loans, asset fields only on assets; other
+  // accounts have no details
   const sent = Object.keys(parsed.data);
   const isCard = isCardType(account.type);
   const isLoan = isLoanType(account.type);
-  if (!isCard && !isLoan) return res.status(422).json({ error: NOT_A_CARD });
+  const isAsset = isAssetType(account.type);
   if (!isCard && sent.some((key) => CARD_FIELDS.includes(key))) {
     return res.status(422).json({ error: NOT_A_CARD });
   }
   if (!isLoan && sent.some((key) => LOAN_FIELDS.includes(key))) {
     return res.status(422).json({ error: NOT_A_LOAN });
   }
+  if (!isAsset && sent.some((key) => ASSET_FIELDS.includes(key))) {
+    return res.status(422).json({ error: NOT_AN_ASSET });
+  }
+  if (!isCard && !isLoan && !isAsset) return res.status(422).json({ error: NO_DETAILS });
   res.json(saveDetails(account.id, parsed.data));
 });
 

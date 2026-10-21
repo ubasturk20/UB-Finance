@@ -101,3 +101,7 @@ eklenir. Ton: sade, kısa, "siz" dili (Kaydedin değil, düğmelerde mastar/emir
 | KKDF (support fund levy)  | KKDF                               |
 | Payment plan / schedule   | Ödeme planı                        |
 | Early payoff              | Erken kapama                       |
+| Quantity (asset)          | Miktar                             |
+| Unit / Unit price         | Birim / Birim fiyatı               |
+| Gram of gold              | Gram altın                         |
+| Equivalent (net worth in) | Karşılık                           |
