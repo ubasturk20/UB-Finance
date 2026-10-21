@@ -223,7 +223,7 @@ test.describe('goals', () => {
     await page.getByRole('main').getByRole('button', { name: 'Hedef ekle' }).first().click();
 
     const dialog = page.getByRole('dialog', { name: 'Hedef ekle' });
-    await dialog.getByRole('textbox', { name: 'Ad' }).fill('Emergency Fund');
+    await dialog.getByRole('textbox', { name: 'Ad', exact: true }).fill('Emergency Fund');
     await dialog.getByRole('textbox', { name: 'Hedef', exact: true }).fill('10000');
     await dialog.getByRole('textbox', { name: 'Şu ana kadar biriken' }).fill('2500');
     await dialog.getByRole('combobox', { name: 'Bağlı hesap' }).selectOption({ label: 'Savings' });
