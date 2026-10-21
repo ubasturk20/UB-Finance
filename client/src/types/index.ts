@@ -617,14 +617,14 @@ export type RecurrenceRule =
   | { type: 'yearly'; anchorMonth: number; anchorDay: number };
 
 export const RECURRENCE_TYPE_LABELS: { value: RecurrenceType; label: string }[] = [
-  { value: 'once', label: 'One Time' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'biweekly', label: 'Every 2 Weeks' },
-  { value: 'semimonthly', label: 'Twice a Month' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'semiannually', label: 'Every 6 Months' },
-  { value: 'yearly', label: 'Yearly' },
+  { value: 'once', label: t('rec.freq.once') },
+  { value: 'weekly', label: t('rec.freq.weekly') },
+  { value: 'biweekly', label: t('rec.freq.biweekly') },
+  { value: 'semimonthly', label: t('rec.freq.semimonthly') },
+  { value: 'monthly', label: t('rec.freq.monthly') },
+  { value: 'quarterly', label: t('rec.freq.quarterly') },
+  { value: 'semiannually', label: t('rec.freq.semiannually') },
+  { value: 'yearly', label: t('rec.freq.yearly') },
 ];
 
 export interface Schedule {

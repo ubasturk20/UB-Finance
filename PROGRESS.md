@@ -4,12 +4,18 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 
 ## Durum
 
-- **Aktif faz:** F3a tamamlandı, CI tamamen yeşil (PR #4, dal `tr/f3a-sayfalar`) — birleştirme onayı bekliyor. Sıradaki: F3b (Bütçe + Düzenli İşlemler + Hedefler).
+- **Aktif faz:** F3b tamamlandı, CI tamamen yeşil (PR #5, dal `tr/f3b-sayfalar`) — birleştirme onayı bekliyor. Sıradaki: F3c (Raporlar, Nakit Akışı, Kurallar, Alıcılar, kalan parçalar).
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Her faz kendi dalında (`tr/fN-…`), PR ile `main`'e.
 - **Çalışma düzeni (önemli):**
   - Oturum ortamı npm'e erişemiyor → test/tsc yerelde çalışmaz; **CI tek doğrulama**. Her PR'da CI (client, server, e2e, electron, website) + `Format report` çalışır.
   - CI loglarına erişim yok; yalnızca **annotation**'lar okunur (`gh api repos/ubasturk20/UB-Finance/check-runs/<job>/annotations`). Playwright hataları ve `Format report` (Prettier'ın değiştireceği dosyalar) annotation olarak gelir.
   - Yerel Prettier 3.8 (`/opt/node-tools/node_modules/prettier/bin/prettier.cjs`), repo 3.9 kullanıyor: **mevcut dosyalara `--write` yapma** (union tiplerini farklı biçimliyor); yalnızca yeni/küçük değişiklikler, sonra `Format report`'a bak.
+
+## F3b — Bütçe, Hedefler, Düzenli İşlemler (2026-10-21, PR #5)
+
+- Mesaj dosyaları: `budget.ts` (`budget.*`, `goals.*`), `recurring.ts` (`rec.*`). Sıklık etiketleri `types/index.ts` `RECURRENCE_TYPE_LABELS`.
+- E2E adları: `Bütçelenecek` (status), `Groceries için planlanan: …`, düzenli işlem satır menüsü `… için diğer işlemler` (`openRowMenu` yardımcısı, `recurring.spec.ts`).
+- Kalan: `e2e/screenshots.ts` (CI'da çalışmıyor) hâlâ `Planned for …`, `Add Goal` arıyor — F11'de güncelle. Rapor bileşenlerindeki "Total Income/Expenses" F3c'de.
 
 ## F3a — Genel Bakış, Hesaplar, İşlemler, içe aktarma (2026-10-21, PR #4)
 

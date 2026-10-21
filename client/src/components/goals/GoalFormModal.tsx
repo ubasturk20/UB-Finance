@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { CurrencyInput } from '../ui/CurrencyInput';
 import { useAccounts } from '../../hooks/useAccounts';
 import type { Goal } from '../../types';
+import { t } from '../../i18n';
 
 const ICONS = ['🎯', '🏠', '✈️', '🚗', '💰', '🎓', '💍', '🏖️', '📱', '🛡️', '🎁', '⭐'];
 const COLORS = [
@@ -79,15 +80,20 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editGoal ? 'Edit Goal' : 'Add Goal'} size="sm">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editGoal ? t('goals.edit') : t('goals.add')}
+      size="sm"
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-text-secondary">Name</label>
+          <label className="text-sm font-medium text-text-secondary">{t('goals.form.name')}</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Emergency Fund"
-            aria-label="Name"
+            placeholder={t('goals.form.namePlaceholder')}
+            aria-label={t('goals.form.name')}
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
             autoFocus
           />
@@ -95,30 +101,36 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-secondary">Target</label>
+            <label className="text-sm font-medium text-text-secondary">
+              {t('goals.form.target')}
+            </label>
             <CurrencyInput
               value={targetAmount}
               onChange={setTargetAmount}
               className="w-full"
-              aria-label="Target"
+              aria-label={t('goals.form.target')}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-secondary">Saved so far</label>
+            <label className="text-sm font-medium text-text-secondary">
+              {t('goals.form.savedSoFar')}
+            </label>
             <CurrencyInput
               value={currentAmount}
               onChange={setCurrentAmount}
               className="w-full"
-              aria-label="Saved so far"
+              aria-label={t('goals.form.savedSoFar')}
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-text-secondary">Target date (optional)</label>
+          <label className="text-sm font-medium text-text-secondary">
+            {t('goals.form.targetDateOptional')}
+          </label>
           <input
             type="date"
-            aria-label="Target date"
+            aria-label={t('goals.form.targetDate')}
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
@@ -127,15 +139,15 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-text-secondary">
-            Linked account (optional)
+            {t('goals.form.linkedAccountOptional')}
           </label>
           <select
-            aria-label="Linked account"
+            aria-label={t('goals.form.linkedAccount')}
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
           >
-            <option value="">None</option>
+            <option value="">{t('common.none')}</option>
             {accounts
               .filter((a) => !a.closedAt)
               .map((a) => (
@@ -147,7 +159,7 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-text-secondary">Icon</label>
+          <label className="text-sm font-medium text-text-secondary">{t('goals.form.icon')}</label>
           <div className="flex flex-wrap gap-1.5">
             {ICONS.map((i) => (
               <button
@@ -166,14 +178,14 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-text-secondary">Color</label>
+          <label className="text-sm font-medium text-text-secondary">{t('goals.form.color')}</label>
           <div className="flex gap-2">
             {COLORS.map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setColor(c)}
-                aria-label={`Color ${c}`}
+                aria-label={t('goals.form.colorOption', { color: c })}
                 aria-pressed={color === c}
                 className={`w-7 h-7 rounded-full border-2 transition-all ${
                   color === c ? 'border-text scale-110' : 'border-transparent'
@@ -186,10 +198,10 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={!name.trim() || targetAmount <= 0}>
-            {editGoal ? 'Save' : 'Add Goal'}
+            {editGoal ? t('common.save') : t('goals.add')}
           </Button>
         </div>
       </form>

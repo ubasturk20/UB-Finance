@@ -8,6 +8,7 @@ import OccurrenceMatchModal from '../components/recurring/OccurrenceMatchModal';
 import DiscoverSchedulesModal from '../components/recurring/DiscoverSchedulesModal';
 import UpcomingLengthModal from '../components/recurring/UpcomingLengthModal';
 import { Button } from '../components/ui/Button';
+import { t } from '../i18n';
 import { useOpenFromLink } from '../hooks/useOpenFromLink';
 import {
   useSchedules,
@@ -19,8 +20,8 @@ import type { Schedule } from '../types';
 import { format, subDays, addDays } from 'date-fns';
 
 const tabs = [
-  { id: 'monthly' as const, label: 'Monthly' },
-  { id: 'all' as const, label: 'All recurring' },
+  { id: 'monthly' as const, label: t('rec.tab.monthly') },
+  { id: 'all' as const, label: t('rec.tab.all') },
 ];
 
 type TabId = (typeof tabs)[number]['id'];
@@ -87,7 +88,7 @@ export default function RecurringTransactionsPage() {
     <div className="flex flex-col h-full bg-surface">
       <div className="px-6 border-b border-border shrink-0 flex flex-wrap items-center justify-between gap-x-4">
         <div className="flex items-center gap-6">
-          <h1 className="text-lg font-semibold text-text py-4">Recurring</h1>
+          <h1 className="text-lg font-semibold text-text py-4">{t('rec.page.title')}</h1>
           <div className="flex gap-1 self-stretch">
             {tabs.map((tab) => (
               <button
@@ -106,10 +107,10 @@ export default function RecurringTransactionsPage() {
         </div>
         <div className="flex items-center gap-2 py-2">
           <Button variant="secondary" size="sm" onClick={() => setDiscoverOpen(true)}>
-            <Sparkles size={13} /> Find recurring
+            <Sparkles size={13} /> {t('rec.find')}
           </Button>
           <Button size="sm" onClick={handleAdd}>
-            <Plus size={13} /> Add recurring
+            <Plus size={13} /> {t('rec.add')}
           </Button>
         </div>
       </div>

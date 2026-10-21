@@ -3,9 +3,11 @@
 // (one file per area, so they can be edited separately); the glossary in ./glossary.md keeps
 // the same English term translated the same way everywhere.
 import { accounts } from './messages/accounts';
+import { budget } from './messages/budget';
 import { common } from './messages/common';
 import { dashboard } from './messages/dashboard';
 import { importing } from './messages/importing';
+import { recurring } from './messages/recurring';
 import { settings } from './messages/settings';
 import { shell } from './messages/shell';
 import { transactionDetail } from './messages/transactionDetail';
@@ -20,6 +22,8 @@ const MESSAGES = {
   ...transactions,
   ...transactionDetail,
   ...importing,
+  ...budget,
+  ...recurring,
 } as const;
 
 export type MessageKey = keyof typeof MESSAGES;

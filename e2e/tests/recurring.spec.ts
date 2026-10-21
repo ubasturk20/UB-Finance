@@ -11,12 +11,16 @@ const scheduleRow = (page: Page, name: string) =>
     .locator('div')
     .filter({ hasText: name })
     .filter({
-      has: page.getByRole('button', { name: 'Actions' }),
+      has: page.getByRole('button', { name: 'diğer işlemler' }),
     });
+
+/** Opens the ⋮ menu on a schedule's row */
+const openRowMenu = (page: Page, name: string) =>
+  scheduleRow(page, name).first().getByRole('button', { name: 'diğer işlemler' }).click();
 
 async function openAll(page: Page) {
   await open(page, '/recurring');
-  await page.getByRole('button', { name: 'All recurring' }).click();
+  await page.getByRole('button', { name: 'Tüm düzenli işlemler' }).click();
 }
 
 async function createRent(api: Api, accountId: string, extra: object = {}) {
@@ -34,19 +38,23 @@ test.describe('recurring', () => {
   test('adds a monthly bill through the form', async ({ page, api }) => {
     await api.createAccount('Checking', 500_000);
     await open(page, '/recurring');
-    await page.getByRole('main').getByRole('button', { name: 'Add recurring' }).first().click();
+    await page
+      .getByRole('main')
+      .getByRole('button', { name: 'Düzenli işlem ekle' })
+      .first()
+      .click();
 
-    const dialog = page.getByRole('dialog', { name: 'Add Recurring' });
-    await dialog.getByRole('textbox', { name: 'Name' }).fill('Streaming Plus');
-    await typeAmount(dialog.getByRole('textbox', { name: 'Amount' }), '15.99');
-    await expect(dialog.getByRole('button', { name: 'Expense' })).toHaveAttribute(
+    const dialog = page.getByRole('dialog', { name: 'Düzenli işlem ekle' });
+    await dialog.getByRole('textbox', { name: 'Ad', exact: true }).fill('Streaming Plus');
+    await typeAmount(dialog.getByRole('textbox', { name: 'Tutar' }), '15.99');
+    await expect(dialog.getByRole('button', { name: 'Gider' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await dialog.getByRole('combobox', { name: 'Frequency' }).selectOption('monthly');
-    await dialog.getByRole('combobox', { name: 'Account' }).selectOption({ label: 'Checking' });
-    await dialog.getByRole('textbox', { name: 'Start date' }).fill(isoDay(1));
-    await dialog.getByRole('button', { name: 'Add Recurring' }).click();
+    await dialog.getByRole('combobox', { name: 'Sıklık' }).selectOption('monthly');
+    await dialog.getByRole('combobox', { name: 'Hesap' }).selectOption({ label: 'Checking' });
+    await dialog.getByRole('textbox', { name: 'Başlangıç tarihi' }).fill(isoDay(1));
+    await dialog.getByRole('button', { name: 'Düzenli işlem ekle' }).click();
     await expect(dialog).toBeHidden();
 
     const [schedule] = await api.call<any[]>('GET', '/schedules');
@@ -58,7 +66,7 @@ test.describe('recurring', () => {
       startDate: isoDay(1),
     });
 
-    await page.getByRole('button', { name: 'All recurring' }).click();
+    await page.getByRole('button', { name: 'Tüm düzenli işlemler' }).click();
     await expect(scheduleRow(page, 'Streaming Plus').first()).toContainText('15,99 ₺');
   });
 
@@ -69,19 +77,23 @@ test.describe('recurring', () => {
     await api.createAccount('Checking', 500_000);
     await api.createAccount('Savings', 100_000, 'savings');
     await open(page, '/recurring');
-    await page.getByRole('main').getByRole('button', { name: 'Add recurring' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Add Recurring' });
-    const name = dialog.getByRole('textbox', { name: 'Name' });
-    const account = dialog.getByRole('combobox', { name: 'Account' });
+    await page
+      .getByRole('main')
+      .getByRole('button', { name: 'Düzenli işlem ekle' })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Düzenli işlem ekle' });
+    const name = dialog.getByRole('textbox', { name: 'Ad', exact: true });
+    const account = dialog.getByRole('combobox', { name: 'Hesap' });
 
     await name.fill('Gym membership');
-    await typeAmount(dialog.getByRole('textbox', { name: 'Amount' }), '45');
+    await typeAmount(dialog.getByRole('textbox', { name: 'Tutar' }), '45');
     await account.selectOption({ label: 'Savings' });
 
     // A brand-new payee (creating it refreshes the payee list)
-    await dialog.getByRole('textbox', { name: 'Payee' }).fill('Iron Temple Gym');
+    await dialog.getByRole('textbox', { name: 'Alıcı' }).fill('Iron Temple Gym');
     await dialog.getByRole('button', { name: /Yeni alıcı oluştur/ }).click();
-    await expect(dialog.getByRole('textbox', { name: 'Payee' })).toHaveValue('Iron Temple Gym');
+    await expect(dialog.getByRole('textbox', { name: 'Alıcı' })).toHaveValue('Iron Temple Gym');
     await expect(name).toHaveValue('Gym membership');
     await expect(account).toHaveValue(/.+/);
     await expect(account.locator('option:checked')).toHaveText('Savings');
@@ -95,9 +107,9 @@ test.describe('recurring', () => {
     await expect(dialog).toBeVisible();
     await expect(name).toHaveValue('Gym membership');
     await expect(account.locator('option:checked')).toHaveText('Savings');
-    await expect(dialog.getByRole('textbox', { name: 'Payee' })).toHaveValue('Iron Temple Gym');
+    await expect(dialog.getByRole('textbox', { name: 'Alıcı' })).toHaveValue('Iron Temple Gym');
 
-    await dialog.getByRole('button', { name: 'Add Recurring' }).click();
+    await dialog.getByRole('button', { name: 'Düzenli işlem ekle' }).click();
     await expect(dialog).toBeHidden();
     const [schedule] = await api.call<any[]>('GET', '/schedules');
     expect(schedule).toMatchObject({ name: 'Gym membership', amount: -4_500 });
@@ -107,8 +119,8 @@ test.describe('recurring', () => {
     const checking = await api.createAccount('Checking', 500_000);
     await createRent(api, checking.id);
     await openAll(page);
-    await scheduleRow(page, 'Rent').first().getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Mark next as paid' }).click();
+    await openRowMenu(page, 'Rent');
+    await page.getByRole('menuitem', { name: 'Sıradakini ödendi olarak işaretle' }).click();
 
     await expect.poll(() => api.balance(checking.id)).toBe(350_000);
     const [paid] = await api.transactions(`?account_id=${checking.id}&from=2000-01-01`);
@@ -124,8 +136,8 @@ test.describe('recurring', () => {
       autoCreate: 1,
     });
     await openAll(page);
-    await scheduleRow(page, 'Rent').first().getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Pause' }).click();
+    await openRowMenu(page, 'Rent');
+    await page.getByRole('menuitem', { name: 'Duraklat' }).click();
 
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/schedules'))[0])
@@ -136,24 +148,24 @@ test.describe('recurring', () => {
         dateFlexibility: 6,
         autoCreate: 1,
       });
-    await scheduleRow(page, 'Rent').first().getByRole('button', { name: 'Actions' }).click();
-    await expect(page.getByRole('menuitem', { name: 'Resume' })).toBeVisible();
+    await openRowMenu(page, 'Rent');
+    await expect(page.getByRole('menuitem', { name: 'Sürdür' })).toBeVisible();
   });
 
   test('cancelling hides a schedule behind "Show canceled"', async ({ page, api }) => {
     const checking = await api.createAccount('Checking', 0);
     await createRent(api, checking.id);
     await openAll(page);
-    await scheduleRow(page, 'Rent').first().getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Cancel recurring' }).click();
+    await openRowMenu(page, 'Rent');
+    await page.getByRole('menuitem', { name: 'Düzenli işlemi iptal et' }).click();
     await page
-      .getByRole('dialog', { name: 'Cancel recurring item?' })
-      .getByRole('button', { name: 'Cancel item' })
+      .getByRole('dialog', { name: 'Düzenli işlem iptal edilsin mi?' })
+      .getByRole('button', { name: 'İptal et', exact: true })
       .click();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/schedules'))[0].status)
       .toBe('canceled');
-    await expect(page.getByText(/Show \d+ canceled|Show canceled/)).toBeVisible();
+    await expect(page.getByText(/İptal edilen düzenli işlemleri göster/)).toBeVisible();
   });
 
   test('"Find recurring" discovers a subscription from past transactions', async ({
@@ -174,12 +186,16 @@ test.describe('recurring', () => {
       });
     }
     await open(page, '/recurring');
-    await page.getByRole('main').getByRole('button', { name: 'Find recurring' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Search for recurring transactions' });
-    await expect(dialog).toContainText('Every month on the 5th');
-    await dialog.getByRole('checkbox', { name: 'Track MusicBox' }).press('Space');
-    await expect(dialog.getByRole('checkbox', { name: 'Track MusicBox' })).toBeChecked();
-    await dialog.getByRole('button', { name: 'Create 1 recurring' }).click();
+    await page
+      .getByRole('main')
+      .getByRole('button', { name: 'Düzenli işlemleri bul' })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Düzenli işlemleri ara' });
+    await expect(dialog).toContainText('Her ayın 5. günü');
+    await dialog.getByRole('checkbox', { name: 'Takip et: MusicBox' }).press('Space');
+    await expect(dialog.getByRole('checkbox', { name: 'Takip et: MusicBox' })).toBeChecked();
+    await dialog.getByRole('button', { name: '1 düzenli işlem oluştur' }).click();
 
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/schedules')).map((s) => s.name))

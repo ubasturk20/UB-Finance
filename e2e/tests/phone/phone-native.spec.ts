@@ -139,26 +139,26 @@ test.describe('budget', () => {
     await open(page, '/budget');
 
     const card = page.getByTestId('budget-card').filter({ hasText: 'Groceries' });
-    await expect(card).toContainText('457,50 ₺ remaining');
+    await expect(card).toContainText('457,50 ₺ kalan');
     await expect(card).toContainText('42,50 ₺');
     await expect(page.getByRole('table')).toHaveCount(0);
-    await expectTouchSize(page.getByRole('button', { name: 'Previous month' }));
-    await expectTouchSize(page.getByRole('button', { name: 'Next month' }));
+    await expectTouchSize(page.getByRole('button', { name: 'Önceki ay' }));
+    await expectTouchSize(page.getByRole('button', { name: 'Sonraki ay' }));
 
-    const planned = card.getByRole('button', { name: 'Planned for Groceries: 500 ₺' });
+    const planned = card.getByRole('button', { name: 'Groceries için planlanan: 500 ₺' });
     await expectTouchSize(planned);
     await planned.click();
-    const sheet = page.getByRole('dialog', { name: 'Plan Groceries' });
+    const sheet = page.getByRole('dialog', { name: 'Groceries planı' });
     await expectBottomSheet(page, sheet);
-    await sheet.getByRole('textbox', { name: 'Planned for Groceries' }).fill('425');
-    await sheet.getByRole('button', { name: 'Save' }).click();
+    await sheet.getByRole('textbox', { name: 'Groceries için planlanan' }).fill('425');
+    await sheet.getByRole('button', { name: 'Kaydet' }).click();
     await expect(sheet).toBeHidden();
-    await expect(card).toContainText('382,50 ₺ remaining');
+    await expect(card).toContainText('382,50 ₺ kalan');
 
     // Enter saves too, and the amount can be used for the next 12 months
-    await card.getByRole('button', { name: /^Planned for Groceries/ }).click();
-    await sheet.getByRole('checkbox', { name: 'Use this amount for the next 12 months' }).check();
-    const input = sheet.getByRole('textbox', { name: 'Planned for Groceries' });
+    await card.getByRole('button', { name: /^Groceries için planlanan/ }).click();
+    await sheet.getByRole('checkbox', { name: 'Bu tutarı sonraki 12 ay için kullan' }).check();
+    const input = sheet.getByRole('textbox', { name: 'Groceries için planlanan' });
     await input.fill('300');
     await input.press('Enter');
     await expect(sheet).toBeHidden();
@@ -179,8 +179,10 @@ test.describe('budget', () => {
   }) => {
     await seedAccount(api);
     await open(page, '/budget');
-    const fixed = page.getByRole('region', { name: 'Fixed' });
-    const showInactive = fixed.getByRole('button', { name: /^Show \d+ inactive categories$/ });
+    const fixed = page.getByRole('region', { name: 'Sabit' });
+    const showInactive = fixed.getByRole('button', {
+      name: /^\d+ etkin olmayan kategoriyi göster$/,
+    });
 
     // Nothing planned yet: every category is listed, so there's something to plan
     await expect(fixed.getByTestId('budget-card').first()).toBeVisible();
@@ -368,22 +370,22 @@ test.describe('recurring', () => {
     // The name is on the card (the desktop columns squeezed it out), and the column
     // headers are gone
     await expect(page.getByText('Rent', { exact: true })).toBeVisible();
-    await expect(page.getByText('Account', { exact: true })).toBeHidden();
-    await expectTouchSize(page.getByRole('button', { name: 'Actions for Rent' }));
+    await expect(page.getByText('Hesap', { exact: true })).toBeHidden();
+    await expectTouchSize(page.getByRole('button', { name: 'Rent için diğer işlemler' }));
 
     // Month navigation and the list/calendar switch stay inside the screen
     const viewport = page.viewportSize()!;
-    for (const name of ['Previous month', 'Next month', 'List', 'Calendar']) {
+    for (const name of ['Önceki ay', 'Sonraki ay', 'Liste', 'Takvim']) {
       const button = page.getByRole('button', { name, exact: true });
       await expectTouchSize(button);
       const box = (await button.boundingBox())!;
       expect(box.x + box.width, name).toBeLessThanOrEqual(viewport.width);
     }
 
-    await page.getByRole('button', { name: 'All recurring' }).click();
+    await page.getByRole('button', { name: 'Tüm düzenli işlemler' }).click();
     await expect(page.getByText('Rent', { exact: true })).toBeVisible();
-    await expect(page.getByText('Frequency', { exact: true })).toBeHidden();
-    await expect(page.getByPlaceholder('Filter recurring…')).toBeVisible();
+    await expect(page.getByText('Sıklık', { exact: true })).toBeHidden();
+    await expect(page.getByPlaceholder('Düzenli işlemlerde ara…')).toBeVisible();
   });
 });
 

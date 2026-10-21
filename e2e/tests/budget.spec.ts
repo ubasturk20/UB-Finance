@@ -3,22 +3,24 @@ import { test, expect, open, isoDay, thisMonth } from './fixtures';
 
 // The zero-based budget: To Be Budgeted = income + carry-over − planned.
 
-const toBeBudgeted = (page: Page) => page.getByRole('status', { name: 'To be budgeted' });
+const toBeBudgeted = (page: Page) => page.getByRole('status', { name: 'Bütçelenecek' });
 
 async function plan(page: Page, category: string, amount: string) {
-  const button = page.getByRole('button', { name: new RegExp(`^Planned for ${category}:`) });
+  const button = page.getByRole('button', { name: new RegExp(`^${category} için planlanan:`) });
   // Categories with no activity sit under "Show N inactive categories" in each section
-  await expect(page.getByRole('button', { name: /^Planned for / }).first()).toBeVisible();
-  const showInactive = page.getByRole('button', { name: /^Show \d+ inactive/ });
+  await expect(page.getByRole('button', { name: / için planlanan: / }).first()).toBeVisible();
+  const showInactive = page.getByRole('button', { name: /^\d+ etkin olmayan kategoriyi göster/ });
   while (!(await button.isVisible()) && (await showInactive.count()) > 0) {
     await showInactive.first().click();
   }
   await button.click();
-  const input = page.getByRole('textbox', { name: `Planned for ${category}` });
+  const input = page.getByRole('textbox', { name: `${category} için planlanan` });
   await input.fill(amount);
   await input.press('Enter');
   await expect(
-    page.getByRole('button', { name: new RegExp(`^Planned for ${category}: -?[\\d.,]+\\s₺$`) }),
+    page.getByRole('button', {
+      name: new RegExp(`^${category} için planlanan: -?[\\d.,]+\\s₺$`),
+    }),
   ).toBeVisible();
 }
 
@@ -36,20 +38,20 @@ test.describe('budget', () => {
 
     await open(page, '/budget');
     await expect(toBeBudgeted(page)).toContainText('3.000 ₺');
-    await expect(toBeBudgeted(page)).toContainText('Left to budget');
+    await expect(toBeBudgeted(page)).toContainText('Bütçelenecek');
 
     await plan(page, 'Groceries', '400');
     await expect(toBeBudgeted(page)).toContainText('2.600 ₺');
     await plan(page, 'Rent / Mortgage', '2600');
     await expect(toBeBudgeted(page)).toContainText('0 ₺');
-    await expect(toBeBudgeted(page)).toContainText('Fully budgeted');
+    await expect(toBeBudgeted(page)).toContainText('Tamamen bütçelendi');
 
     const summary = await api.call('GET', `/budget/${thisMonth()}/summary`);
     expect(summary).toMatchObject({ income: 300_000, totalBudgeted: 300_000, toBeBudgeted: 0 });
 
     await plan(page, 'Restaurants', '50');
     await expect(toBeBudgeted(page)).toContainText('-50 ₺');
-    await expect(toBeBudgeted(page)).toContainText('Over budget');
+    await expect(toBeBudgeted(page)).toContainText('Bütçe aşıldı');
   });
 
   test('spending shows against its categories, including split parts', async ({ page, api }) => {
@@ -113,13 +115,13 @@ test.describe('budget', () => {
 
     await open(page, '/budget');
     await expect(toBeBudgeted(page)).toContainText('600 ₺');
-    await page.getByRole('button', { name: 'Next month' }).click();
+    await page.getByRole('button', { name: 'Sonraki ay' }).click();
     // Last month's unbudgeted 600 ₺ is still there to budget
     await expect(toBeBudgeted(page)).toContainText('600 ₺');
-    await page.getByRole('button', { name: 'Previous month' }).click();
-    await page.getByRole('button', { name: 'Previous month' }).click();
+    await page.getByRole('button', { name: 'Önceki ay' }).click();
+    await page.getByRole('button', { name: 'Önceki ay' }).click();
     await expect(toBeBudgeted(page)).toContainText('0 ₺');
-    await page.getByRole('button', { name: 'Today' }).click();
+    await page.getByRole('button', { name: 'Bugün' }).click();
     await expect(toBeBudgeted(page)).toContainText('600 ₺');
   });
 
@@ -149,7 +151,7 @@ test.describe('budget', () => {
     const groceries = await api.category('Groceries');
     await api.call('PUT', `/budget/${thisMonth()}/${groceries.id}`, { budgeted: 20_000 });
     await open(page, '/budget');
-    const groceriesPlanned = page.getByRole('button', { name: /^Planned for Groceries:/ });
+    const groceriesPlanned = page.getByRole('button', { name: /^Groceries için planlanan:/ });
     await expect(groceriesPlanned).toBeVisible();
 
     // Make next month slow to load, so the moment in between can be checked
@@ -160,16 +162,16 @@ test.describe('budget', () => {
       await route.continue();
     });
 
-    await page.getByRole('button', { name: 'Next month' }).click();
+    await page.getByRole('button', { name: 'Sonraki ay' }).click();
     // Still loading: this month's table stays (faded) instead of collapsing to nothing
     await expect(page.locator('[aria-busy="true"]')).toBeVisible();
     await expect(groceriesPlanned).toBeVisible();
-    await expect(page.getByText('No categories yet')).toHaveCount(0);
+    await expect(page.getByText('Henüz kategori yok')).toHaveCount(0);
 
     // Then next month's figures replace it
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
     await expect(
-      page.getByRole('button', { name: /^Planned for Groceries: 0(,00)?\s₺$/ }),
+      page.getByRole('button', { name: /^Groceries için planlanan: 0(,00)?\s₺$/ }),
     ).toBeVisible();
   });
 });

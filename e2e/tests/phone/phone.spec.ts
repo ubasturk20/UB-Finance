@@ -141,7 +141,7 @@ test('the sidebar is a drawer behind a menu button', async ({ page, api }) => {
   await nav.getByRole('link', { name: 'Bütçe', exact: true }).click();
   await expect(page).toHaveURL(/#\/budget$/);
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('status', { name: 'To be budgeted' })).toBeVisible();
+  await expect(page.getByRole('status', { name: 'Bütçelenecek' })).toBeVisible();
 
   // So does the close button
   await menu.click();

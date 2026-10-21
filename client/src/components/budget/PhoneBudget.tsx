@@ -8,6 +8,7 @@ import { useCanSave } from '../../hooks/useConnection';
 import { formatCurrency } from '../../utils/currency';
 import { categoryFigures, splitCategories } from '../../utils/budgetFigures';
 import type { BudgetCategory } from '../../types';
+import { t } from '../../i18n';
 
 export interface PhoneBudgetSection {
   key: string;
@@ -87,7 +88,10 @@ function Section({
         )}
         <span className="flex-1 text-sm font-semibold text-text">{section.label}</span>
         <span className="text-xs text-text-tertiary tabular-nums">
-          {formatCurrency(actual)} of {formatCurrency(planned)}
+          {t('budget.phone.actualOfPlanned', {
+            actual: formatCurrency(actual),
+            planned: formatCurrency(planned),
+          })}
         </span>
       </button>
       {!collapsed && (
@@ -102,8 +106,9 @@ function Section({
               className="w-full min-h-11 flex items-center gap-1.5 px-4 text-sm text-text-tertiary"
             >
               <Eye size={14} aria-hidden />
-              {showInactive ? 'Hide' : 'Show'} {inactiveCount} inactive{' '}
-              {inactiveCount === 1 ? 'category' : 'categories'}
+              {t(showInactive ? 'budget.hideInactive' : 'budget.showInactive', {
+                count: inactiveCount,
+              })}
             </button>
           )}
         </>
@@ -143,7 +148,7 @@ function CategoryCard({
           className={`shrink-0 rounded-full px-2.5 py-0.5 text-sm font-medium tabular-nums text-text ${pill}`}
         >
           {formatCurrency(remaining)}
-          <span className="sr-only"> remaining</span>
+          <span className="sr-only">{t('budget.phone.remaining')}</span>
         </span>
       </div>
       <SpentBar
@@ -157,11 +162,14 @@ function CategoryCard({
           type="button"
           onClick={onEdit}
           disabled={!canSave}
-          aria-label={`Planned for ${cat.name}: ${formatCurrency(cat.budgeted)}`}
+          aria-label={t('budget.plannedForAmount', {
+            name: cat.name,
+            amount: formatCurrency(cat.budgeted),
+          })}
           className="min-h-11 flex items-center gap-1.5 text-left disabled:opacity-50"
         >
           <span className="grid">
-            <span className="text-xs text-text-tertiary">Planned</span>
+            <span className="text-xs text-text-tertiary">{t('budget.col.planned')}</span>
             <span className="text-sm font-medium tabular-nums text-text">
               {formatCurrency(cat.budgeted)}
             </span>
@@ -172,7 +180,9 @@ function CategoryCard({
           to={`/budget/category/${cat.id}`}
           className="min-h-11 grid justify-items-end content-center text-right"
         >
-          <span className="text-xs text-text-tertiary">{isIncome ? 'Received' : 'Spent'}</span>
+          <span className="text-xs text-text-tertiary">
+            {t(isIncome ? 'budget.col.received' : 'budget.col.spent')}
+          </span>
           <span className="text-sm font-medium tabular-nums text-text">
             {formatCurrency(actual)}
           </span>
