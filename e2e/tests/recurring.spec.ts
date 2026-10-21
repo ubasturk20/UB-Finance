@@ -59,7 +59,7 @@ test.describe('recurring', () => {
     });
 
     await page.getByRole('button', { name: 'All recurring' }).click();
-    await expect(scheduleRow(page, 'Streaming Plus').first()).toContainText('$15.99');
+    await expect(scheduleRow(page, 'Streaming Plus').first()).toContainText('15,99 ₺');
   });
 
   test('picking or creating a payee or category keeps what was already filled in', async ({

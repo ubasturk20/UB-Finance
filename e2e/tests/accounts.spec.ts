@@ -42,7 +42,7 @@ test.describe('accounts', () => {
     await open(page, '/accounts');
     const main = page.getByRole('main');
     await expect(main.getByText('Assets', { exact: true })).toBeVisible();
-    // No "$0" rows for kinds of accounts that were never added
+    // No "0 ₺" rows for kinds of accounts that were never added
     await expect(main.getByText('Investments', { exact: true })).toHaveCount(0);
     await expect(main.getByText('Credit', { exact: true })).toHaveCount(0);
     await expect(main.getByText('No credit cards or loans yet.')).toBeVisible();
@@ -104,7 +104,7 @@ test.describe('accounts', () => {
     await dialog.getByRole('button', { name: 'Save' }).click();
 
     await expect(page.getByRole('heading', { level: 1, name: 'Joint Checking' })).toBeVisible();
-    await expect(page.getByRole('main')).toContainText('$2,376.55');
+    await expect(page.getByRole('main')).toContainText('2.376,55 ₺');
     expect(await api.balance(account.id)).toBe(237_655);
   });
 
@@ -173,8 +173,8 @@ test.describe('accounts', () => {
     // A change in value isn't money earned or spent: reports leave it out
     await open(page, '/reports');
     const main = page.getByRole('main');
-    await expect(main).toContainText(/\$0\s*Total Income/);
-    await expect(main).toContainText(/\$0\s*Total Expenses/);
+    await expect(main).toContainText(/0\s₺\s*Total Income/);
+    await expect(main).toContainText(/0\s₺\s*Total Expenses/);
   });
 
   test('the accounts page totals assets and liabilities', async ({ page, api }) => {
@@ -183,9 +183,9 @@ test.describe('accounts', () => {
     await api.createAccount('Car Loan', -1_200_000, 'auto_loan');
     await open(page, '/accounts');
     const main = page.getByRole('main');
-    await expect(main).toContainText(/Net Worth\s*-\$9,450/);
-    await expect(main).toContainText(/Assets\s*\$3,000/);
-    await expect(main).toContainText(/Liabilities\s*-\$12,450/);
-    await expect(main).toContainText(/Loans\s*-\$12,000/);
+    await expect(main).toContainText(/Net Worth\s*-9\.450\s₺/);
+    await expect(main).toContainText(/Assets\s*3\.000\s₺/);
+    await expect(main).toContainText(/Liabilities\s*-12\.450\s₺/);
+    await expect(main).toContainText(/Loans\s*-12\.000\s₺/);
   });
 });

@@ -1,0 +1,31 @@
+# UB-Finance: lists files Prettier would change as annotations, so tools that can't read the
+# CI logs (only annotations) can see which files to fix. The CI's format:check stays the gate.
+name: Format report
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Report unformatted files
+        run: |
+          files=$(npx prettier --list-different . || true)
+          for f in $files; do
+            echo "::error file=$f::Prettier would reformat this file"
+          done
+          if [ -n "$files" ]; then
+            npx prettier --write $files >/dev/null
+            git diff --unified=0 | head -200 | sed 's/^/::notice::/'
+            exit 1
+          fi

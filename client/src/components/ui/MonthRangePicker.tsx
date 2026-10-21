@@ -4,7 +4,8 @@ import { format, parseISO } from 'date-fns';
 import { CalendarRange, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatMonth } from '../../utils/dateRange';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// Short month names in the app's language (Oca, Şub, …), read when drawn: the locale is set at startup
+const monthNames = () => Array.from({ length: 12 }, (_, i) => format(new Date(2000, i, 1), 'MMM'));
 /** Earliest year the arrows go back to ("All" starts in 2020) */
 const MIN_YEAR = 2000;
 const GAP = 6;
@@ -77,7 +78,7 @@ function MonthGrid({
         </button>
       </div>
       <div className="grid grid-cols-3 gap-1">
-        {MONTHS.map((m, i) => {
+        {monthNames().map((m, i) => {
           const v = ym(year, i);
           const selected = v === value;
           const disabled = isDisabled(v);

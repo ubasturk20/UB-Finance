@@ -572,9 +572,10 @@ test.describe('export, backup and restore', () => {
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Download CSV' }).click();
     const csv = fs.readFileSync(await (await download).path(), 'utf8');
-    expect(csv.split('\n')[0]).toBe('Date,Account,Payee,Category,Notes,Amount,Reconciled');
+    // Turkish amounts have a decimal comma, so columns are separated by semicolons
+    expect(csv.split('\n')[0]).toBe('Date;Account;Payee;Category;Notes;Amount;Reconciled');
     expect(csv).toContain(`"'=HYPERLINK(""http://evil.example"")"`);
-    expect(csv).toContain('-10.00');
+    expect(csv).toContain('-10,00');
   });
 
   test('a backup restores everything it contained', async ({ page, api }) => {
@@ -621,7 +622,7 @@ test.describe('export, backup and restore', () => {
     const payees = (await api.transactions()).map((t) => t.payeeName);
     expect(payees).toEqual(['Before Backup']);
     // The sidebar shows the restored data without reloading
-    await expect(page.getByRole('complementary')).toContainText('$475');
+    await expect(page.getByRole('complementary')).toContainText('475 ₺');
   });
 
   test('restoring a file that is not a backup changes nothing', async ({ page, api }) => {

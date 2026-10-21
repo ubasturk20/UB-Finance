@@ -132,8 +132,8 @@ test.describe('preferences', () => {
     await open(page, '/settings');
     await page.getByRole('button', { name: 'Preferences' }).click();
     const main = page.getByRole('main');
-    // Automatic follows the browser's language (en-US in the tests)
-    await expect(main).toContainText('Example: -$1,234.56');
+    // Automatic is the Turkish way, whatever the browser's language (en-US in the tests)
+    await expect(main).toContainText('Example: -1.234,56 ₺');
 
     await main
       .getByRole('group', { name: 'Number format' })
@@ -261,10 +261,13 @@ test('settings link to the license and the source code', async ({ page, api }) =
 test.describe('amounts on a German device', () => {
   test.use({ locale: 'de-DE' });
 
-  test('a new install follows the device language', async ({ page, api }) => {
+  test('a new install writes amounts the Turkish way whatever the device language', async ({
+    page,
+    api,
+  }) => {
     const girokonto = await api.createAccount('Girokonto', 123_456);
     await open(page, `/accounts/${girokonto.id}`);
-    await expect(page.getByRole('main')).toContainText('1.234,56 $');
+    await expect(page.getByRole('main')).toContainText('1.234,56 ₺');
   });
 
   test('an install from before the setting keeps the amounts it had', async ({ page, api }) => {

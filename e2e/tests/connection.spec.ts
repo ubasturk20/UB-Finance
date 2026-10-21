@@ -23,7 +23,7 @@ test('the reconnect screen retries on its own and the app loads without a reload
 
   // The server answers again: no clicks, no reload
   await page.unroute('**/api/**');
-  await expect(page.getByRole('link', { name: 'All accounts $1,500' })).toBeVisible({
+  await expect(page.getByRole('link', { name: 'All accounts 1.500 ₺' })).toBeVisible({
     timeout: 15_000,
   });
   await expect(page.getByRole('heading', { name: 'FlyBudget is starting up again' })).toBeHidden();
@@ -36,7 +36,7 @@ test('"Try now" reconnects straight away', async ({ page, api }) => {
   await expect(page.getByRole('button', { name: 'Try now' })).toBeVisible();
   await page.unroute('**/api/**');
   await page.getByRole('button', { name: 'Try now' }).click();
-  await expect(page.getByRole('link', { name: 'All accounts $1,500' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'All accounts 1.500 ₺' })).toBeVisible();
 });
 
 test('mid-session the app keeps what it loaded, keeps new transactions, and recovers', async ({

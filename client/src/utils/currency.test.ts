@@ -195,7 +195,7 @@ describe('currency helpers (property-based)', () => {
   it('uses the preferences when no style is given', () => {
     expect(
       amountStyle({ amountFormat: 'comma', symbolPosition: 'after', currencySymbol: '' }),
-    ).toEqual({ format: 'comma', position: 'after', symbol: '$' });
+    ).toEqual({ format: 'comma', position: 'after', symbol: '₺' });
   });
 });
 
@@ -317,7 +317,9 @@ describe('amounts in other currencies', () => {
   it('writes Turkish lira after the amount with a space, in the Turkish format', () => {
     expect(currencyConvention('TRY')).toEqual({ position: 'after', space: true });
     const auto = { amountFormat: 'auto', symbolPosition: 'auto', currencySymbol: '₺' } as const;
-    expect(formatAmount(-123_456, currencyAmountStyle('TRY', auto, 'TRY'))).toBe('-1.234,56 ₺');
-    expect(formatAmount(-123_456, currencyAmountStyle(null, auto, null))).toBe('-1.234,56 ₺');
+    expect(formatAmount(-123_456, currencyAmountStyle('TRY', auto, 'TRY'))).toBe(
+      '-1.234,56\u00a0₺',
+    );
+    expect(formatAmount(-123_456, currencyAmountStyle(null, auto, null))).toBe('-1.234,56\u00a0₺');
   });
 });
