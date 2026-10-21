@@ -97,6 +97,16 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
     loanTerm: 120,
     loanFirstPayment: `${thisMonth()}-28`,
   });
+  // Gold with its quantity and price: the asset summary and the net worth's equivalents too
+  const gold = await api.createAccount('Cumhuriyet Altını Birikimi', 0, 'valuables');
+  await api.call('PUT', `/accounts/${gold.id}/details`, {
+    assetQuantity: '12.75',
+    assetUnit: 'cumhuriyet altını',
+  });
+  await api.call('POST', `/accounts/${gold.id}/asset-price`, {
+    unitPrice: 1_987_654,
+    date: isoDay(0),
+  });
 
   const routes: [string, string][] = [
     ['dashboard', '/dashboard'],
@@ -105,6 +115,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
     ['reconcile', `/accounts/${checking.id}/reconcile`],
     ['credit-card', `/accounts/${card.id}`],
     ['loan', `/accounts/${loan.id}`],
+    ['asset', `/accounts/${gold.id}`],
     ['transactions', '/transactions'],
     ['budget', '/budget'],
     ['budget-category', `/budget/category/${groceries.id}`],

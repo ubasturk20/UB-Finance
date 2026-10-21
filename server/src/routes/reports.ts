@@ -4,11 +4,10 @@ import { transactions, accounts, categories, categoryGroups, payees } from '../d
 import { eq, and, gte, lte, sql, inArray, lt, isNull } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { monthBounds } from '../utils/date.js';
-import { isLiabilityType } from '../utils/accountTypes.js';
 import { isMonth, isRealDate } from '../utils/validation.js';
 import { inAccountBalance, isIncomeOrSpending, mainAmount } from '../services/balances.js';
-import { currencyContext, todayIso, valueToday } from '../services/mainAmountService.js';
-import { isForeign } from '../utils/currencies.js';
+import { currencyContext, todayIso } from '../services/mainAmountService.js';
+import { addUpNetWorth } from '../services/netWorth.js';
 
 export const reportsRouter = Router();
 
@@ -153,34 +152,29 @@ reportsRouter.get('/net-worth', (req, res) => {
   const ctx = currencyContext();
   const today = todayIso();
   const result = periods.map((period) => {
-    let assets = 0,
-      liabilities = 0;
-    const unconverted = new Set<string>();
     const asOf = isDaily ? period : monthEnd(period);
     for (const c of cursors) {
       while (c.next < c.entries.length && c.entries[c.next].period <= period) {
         c.balance += c.entries[c.next++].total;
       }
-      let balance = c.balance;
-      const currency = c.acct.currency ?? ctx.budget;
-      if (isForeign(currency, ctx.budget)) {
-        const value = valueToday(balance, currency, ctx, asOf < today ? asOf : today);
-        if (value.mainBalance === null) {
-          if (balance !== 0) unconverted.add(currency!);
-          continue;
-        }
-        balance = value.mainBalance;
-      }
-      if (isLiabilityType(c.acct.type)) liabilities += Math.abs(Math.min(balance, 0));
-      else assets += Math.max(balance, 0);
     }
+    const balances = cursors.map((c) => ({
+      type: c.acct.type,
+      currency: c.acct.currency,
+      balance: c.balance,
+    }));
+    const { assets, liabilities, netWorth, unconverted } = addUpNetWorth(
+      balances,
+      ctx,
+      asOf < today ? asOf : today,
+    );
     return {
       month: period,
       assets,
       liabilities,
-      netWorth: assets - liabilities,
+      netWorth,
       // Accounts left out for want of a rate on that day
-      ...(unconverted.size ? { unconverted: [...unconverted].sort() } : {}),
+      ...(unconverted.length ? { unconverted } : {}),
     };
   });
 

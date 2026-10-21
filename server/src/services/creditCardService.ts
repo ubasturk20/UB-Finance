@@ -17,7 +17,7 @@ import {
 } from './creditCard.js';
 
 // Database side of credit card tracking (the math is in creditCard.ts). Every write to
-// account_details (card and loan details) and installment_plans goes through here.
+// account_details (card, loan and asset details) and installment_plans goes through here.
 
 export type AccountDetails = typeof accountDetails.$inferSelect;
 export type DetailsPatch = Partial<Omit<AccountDetails, 'accountId' | 'updatedAt'>>;
@@ -38,6 +38,10 @@ export function getDetails(accountId: string): AccountDetails {
       loanFirstPayment: null,
       loanBsmvRate: null,
       loanKkdfRate: null,
+      assetQuantity: null,
+      assetUnit: null,
+      assetUnitPrice: null,
+      assetPriceDate: null,
       updatedAt: '',
     }
   );

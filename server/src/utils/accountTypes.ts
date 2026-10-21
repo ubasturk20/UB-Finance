@@ -74,3 +74,16 @@ export function isLoanType(type: string): boolean {
 export function defaultLoanTaxBp(type: string): number {
   return type === 'mortgage' ? 0 : 1_500;
 }
+
+/** Assets that can be tracked as a quantity at a unit price: gold, currency, funds, shares, crypto */
+const ASSET_TYPES = new Set<string>([
+  'investment',
+  'retirement',
+  'crypto',
+  'valuables',
+  'other_asset',
+]);
+
+export function isAssetType(type: string): boolean {
+  return ASSET_TYPES.has(type);
+}

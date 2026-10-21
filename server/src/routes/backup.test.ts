@@ -121,11 +121,24 @@ describe('backup and restore', () => {
             loanFirstPayment: '2025-05-15',
             loanBsmvRate: 1_500,
           });
+          const { body: gold } = await send('POST', '/accounts', {
+            name: 'Gold',
+            type: 'valuables',
+          });
+          await send('PUT', `/accounts/${gold.id}/details`, {
+            assetQuantity: '12.5',
+            assetUnit: 'gram altın',
+            assetUnitPrice: 295_000,
+            assetPriceDate: '2025-05-15',
+          });
           await send('GET', '/dashboards');
 
           const before = await backup();
           expect(before.accountDetails).toContainEqual(
             expect.objectContaining({ accountId: loan.id, loanTerm: 36, loanRate: 349 }),
+          );
+          expect(before.accountDetails).toContainEqual(
+            expect.objectContaining({ accountId: gold.id, assetQuantity: '12.5' }),
           );
           // Change things, then restore
           await send('POST', '/accounts', { name: 'Extra', type: 'savings' });

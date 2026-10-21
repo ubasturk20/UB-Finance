@@ -12,6 +12,7 @@ import { schedulesRouter } from '../routes/schedules.js';
 import { buildDemoBudget } from './demoBudget.js';
 import { loadDemoBudget } from './loadDemoBudget.js';
 import { listTransferSuggestions } from '../services/transferService.js';
+import { assetValue } from '../services/assets.js';
 
 // The website demo's budget (see ../browser/README.md) has to look finished whatever day
 // someone opens it: these check it for any "today".
@@ -96,6 +97,22 @@ describe('the demo budget (property-based)', () => {
         const first = demo.transactions.map((t) => t.date).sort()[0];
         expect(demo.exchangeRates[0].date <= first).toBe(true);
         expect(demo.exchangeRates.every((r) => r.base === 'EUR' && r.quote === 'USD')).toBe(true);
+      }),
+      { numRuns: 30 },
+    );
+  });
+
+  it("counts the brokerage's fund shares at its balance", () => {
+    fc.assert(
+      fc.property(anyDay, (today) => {
+        const demo = buildDemoBudget(today);
+        const account = demo.accounts.find((a) => a.type === 'investment')!;
+        const details = demo.accountDetails.find((d) => d.accountId === account.id)!;
+        const balance = demo.transactions
+          .filter((t) => t.accountId === account.id && !t.parentTransactionId)
+          .reduce((sum, t) => sum + t.amount, account.startingBalance ?? 0);
+        expect(assetValue(details.assetQuantity!, details.assetUnitPrice!)).toBe(balance);
+        expect(details.assetPriceDate! <= ymd(today)).toBe(true);
       }),
       { numRuns: 30 },
     );
