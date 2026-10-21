@@ -200,7 +200,8 @@ export default function AccountsPage() {
           <div className="px-6 pt-5 pb-3">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <Card>
-                <NetWorthMini />
+                {/* The assets and liabilities are broken down in the card beside it */}
+                <NetWorthMini showSplit={false} />
               </Card>
               <Card>
                 <AssetLiabilitySummary accounts={accounts} />

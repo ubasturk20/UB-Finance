@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { earlierValue } from './accountMoney';
+import { assetsAndLiabilities, earlierValue } from './accountMoney';
 
 describe('earlierValue', () => {
   it("rescales an earlier balance by today's rate exactly, even for large balances", () => {
@@ -32,5 +32,29 @@ describe('earlierValue', () => {
     expect(earlierValue({ balance: -1000, mainBalance: -900, rateDate: '2026-01-01' }, -500)).toBe(
       -450,
     );
+  });
+});
+
+describe('assetsAndLiabilities', () => {
+  it('splits accounts by type and adds up to the total, leaving out ones without a rate', () => {
+    const accountArb = fc.record({
+      type: fc.constantFrom('checking', 'credit', 'investment', 'mortgage', 'other_liability'),
+      balance: fc.integer({ min: -1e10, max: 1e10 }),
+      mainBalance: fc.option(fc.integer({ min: -1e10, max: 1e10 })),
+    });
+    fc.assert(
+      fc.property(fc.array(accountArb, { maxLength: 20 }), (accounts) => {
+        const { assets, liabilities } = assetsAndLiabilities(accounts);
+        const total = accounts.reduce((sum, a) => sum + (a.mainBalance ?? 0), 0);
+        expect(assets + liabilities).toBe(total);
+      }),
+    );
+    expect(
+      assetsAndLiabilities([
+        { type: 'checking', balance: 1000, mainBalance: 1000 },
+        { type: 'credit', balance: -300, mainBalance: -300 },
+        { type: 'loan', balance: -500, mainBalance: null },
+      ]),
+    ).toEqual({ assets: 1000, liabilities: -300 });
   });
 });

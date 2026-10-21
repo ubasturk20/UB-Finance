@@ -6,6 +6,7 @@ import type {
   InstallmentPlan,
   LoanSchedule,
   NetWorthEquivalents,
+  Obligations,
 } from '../types';
 
 /**
@@ -61,3 +62,7 @@ export const setAssetPrice = (accountId: string, data: { unitPrice: number; date
 
 export const getNetWorthEquivalents = (today: string) =>
   apiFetch<NetWorthEquivalents>(`/net-worth/equivalents${todayQuery(today)}`);
+
+/** Open cards' due dates and open loans' next installments (the dashboard) */
+export const getObligations = (today: string) =>
+  apiFetch<Obligations>(`/dashboard/obligations${todayQuery(today)}`);

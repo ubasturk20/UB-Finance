@@ -15,12 +15,14 @@ import {
   saveDetails,
 } from '../services/creditCardService.js';
 import { loanScheduleFor } from '../services/loanService.js';
+import { obligationsFor } from '../services/obligationsService.js';
 import { normalizeQuantity, UNIT_MAX_LENGTH } from '../services/assets.js';
 
 // Credit card details, statement summary and installment purchases (Turkish cards), loan
 // details with their payment plan (ihtiyaç/konut/taşıt/eğitim kredisi), and the quantity and
 // unit price of assets (altın, döviz, fon, hisse, kripto; their price updates are in assets.ts).
-// Mounted at /api (paths under /accounts/:id and /installments/:id).
+// Mounted at /api (paths under /accounts/:id and /installments/:id, and the dashboard's
+// upcoming card and loan payments at /dashboard/obligations).
 
 export const creditCardsRouter = Router();
 
@@ -173,4 +175,9 @@ creditCardsRouter.delete('/installments/:id', (req, res) => {
     return res.status(404).json({ error: 'Taksit planı bulunamadı' });
   }
   res.status(204).send();
+});
+
+/** Open cards' due dates and statements, open loans' next installments (the dashboard) */
+creditCardsRouter.get('/dashboard/obligations', (req, res) => {
+  res.json(obligationsFor(todayOf(req.query)));
 });

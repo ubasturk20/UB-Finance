@@ -101,3 +101,13 @@ export function useNetWorthEquivalents() {
     queryFn: () => cardsApi.getNetWorthEquivalents(day),
   });
 }
+
+/** Upcoming card and loan payments (under ['accounts'], so payments and details refresh it) */
+export function useObligations(enabled = true) {
+  const day = today();
+  return useQuery({
+    queryKey: ['accounts', 'obligations', day],
+    queryFn: () => cardsApi.getObligations(day),
+    enabled,
+  });
+}

@@ -8,6 +8,7 @@ import SpendingComparison from '../components/dashboard/SpendingComparison';
 import SpendingBreakdown from '../components/dashboard/SpendingBreakdown';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import UpcomingBills from '../components/dashboard/UpcomingBills';
+import UpcomingPayments from '../components/dashboard/UpcomingPayments';
 import { HelpFooter } from '../components/layout/HelpFooter';
 
 const now = new Date();
@@ -21,20 +22,28 @@ export default function Dashboard() {
         <GettingStarted currentMonth={currentMonth} />
       </div>
 
-      <NetWorthMini />
+      {/* Upcoming card and loan payments beside the net worth; hidden without such accounts */}
+      <div className="flex flex-col lg:flex-row gap-5">
+        <div className="flex-1 min-w-0">
+          <NetWorthMini />
+        </div>
+        <div className="lg:w-[400px] lg:shrink-0 min-w-0 empty:hidden">
+          <UpcomingPayments />
+        </div>
+      </div>
 
       <div className="mt-5">
         <SummaryStats currentMonth={currentMonth} sixMonthsAgo={sixMonthsAgo} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
-        <IncomeExpensesMini sixMonthsAgo={sixMonthsAgo} currentMonth={currentMonth} />
-        <SpendingComparison />
+        <BudgetProgress currentMonth={currentMonth} />
+        <UpcomingBills />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
-        <BudgetProgress currentMonth={currentMonth} />
-        <UpcomingBills />
+        <IncomeExpensesMini sixMonthsAgo={sixMonthsAgo} currentMonth={currentMonth} />
+        <SpendingComparison />
       </div>
 
       {/* Both cards take the row's height, so they line up (empty or not) */}

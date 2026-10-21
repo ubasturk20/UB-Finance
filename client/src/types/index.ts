@@ -1085,3 +1085,45 @@ export interface LoanSchedule {
   status: LoanStatus | null;
   today: string;
 }
+
+/** A credit card on the dashboard's upcoming payments (GET /dashboard/obligations) */
+export interface CardObligation {
+  accountId: string;
+  name: string;
+  /** Null = the budget's */
+  currency: string | null;
+  /** The last statement's due date; null without a statement day and due day */
+  dueDate: string | null;
+  /** Negative once the due date has passed */
+  daysLeft: number | null;
+  statementDebt: number | null;
+  /** The statement less what came in since it */
+  remaining: number | null;
+  minimumPayment: number | null;
+  available: number | null;
+  /** What's owed on the card now */
+  used: number;
+}
+
+/** A loan's next installment on the dashboard's upcoming payments */
+export interface LoanObligation {
+  accountId: string;
+  name: string;
+  currency: string | null;
+  nextDate: string;
+  daysLeft: number;
+  nextAmount: number;
+  remainingPrincipal: number;
+  paidCount: number;
+  term: number;
+}
+
+export interface Obligations {
+  /** By due date */
+  cards: CardObligation[];
+  /** By next installment */
+  loans: LoanObligation[];
+  /** In the budget's currency; accounts in another currency are left out and named */
+  totals: { cardDebt: number; loanPrincipal: number };
+  unconverted: string[];
+}

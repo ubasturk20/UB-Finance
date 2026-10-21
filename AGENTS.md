@@ -315,16 +315,17 @@ UI components live in `client/src/components/recurring/`. Occurrence computation
 The dashboard at `/dashboard` (default landing page) is built from the components in `client/src/components/dashboard/`, with `HelpFooter` (docs, GitHub and issues links) at the bottom:
 
 - `GettingStarted` — first-run checklist (add an account, bring in transactions, add bills and paychecks, plan the budget, create a rule), ticked off from real data; hidden once every step is done or by the user (`gettingStartedHidden` preference)
-- `NetWorthMini` — net worth with a range picker and area chart
+- `NetWorthMini` — net worth with a range picker and area chart, with "Varlıklar X · Borçlar Y" under it (`assetsAndLiabilities` in `utils/accountMoney.ts`, the same split as `AssetLiabilitySummary`; `showSplit={false}` on the Accounts page, where that card sits beside it)
+- `UpcomingPayments` — "Yaklaşan Ödemeler", beside the net worth on wide screens: open credit cards with details (due date and days left, remaining statement debt, minimum payment) and open loans with a payment plan (next installment, days left, `paid/term`), each linking to its account, with total card debt and remaining loan principal. Data from `GET /api/dashboard/obligations?today=` (`services/obligationsService.ts`, which reuses `cardSummaryFor` and `loanScheduleFor`; cards by due date, loans by next installment; totals only count accounts in the budget's currency and name the others in `unconverted`). Hidden while there are no card or loan accounts; an empty state links to Accounts when none has details
 - `SummaryStats` — Left to Spend, average monthly income/expenses, savings rate (shows "—" with a hint until there's a budget or income)
-- `IncomeExpensesMini` — 6-month income vs. expenses bars
-- `SpendingComparison` — cumulative spending, this period vs. a comparison period
 - `BudgetProgress` — planned vs. spent by budget type this month
 - `UpcomingBills` — next upcoming/due recurring items within 30 days
+- `IncomeExpensesMini` — 6-month income vs. expenses bars
+- `SpendingComparison` — cumulative spending, this period vs. a comparison period
 - `SpendingBreakdown` — top spending categories this month
 - `RecentTransactions` — the latest transactions
 
-Every card has an empty state with a button to where its data comes from.
+Every card has an empty state with a button to where its data comes from (except `UpcomingPayments`, which is hidden without card or loan accounts).
 
 ### Bank Sync (Plaid, SimpleFin, Enable Banking)
 
