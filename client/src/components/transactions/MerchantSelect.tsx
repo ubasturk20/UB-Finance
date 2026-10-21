@@ -3,6 +3,7 @@ import { CreditCard, Plus } from 'lucide-react';
 import { useCanSave } from '../../hooks/useConnection';
 import { usePayees, useCreatePayee } from '../../hooks/usePayees';
 import { PayeeIcon } from '../payees/PayeeIcon';
+import { t } from '../../i18n';
 
 export const selectorInputClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm text-text bg-surface placeholder-text-disabled focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600';
@@ -28,8 +29,8 @@ interface Props {
 export function MerchantSelect({
   value,
   onChange,
-  placeholder = 'Search merchants...',
-  label = 'Merchant',
+  placeholder = t('txd.payee.search'),
+  label = t('txd.payee.label'),
 }: Props) {
   const { data: payees = [] } = usePayees();
   const createPayee = useCreatePayee();
@@ -108,7 +109,7 @@ export function MerchantSelect({
           {query.trim() && !exactMatch && !canSave && (
             // New merchants are made on the server, so offline only existing ones can be picked
             <p className="px-3 py-2.5 text-xs text-caution border-t border-border-light">
-              New merchants can be added once FlyBudget reconnects.
+              {t('txd.payee.offline')}
             </p>
           )}
           {query.trim() && !exactMatch && canSave && (
@@ -124,7 +125,7 @@ export function MerchantSelect({
               className="w-full text-left px-3 py-2.5 text-sm text-brand-600 font-medium flex items-center gap-1.5 hover:bg-surface-alt cursor-pointer border-t border-border-light"
             >
               <Plus size={14} />
-              Create new merchant: &ldquo;{query.trim()}&rdquo;
+              {t('txd.payee.createNew', { name: query.trim() })}
             </button>
           )}
         </div>

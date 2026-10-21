@@ -46,7 +46,7 @@ test('a new server asks for a password and the setup code', async ({ baseURL }) 
 
   await owner.getByLabel('Parolayı onayla').fill(PASSWORD);
   await owner.getByRole('button', { name: 'Parola oluştur' }).click();
-  await expect(owner.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
+  await expect(owner.getByRole('heading', { name: "UB-Finance'a hoş geldiniz" })).toBeVisible();
 
   // The session cookie can't be read by scripts
   const cookies = await owner.context().cookies();
@@ -56,10 +56,10 @@ test('a new server asks for a password and the setup code', async ({ baseURL }) 
 });
 
 test('the signed-in owner uses the app, with real page URLs', async ({ baseURL }) => {
-  await owner.getByRole('button', { name: /Add accounts manually/ }).click();
-  const dialog = owner.getByRole('dialog', { name: 'Add Account' });
-  await dialog.getByRole('textbox', { name: 'Account name' }).fill('Credit Union');
-  await dialog.getByRole('button', { name: 'Add Account' }).click();
+  await owner.getByRole('button', { name: /Hesapları elle ekle/ }).click();
+  const dialog = owner.getByRole('dialog', { name: 'Hesap Ekle' });
+  await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Credit Union');
+  await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
   await expect(dialog).toBeHidden();
 
   // Server mode uses normal URLs: deep links and reloads work
@@ -76,7 +76,7 @@ test('another browser sees only the login screen', async ({ page, baseURL }) => 
   await signIn(page, 'not the password');
   await expect(page.getByText('Incorrect password')).toBeVisible();
   await signIn(page, PASSWORD);
-  await expect(page.getByRole('heading', { level: 1, name: 'Accounts' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Hesaplar' })).toBeVisible();
   await expect(page.getByRole('main')).toContainText('Credit Union');
 });
 
@@ -231,14 +231,14 @@ test('with the server unreachable, the app opens with the offline copy and keeps
   await owner.goBack();
 
   // A new transaction waits on the device, even across a reload
-  await owner.getByRole('button', { name: 'Add Transaction' }).click();
-  const form = owner.getByRole('form', { name: 'New transaction' });
-  await form.getByRole('textbox', { name: 'Payee' }).fill('Coffee Cart');
-  await form.getByRole('textbox', { name: 'Outflow' }).fill('4.75');
-  await form.getByRole('button', { name: 'Save' }).click();
-  const waiting = owner.getByRole('region', { name: 'Saved on this device' });
+  await owner.getByRole('button', { name: 'İşlem ekle' }).click();
+  const form = owner.getByRole('form', { name: 'Yeni işlem' });
+  await form.getByRole('textbox', { name: 'Alıcı' }).fill('Coffee Cart');
+  await form.getByRole('textbox', { name: 'Çıkış' }).fill('4.75');
+  await form.getByRole('button', { name: 'Kaydet' }).click();
+  const waiting = owner.getByRole('region', { name: 'Bu cihaza kaydedildi' });
   await expect(waiting.getByTestId('waiting-transaction')).toContainText('Coffee Cart');
-  await expect(waiting).toContainText('Sent when FlyBudget reconnects');
+  await expect(waiting).toContainText('UB-Finance yeniden bağlanınca gönderilir');
   await expect(banner).toContainText('1 işlem gönderilmeyi bekliyor');
   await owner.reload();
   await expect(waiting.getByTestId('waiting-transaction')).toContainText('Coffee Cart');

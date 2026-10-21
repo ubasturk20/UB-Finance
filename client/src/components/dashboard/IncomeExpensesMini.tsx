@@ -10,6 +10,7 @@ import { EmptyState } from '../ui/EmptyState';
 import { ButtonLink } from '../ui/Button';
 import { chartColors } from '../../utils/chartColors';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
+import { t } from '../../i18n';
 
 function CurrencyTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -65,14 +66,14 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
   return (
     <Card>
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-sm font-semibold text-text">Cash Flow</h3>
+        <h3 className="text-sm font-semibold text-text">{t('dash.cashFlow.title')}</h3>
         <Link to="/reports" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
-          View all
+          {t('dash.viewAll')}
         </Link>
       </div>
       {hasData && (
         <p className="text-sm text-text-tertiary mb-3">
-          Net this month:{' '}
+          {t('dash.cashFlow.netThisMonth')}{' '}
           <span
             className={`font-semibold tabular-nums ${latestNet >= 0 ? 'text-positive' : 'text-negative'}`}
           >
@@ -90,13 +91,13 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
               <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: chartColors.axis }} />
               <Bar
                 dataKey="income"
-                name="Income"
+                name={t('dash.cashFlow.income')}
                 fill={chartColors.positive}
                 radius={[3, 3, 0, 0]}
               />
               <Bar
                 dataKey="expenses"
-                name="Expenses"
+                name={t('dash.cashFlow.expenses')}
                 fill={chartColors.negative}
                 radius={[3, 3, 0, 0]}
               />
@@ -107,11 +108,11 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
         <EmptyState
           compact
           icon={<ArrowLeftRight size={20} />}
-          title="No money in or out yet"
-          description="Add transactions to compare what comes in with what goes out, month by month."
+          title={t('dash.cashFlow.emptyTitle')}
+          description={t('dash.cashFlow.emptyDescription')}
           actions={
             <ButtonLink size="sm" to="/transactions?add=1">
-              Add a transaction
+              {t('dash.addTransaction')}
             </ButtonLink>
           }
         />

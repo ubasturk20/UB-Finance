@@ -15,6 +15,7 @@ import { AmountFields, useAmountValidity } from '../components/ui/amountValidity
 import { formatMoney } from '../utils/currency';
 import type { Transaction } from '../types';
 import { formatDay } from '../utils/dates';
+import { t } from '../i18n';
 
 export default function ReconcilePage() {
   const { id } = useParams<{ id: string }>();
@@ -49,7 +50,9 @@ export default function ReconcilePage() {
   }, [account, unreconciledTxns]);
 
   const checkedSum = useMemo(() => {
-    return unreconciledTxns.filter((t) => checkedIds.has(t.id)).reduce((s, t) => s + t.amount, 0);
+    return unreconciledTxns
+      .filter((tx) => checkedIds.has(tx.id))
+      .reduce((s, tx) => s + tx.amount, 0);
   }, [unreconciledTxns, checkedIds]);
 
   const selectedBalance = reconciledBase + checkedSum;
@@ -77,7 +80,7 @@ export default function ReconcilePage() {
       accountId: id,
       date: format(new Date(), 'yyyy-MM-dd'),
       amount: adjustmentAmount,
-      notes: 'Reconciliation adjustment',
+      notes: t('acc.reconcile.adjustmentNote'),
       adjustment: true,
     });
     const idsToReconcile = [...checkedIds, created.id];
@@ -93,17 +96,19 @@ export default function ReconcilePage() {
         <div className="px-6 py-3 border-b border-border shrink-0">
           <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-1">
             <Link to="/accounts" className="hover:text-brand-600 transition-colors">
-              Accounts
+              {t('acc.page.title')}
             </Link>
             <ChevronRight size={11} />
             <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">
               {account.name}
             </Link>
             <ChevronRight size={11} />
-            <span className="text-text-secondary">Reconcile</span>
+            <span className="text-text-secondary">{t('acc.reconcile')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-text">Reconcile: {account.name}</h1>
+            <h1 className="text-lg font-semibold text-text">
+              {t('acc.reconcile.heading', { name: account.name })}
+            </h1>
             <Badge variant={account.type} />
           </div>
         </div>
@@ -112,35 +117,35 @@ export default function ReconcilePage() {
           <div className="w-full max-w-sm space-y-6">
             <div>
               <h2 className="text-base font-semibold text-text mb-1">
-                Enter your bank's ending balance
+                {t('acc.reconcile.enterBalance')}
               </h2>
-              <p className="text-sm text-text-secondary">
-                Check your bank statement or online banking for the current balance.
-              </p>
+              <p className="text-sm text-text-secondary">{t('acc.reconcile.enterBalanceHint')}</p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-text-secondary">Statement Balance</label>
+              <label className="text-sm font-medium text-text-secondary">
+                {t('acc.reconcile.statementBalance')}
+              </label>
               <AmountFields report={report}>
                 <CurrencyInput
                   currency={account.currency}
                   value={statementBalance}
                   onChange={setStatementBalance}
-                  aria-label="Statement balance"
+                  aria-label={t('acc.reconcile.statementBalanceAria')}
                   className="w-full text-lg"
                 />
               </AmountFields>
             </div>
 
             <div className="rounded-lg border border-border-light bg-surface-alt px-4 py-3">
-              <p className="text-xs text-text-tertiary">Current selected balance in app</p>
+              <p className="text-xs text-text-tertiary">{t('acc.reconcile.currentSelected')}</p>
               <p className="text-lg font-semibold text-text mt-0.5 tabular-nums">
                 {formatMoney(selectedBalance, account.currency)}
               </p>
             </div>
 
             <Button onClick={startStep2} disabled={isLoading || !statementValid} className="w-full">
-              Start Reconciliation
+              {t('acc.reconcile.start')}
             </Button>
           </div>
         </div>
@@ -155,17 +160,19 @@ export default function ReconcilePage() {
       <div className="px-6 py-3 border-b border-border shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-1">
           <Link to="/accounts" className="hover:text-brand-600 transition-colors">
-            Accounts
+            {t('acc.page.title')}
           </Link>
           <ChevronRight size={11} />
           <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">
             {account.name}
           </Link>
           <ChevronRight size={11} />
-          <span className="text-text-secondary">Reconcile</span>
+          <span className="text-text-secondary">{t('acc.reconcile')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold text-text">Reconcile: {account.name}</h1>
+          <h1 className="text-lg font-semibold text-text">
+            {t('acc.reconcile.heading', { name: account.name })}
+          </h1>
           <Badge variant={account.type} />
         </div>
       </div>
@@ -176,16 +183,16 @@ export default function ReconcilePage() {
             <thead className="sticky top-0 bg-surface-alt border-b border-border z-10">
               <tr>
                 <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary w-24">
-                  Date
+                  {t('acc.reconcile.col.date')}
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">
-                  Payee
+                  {t('acc.reconcile.col.payee')}
                 </th>
                 <th className="px-4 py-2 text-right text-xs font-medium text-text-tertiary w-28">
-                  Amount
+                  {t('acc.reconcile.col.amount')}
                 </th>
                 <th className="px-4 py-2 text-center text-xs font-medium text-text-tertiary w-12">
-                  C
+                  {t('acc.reconcile.col.cleared')}
                 </th>
               </tr>
             </thead>
@@ -193,13 +200,13 @@ export default function ReconcilePage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">
-                    Loading...
+                    {t('common.loading')}
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">
-                    No unreconciled transactions.
+                    {t('acc.reconcile.none')}
                   </td>
                 </tr>
               ) : (
@@ -242,25 +249,31 @@ export default function ReconcilePage() {
         <div className="w-64 shrink-0 border-l border-border flex flex-col">
           <div className="flex-1 px-5 py-6 space-y-5">
             <div>
-              <p className="text-xs text-text-tertiary mb-0.5">Selected Balance</p>
+              <p className="text-xs text-text-tertiary mb-0.5">
+                {t('acc.reconcile.selectedBalance')}
+              </p>
               <p className="text-xl font-semibold text-text tabular-nums">
                 {formatMoney(selectedBalance, account.currency)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-text-tertiary mb-0.5">Statement Balance</p>
+              <p className="text-xs text-text-tertiary mb-0.5">
+                {t('acc.reconcile.statementBalance')}
+              </p>
               <p className="text-xl font-semibold text-text tabular-nums">
                 {formatMoney(statementBalance, account.currency)}
               </p>
             </div>
             <div className="pt-3 border-t border-border-light">
-              <p className="text-xs text-text-tertiary mb-0.5">Difference</p>
+              <p className="text-xs text-text-tertiary mb-0.5">{t('acc.reconcile.difference')}</p>
               <p
                 className={`text-2xl font-semibold tabular-nums ${isBalanced ? 'text-positive' : 'text-negative'}`}
               >
                 {formatMoney(difference, account.currency)}
               </p>
-              {isBalanced && <p className="text-xs text-positive mt-1">Ready to finish!</p>}
+              {isBalanced && (
+                <p className="text-xs text-positive mt-1">{t('acc.reconcile.ready')}</p>
+              )}
             </div>
           </div>
 
@@ -270,7 +283,7 @@ export default function ReconcilePage() {
               disabled={!isBalanced || reconcileAccount.isPending || checkedIds.size === 0}
               className="w-full"
             >
-              {reconcileAccount.isPending ? 'Saving...' : 'Finish'}
+              {reconcileAccount.isPending ? t('common.saving') : t('acc.reconcile.finish')}
             </Button>
             {!isBalanced && (
               <Button
@@ -279,14 +292,14 @@ export default function ReconcilePage() {
                 disabled={reconcileAccount.isPending || createTransaction.isPending}
                 className="w-full"
               >
-                Create Adjustment
+                {t('acc.reconcile.createAdjustment')}
               </Button>
             )}
             <button
               onClick={() => navigate(`/accounts/${id}`)}
               className="w-full py-2 text-xs text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

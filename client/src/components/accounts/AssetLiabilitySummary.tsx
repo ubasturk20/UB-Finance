@@ -6,6 +6,7 @@ import { UnconvertedNote } from '../currency/UnconvertedNote';
 import { chartColors } from '../../utils/chartColors';
 import { accountTypeInfo } from '../../utils/accountTypes';
 import type { Account, AccountGroup } from '../../types';
+import { t } from '../../i18n';
 
 interface Bucket {
   group: AccountGroup;
@@ -14,16 +15,16 @@ interface Bucket {
 }
 
 const ASSET_BUCKETS: Bucket[] = [
-  { group: 'investments', label: 'Investments', color: '#7C3AED' },
-  { group: 'cash', label: 'Cash', color: chartColors.positive },
-  { group: 'property', label: 'Property', color: '#0891B2' },
-  { group: 'other', label: 'Other', color: '#78716C' },
+  { group: 'investments', label: t('acc.group.investments'), color: '#7C3AED' },
+  { group: 'cash', label: t('acc.group.cash'), color: chartColors.positive },
+  { group: 'property', label: t('acc.group.property'), color: '#0891B2' },
+  { group: 'other', label: t('acc.group.other'), color: '#78716C' },
 ];
 
 const LIABILITY_BUCKETS: Bucket[] = [
-  { group: 'credit', label: 'Credit', color: chartColors.negative },
-  { group: 'loans', label: 'Loans', color: '#EA580C' },
-  { group: 'other', label: 'Other', color: '#9F1239' },
+  { group: 'credit', label: t('acc.group.credit'), color: chartColors.negative },
+  { group: 'loans', label: t('acc.group.loans'), color: '#EA580C' },
+  { group: 'other', label: t('acc.group.other'), color: '#9F1239' },
 ];
 
 interface Props {
@@ -47,17 +48,17 @@ export function AssetLiabilitySummary({ accounts }: Props) {
   return (
     <div>
       <Section
-        title="Assets"
+        title={t('acc.summary.assets')}
         buckets={ASSET_BUCKETS}
         sums={assets}
-        emptyText="No bank accounts, investments or property yet."
+        emptyText={t('acc.summary.noAssets')}
       />
       <div className="border-t border-border-light my-4" />
       <Section
-        title="Liabilities"
+        title={t('acc.summary.liabilities')}
         buckets={LIABILITY_BUCKETS}
         sums={liabilities}
-        emptyText="No credit cards or loans yet."
+        emptyText={t('acc.summary.noLiabilities')}
         owed
       />
       <UnconvertedNote currencies={unconvertedCurrencies(accounts)} className="mt-3" />
@@ -118,7 +119,7 @@ function Section({ title, buckets, sums, emptyText, owed = false }: SectionProps
             to="/accounts?add=1"
             className="font-medium text-brand-600 hover:text-brand-700 whitespace-nowrap"
           >
-            Add account
+            {t('acc.addLink')}
           </Link>
         </p>
       )}

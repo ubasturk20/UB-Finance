@@ -40,7 +40,7 @@ async function buildCoffeeRule(page: Page, expectedMatches: number) {
       : 'No transactions match yet',
   );
   await dialog.getByRole('button', { name: 'Choose a category…' }).click();
-  await page.getByPlaceholder('Search categories...').fill('coffee');
+  await page.getByPlaceholder('Kategori ara…').fill('coffee');
   await page.getByRole('button', { name: /Coffee Shops/ }).click();
   return dialog;
 }
@@ -80,11 +80,11 @@ test.describe('rules', () => {
     await expect(page.getByRole('main')).toContainText('Coffee Shops');
 
     await open(page, `/accounts/${checking.id}`);
-    await page.getByRole('button', { name: 'Add Transaction' }).click();
-    const form = page.getByRole('form', { name: 'New transaction' });
-    await form.getByRole('textbox', { name: 'Payee' }).fill('Corner Coffee Co');
-    await form.getByRole('textbox', { name: 'Outflow' }).fill('3.75');
-    await form.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'İşlem ekle' }).click();
+    const form = page.getByRole('form', { name: 'Yeni işlem' });
+    await form.getByRole('textbox', { name: 'Alıcı' }).fill('Corner Coffee Co');
+    await form.getByRole('textbox', { name: 'Çıkış' }).fill('3.75');
+    await form.getByRole('button', { name: 'Kaydet' }).click();
     await expect(
       page.getByTestId('transaction-row').filter({ hasText: 'Corner Coffee Co' }),
     ).toContainText('Coffee Shops');

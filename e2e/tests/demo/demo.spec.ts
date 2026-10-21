@@ -31,8 +31,8 @@ test('the demo opens on a finished budget, and every page works', async ({ page 
   page.on('request', (r) => requests.push(new URL(r.url()).pathname));
 
   await openDemo(page);
-  await expect(page.getByText('Left to Spend')).toBeVisible();
-  await expect(page.getByText('Upcoming Bills')).toBeVisible();
+  await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
+  await expect(page.getByText('Yaklaşan Faturalar')).toBeVisible();
 
   for (const [route, text] of [
     ['/budget', 'Renters Insurance'],
@@ -97,7 +97,7 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Start over' }).click();
-  await expect(page.getByText('Left to Spend')).toBeVisible();
+  await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Alıcılar' }).click();
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toBeVisible();
 });
@@ -217,15 +217,15 @@ test('nothing leaves the browser: imports, backups and restores stay in the tab'
 
   // A CSV import, all the way through
   await page.evaluate(() => (location.hash = '#/accounts/demo-acct-checking'));
-  await page.getByRole('button', { name: 'Import CSV' }).first().click();
+  await page.getByRole('button', { name: 'CSV içe aktar' }).first().click();
   await page.locator('#csv-file-input').setInputFiles({
     name: 'bank.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from('Date,Description,Amount\n2026-01-05,Private Test Payee,-12.34\n'),
   });
-  await page.getByRole('button', { name: 'Preview' }).click();
-  await page.getByRole('button', { name: 'Import 1 Transactions' }).click();
-  await expect(page.getByText('Import complete')).toBeVisible();
+  await page.getByRole('button', { name: 'Önizle' }).click();
+  await page.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+  await expect(page.getByText('İçe aktarma tamamlandı')).toBeVisible();
 
   expect(outside).toEqual([]);
 });
@@ -245,7 +245,7 @@ test("the demo's preferences stay in the tab, and Start over resets them", async
   expect(stored.session).toContain('dark');
 
   await page.getByRole('button', { name: 'Start over' }).click();
-  await expect(page.getByText('Left to Spend')).toBeVisible();
+  await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
   await expect(page.locator('html')).not.toHaveClass(/dark/);
 });
 
@@ -265,7 +265,7 @@ test('the demo runs under a strict Content Security Policy', async ({ page }) =>
   expect(meta).toContain("default-src 'self'");
   expect(meta).toContain("connect-src 'self'");
   await expect(page.getByRole('region', { name: 'Demo' })).toBeVisible();
-  await expect(page.getByText('Left to Spend')).toBeVisible();
+  await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
 
   // A request to another site is blocked
   const blocked = await page.evaluate(() =>

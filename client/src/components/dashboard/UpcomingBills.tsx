@@ -9,6 +9,7 @@ import { EmptyState } from '../ui/EmptyState';
 import { ButtonLink } from '../ui/Button';
 import { useSchedules } from '../../hooks/useSchedules';
 import { formatShortDay } from '../../utils/dates';
+import { t } from '../../i18n';
 
 export default function UpcomingBills() {
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -46,9 +47,9 @@ export default function UpcomingBills() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text">Upcoming Bills</h3>
+        <h3 className="text-sm font-semibold text-text">{t('dash.bills.title')}</h3>
         <Link to="/recurring" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
-          View all
+          {t('dash.viewAll')}
         </Link>
       </div>
 
@@ -57,17 +58,17 @@ export default function UpcomingBills() {
           <EmptyState
             compact
             icon={<CalendarClock size={20} />}
-            title="Track your bills and paychecks"
-            description="Add rent, subscriptions and income that repeat, or let FlyBudget find them in your transactions."
+            title={t('dash.bills.emptyTitle')}
+            description={t('dash.bills.emptyDescription')}
             actions={
               <ButtonLink size="sm" to="/recurring?add=1">
-                Add recurring
+                {t('dash.bills.add')}
               </ButtonLink>
             }
           />
         ) : (
           <p className="text-sm text-text-tertiary py-6 text-center">
-            Nothing due in the next 30 days.
+            {t('dash.bills.nothingDue')}
           </p>
         )
       ) : (
@@ -92,13 +93,14 @@ export default function UpcomingBills() {
                   </p>
                   <p className="text-xs text-text-tertiary">
                     {formatShortDay(occ.expectedDate)}
+                    {' · '}
                     {isWaiting
-                      ? ` · ${Math.abs(daysUntil)}d overdue`
+                      ? t('dash.bills.overdue', { days: Math.abs(daysUntil) })
                       : daysUntil === 0
-                        ? ' · Today'
+                        ? t('common.today')
                         : daysUntil === 1
-                          ? ' · Tomorrow'
-                          : ` · in ${daysUntil}d`}
+                          ? t('dash.bills.tomorrow')
+                          : t('dash.bills.inDays', { days: daysUntil })}
                   </p>
                 </div>
                 <span

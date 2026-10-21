@@ -5,6 +5,7 @@ import { usePreferencesStore } from '../../store/preferencesStore';
 import { CategoryPicker } from './CategoryPicker';
 import { selectorInputClass } from './MerchantSelect';
 import type { CategoryGroup } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   value: string | null;
@@ -20,7 +21,7 @@ export function CategorySelectButton({
   value,
   onChange,
   position = 'below',
-  placeholder = 'Search categories...',
+  placeholder = t('txd.picker.searchPlaceholder'),
   transferAccounts,
 }: Props) {
   const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
@@ -31,7 +32,7 @@ export function CategorySelectButton({
     if (!value) return null;
     if (value.startsWith('transfer:')) {
       const account = transferAccounts?.find((a) => `transfer:${a.id}` === value);
-      return account ? { name: `Transfer: ${account.name}`, icon: null } : null;
+      return account ? { name: t('txd.transferTo', { name: account.name }), icon: null } : null;
     }
     for (const g of groups as CategoryGroup[]) {
       const cat = g.categories.find((c) => c.id === value);
@@ -45,7 +46,7 @@ export function CategorySelectButton({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        aria-label={`Category: ${entry?.name ?? placeholder}`}
+        aria-label={t('txd.categoryButton', { name: entry?.name ?? placeholder })}
         aria-expanded={open}
         className={`${selectorInputClass} text-left flex items-center justify-between cursor-pointer`}
       >

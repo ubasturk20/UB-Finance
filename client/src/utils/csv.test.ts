@@ -461,6 +461,12 @@ describe('columnRolesFor', () => {
     // A header named like an object property is still just a header
     expect(columnRolesFor(['constructor', 'Amount'], {})).toEqual(['skip', 'amount']);
   });
+
+  it('recognizes Turkish bank headers, in capitals too', () => {
+    const headers = ['İşlem Tarihi', 'Açıklama', 'İşlem Tutarı', 'Borç', 'Alacak'];
+    expect(columnRolesFor(headers)).toEqual(['date', 'payee', 'amount', 'outflow', 'inflow']);
+    expect(columnRolesFor(['TARİH', 'AÇIKLAMA', 'TUTAR'])).toEqual(['date', 'payee', 'amount']);
+  });
 });
 
 describe('readDirection', () => {
@@ -571,8 +577,8 @@ describe('buildImportRows', () => {
   });
 
   it('explains a missing date or amount column', () => {
-    expect(buildImportRows([], ['payee', 'amount'])).toBe('Date column is required');
-    expect(buildImportRows([], ['date', 'payee'])).toBe('At least one amount column is required');
+    expect(buildImportRows([], ['payee', 'amount'])).toBe('Tarih sütunu gerekli');
+    expect(buildImportRows([], ['date', 'payee'])).toBe('En az bir tutar sütunu gerekli');
   });
 
   it('accounts for every row: each one is imported or reported as skipped', () => {
@@ -605,14 +611,14 @@ describe('buildImportRows', () => {
 describe('describeSkippedRows', () => {
   it('names each skipped row and its value', () => {
     expect(describeSkippedRows([{ row: 3, field: 'amount', value: 'N/A' }])).toBe(
-      '1 row skipped: row 3, amount "N/A".',
+      '1 satır atlandı: 3. satır, tutar "N/A".',
     );
     expect(
       describeSkippedRows([
         { row: 3, field: 'amount', value: '' },
         { row: 7, field: 'date', value: '13/45/2024' },
       ]),
-    ).toBe('2 rows skipped: row 3, amount (empty); row 7, date "13/45/2024".');
+    ).toBe('2 satır atlandı: 3. satır, tutar (boş); 7. satır, tarih "13/45/2024".');
   });
 
   it('lists the first few and counts the rest', () => {
@@ -622,8 +628,8 @@ describe('describeSkippedRows', () => {
       value: 'x',
     }));
     expect(describeSkippedRows(skipped)).toBe(
-      '8 rows skipped: row 1, amount "x"; row 2, amount "x"; row 3, amount "x"; ' +
-        'row 4, amount "x"; row 5, amount "x"; and 3 more.',
+      '8 satır atlandı: 1. satır, tutar "x"; 2. satır, tutar "x"; 3. satır, tutar "x"; ' +
+        '4. satır, tutar "x"; 5. satır, tutar "x"; ve 3 satır daha.',
     );
   });
 });

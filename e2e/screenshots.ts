@@ -65,20 +65,20 @@ async function openTransaction(page: Page, payee: string) {
 }
 
 async function importCsv(page: Page) {
-  await page.getByRole('button', { name: 'Import CSV' }).first().click();
+  await page.getByRole('button', { name: 'CSV içe aktar' }).first().click();
   await page.locator('#csv-file-input').setInputFiles({
     name: 'harbor-checking.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(SAMPLE_CSV),
   });
-  await page.getByRole('button', { name: 'Preview' }).waitFor();
+  await page.getByRole('button', { name: 'Önizle' }).waitFor();
 }
 
 const SHOTS: Shot[] = [
   // --- The tour: one screenshot of each page ---
   { name: 'dashboard', route: '/dashboard', waitFor: 'Left to Spend' },
   { name: 'accounts', route: '/accounts', waitFor: 'Harbor Checking' },
-  { name: 'account-register', route: '/accounts/demo-acct-checking', waitFor: 'Reconcile' },
+  { name: 'account-register', route: '/accounts/demo-acct-checking', waitFor: 'Mutabakat' },
   { name: 'transactions', route: '/transactions', waitFor: 'Fresh Fields Market' },
   { name: 'budget', route: '/budget', waitFor: 'Left to budget' },
   { name: 'category-detail', route: '/budget/category/demo-cat-groceries', waitFor: 'Groceries' },
@@ -126,34 +126,34 @@ const SHOTS: Shot[] = [
   {
     name: 'transaction-add-inline',
     route: '/accounts/demo-acct-checking',
-    waitFor: 'Reconcile',
-    prepare: (page) => page.getByRole('button', { name: 'Add Transaction' }).first().click(),
+    waitFor: 'Mutabakat',
+    prepare: (page) => page.getByRole('button', { name: 'İşlem ekle' }).first().click(),
   },
   {
     name: 'transaction-split',
     route: '/transactions',
     waitFor: 'Fresh Fields Market',
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'Last 3 Months' }).click();
-      await page.getByPlaceholder(/Search payee or notes/).fill('Costwise');
+      await page.getByRole('button', { name: 'Son 3 ay' }).click();
+      await page.getByPlaceholder(/Alıcı veya notlarda ara/).fill('Costwise');
       await openTransaction(page, 'Costwise Warehouse');
     },
   },
   {
     name: 'import-csv',
     route: '/accounts/demo-acct-checking',
-    waitFor: 'Reconcile',
+    waitFor: 'Mutabakat',
     prepare: importCsv,
     element: dialog,
   },
   {
     name: 'import-csv-preview',
     route: '/accounts/demo-acct-checking',
-    waitFor: 'Reconcile',
+    waitFor: 'Mutabakat',
     prepare: async (page) => {
       await importCsv(page);
-      await page.getByRole('button', { name: 'Preview' }).click();
-      await page.getByRole('button', { name: /^Import \d+ Transactions$/ }).waitFor();
+      await page.getByRole('button', { name: 'Önizle' }).click();
+      await page.getByRole('button', { name: /^\d+ işlemi içe aktar$/ }).waitFor();
     },
     element: dialog,
   },
@@ -161,15 +161,15 @@ const SHOTS: Shot[] = [
   {
     name: 'update-value',
     route: '/accounts/demo-acct-car',
-    waitFor: 'Update value',
-    prepare: (page) => openDialog(page, 'Update value'),
+    waitFor: 'Değeri güncelle',
+    prepare: (page) => openDialog(page, 'Değeri güncelle'),
     element: dialog,
   },
   {
     name: 'add-account',
     route: '/accounts',
     waitFor: 'Harbor Checking',
-    prepare: (page) => openDialog(page, 'Add Account'),
+    prepare: (page) => openDialog(page, 'Hesap Ekle'),
     element: dialog,
   },
   {

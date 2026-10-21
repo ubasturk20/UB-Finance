@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CURRENCY_CODES } from '../../utils/currencies';
 import { currencyName } from '../../utils/currency';
+import { t } from '../../i18n';
 
 /** Asked for most: shown first, after the ones already in use */
 const COMMON = ['EUR', 'USD', 'GBP', 'CHF', 'PLN', 'SEK', 'NOK', 'DKK', 'CZK', 'CAD', 'AUD', 'JPY'];
@@ -24,7 +25,7 @@ export function CurrencySelect({
   first = [],
   disabled,
   id,
-  'aria-label': ariaLabel = 'Currency',
+  'aria-label': ariaLabel = t('currency.select.aria'),
   'aria-describedby': describedBy,
   className = '',
 }: Props) {
@@ -51,14 +52,14 @@ export function CurrencySelect({
       aria-describedby={describedBy}
       className={`block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-60 ${className}`}
     >
-      <optgroup label="Common">
+      <optgroup label={t('currency.select.common')}>
         {groups.top.map((c) => (
           <option key={c.code} value={c.code}>
             {c.code} · {c.name}
           </option>
         ))}
       </optgroup>
-      <optgroup label="All currencies">
+      <optgroup label={t('currency.select.all')}>
         {groups.rest.map((c) => (
           <option key={c.code} value={c.code}>
             {c.code} · {c.name}

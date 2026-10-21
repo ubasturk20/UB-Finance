@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Payee } from '../../types';
+import { t } from '../../i18n';
 
 interface PayeeValue {
   id: string | null;
@@ -59,8 +60,8 @@ export function PayeeCombobox({ value, onChange, payees, className = '', fieldCl
         value={query}
         onChange={handleChange}
         onFocus={() => setOpen(true)}
-        placeholder="Payee"
-        aria-label="Payee"
+        placeholder={t('txd.payee.label')}
+        aria-label={t('txd.payee.label')}
         className={
           fieldClassName ??
           `block w-full bg-transparent text-sm text-text placeholder-text-tertiary focus:outline-none ${className}`
@@ -85,7 +86,7 @@ export function PayeeCombobox({ value, onChange, payees, className = '', fieldCl
           ))}
           {query && !exactMatch && (
             <div className="px-3 py-1.5 text-xs text-text-tertiary border-t border-border-light">
-              New payee: "{query}"
+              {t('txd.payee.new', { name: query })}
             </div>
           )}
         </div>

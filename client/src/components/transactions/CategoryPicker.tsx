@@ -3,6 +3,7 @@ import { Search, Check, Plus, X } from 'lucide-react';
 import { useCreateCategory } from '../../hooks/useCategories';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import type { BudgetType, CategoryGroup } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   value: string | null;
@@ -60,7 +61,7 @@ export function CategoryPicker({
     }))
     .filter((g) => g.categories.length > 0);
   const filteredTransfers = transferAccounts.filter((a) =>
-    `Transfer: ${a.name}`.toLowerCase().includes(query.toLowerCase()),
+    t('txd.transferTo', { name: a.name }).toLowerCase().includes(query.toLowerCase()),
   );
 
   const selectedGroup = groups.find((g) => g.id === newGroupId);
@@ -99,8 +100,8 @@ export function CategoryPicker({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search categories..."
-            aria-label="Search categories"
+            placeholder={t('txd.picker.searchPlaceholder')}
+            aria-label={t('txd.picker.searchLabel')}
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-md bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
           />
         </div>
@@ -112,7 +113,7 @@ export function CategoryPicker({
           onClick={() => onChange(null)}
           className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between hover:bg-hover ${value === null ? 'bg-brand-50 text-brand-700' : 'text-text-secondary'}`}
         >
-          <span className="italic">Uncategorized</span>
+          <span className="italic">{t('txd.uncategorized')}</span>
           {value === null && <Check size={14} className="text-brand-600 shrink-0" />}
         </button>
 
@@ -141,7 +142,7 @@ export function CategoryPicker({
         {filteredTransfers.length > 0 && (
           <div>
             <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
-              Transfer
+              {t('txd.transfer')}
             </div>
             {filteredTransfers.map((a) => {
               const id = `transfer:${a.id}`;
@@ -152,7 +153,7 @@ export function CategoryPicker({
                   onClick={() => onChange(id)}
                   className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-hover ${value === id ? 'bg-brand-50 text-brand-700' : 'text-text'}`}
                 >
-                  <span className="truncate flex-1">Transfer: {a.name}</span>
+                  <span className="truncate flex-1">{t('txd.transferTo', { name: a.name })}</span>
                   {value === id && <Check size={14} className="text-brand-600 shrink-0" />}
                 </button>
               );
@@ -162,7 +163,7 @@ export function CategoryPicker({
 
         {filtered.length === 0 && filteredTransfers.length === 0 && (
           <div className="px-3 py-4 text-sm text-text-tertiary text-center">
-            No categories found
+            {t('txd.picker.noCategories')}
           </div>
         )}
       </div>
@@ -185,9 +186,9 @@ export function CategoryPicker({
               <div className="flex gap-1">
                 {(
                   [
-                    ['fixed', 'Fixed'],
-                    ['flexible', 'Flexible'],
-                    ['non_monthly', 'Non-Monthly'],
+                    ['fixed', t('settings.categories.type.fixed')],
+                    ['flexible', t('settings.categories.type.flexible')],
+                    ['non_monthly', t('settings.categories.type.nonMonthly')],
                   ] as [BudgetType, string][]
                 ).map(([key, label]) => (
                   <button
@@ -209,8 +210,8 @@ export function CategoryPicker({
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Category name"
-              aria-label="New category name"
+              placeholder={t('txd.picker.newNamePlaceholder')}
+              aria-label={t('txd.picker.newNameLabel')}
               className="w-full text-sm border border-border rounded px-2 py-1.5 bg-surface text-text focus:border-brand-600 focus:outline-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreate();
@@ -224,7 +225,7 @@ export function CategoryPicker({
                 disabled={!newName.trim() || createCategory.isPending}
                 className="flex-1 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded px-2 py-1.5 disabled:opacity-50"
               >
-                {createCategory.isPending ? 'Creating...' : 'Create'}
+                {createCategory.isPending ? t('txd.picker.creating') : t('txd.picker.create')}
               </button>
               <button
                 type="button"
@@ -232,6 +233,7 @@ export function CategoryPicker({
                   setShowCreate(false);
                   setNewName('');
                 }}
+                aria-label={t('txd.picker.cancelCreate')}
                 className="p-1.5 text-text-tertiary hover:text-text-secondary"
               >
                 <X size={14} />
@@ -245,7 +247,7 @@ export function CategoryPicker({
             className="w-full px-3 py-2.5 text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1.5 hover:bg-hover"
           >
             <Plus size={14} />
-            Create new category
+            {t('txd.picker.createNew')}
           </button>
         )}
       </div>

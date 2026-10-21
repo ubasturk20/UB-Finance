@@ -2,11 +2,25 @@
 // switching: `t(key)` returns the Turkish text for a key. Messages live by area in ./messages
 // (one file per area, so they can be edited separately); the glossary in ./glossary.md keeps
 // the same English term translated the same way everywhere.
+import { accounts } from './messages/accounts';
 import { common } from './messages/common';
+import { dashboard } from './messages/dashboard';
+import { importing } from './messages/importing';
 import { settings } from './messages/settings';
 import { shell } from './messages/shell';
+import { transactionDetail } from './messages/transactionDetail';
+import { transactions } from './messages/transactions';
 
-const MESSAGES = { ...common, ...shell, ...settings } as const;
+const MESSAGES = {
+  ...common,
+  ...shell,
+  ...settings,
+  ...dashboard,
+  ...accounts,
+  ...transactions,
+  ...transactionDetail,
+  ...importing,
+} as const;
 
 export type MessageKey = keyof typeof MESSAGES;
 export type MessageVars = Record<string, string | number>;

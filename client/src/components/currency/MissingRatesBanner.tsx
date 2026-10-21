@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 import { useCurrencySettings } from '../../hooks/useCurrency';
+import { t } from '../../i18n';
 
 /**
  * Over the budget and reports: transactions in another currency whose day has no exchange
@@ -18,12 +19,14 @@ export function MissingRatesBanner({ className = '' }: { className?: string }) {
     >
       <AlertTriangle size={15} className="shrink-0 text-caution" aria-hidden />
       <span>
-        {missing.count} {missing.currencies.join(', ')} transaction{missing.count === 1 ? '' : 's'}{' '}
-        {missing.count === 1 ? 'has' : 'have'} no {data!.currency} value yet: no exchange rate for{' '}
-        {missing.count === 1 ? 'its' : 'their'} day.
+        {t('currency.missingBanner', {
+          count: missing.count,
+          currencies: missing.currencies.join(', '),
+          budget: data!.currency ?? '',
+        })}
       </span>
       <Link to="/settings?tab=currencies" className="font-medium text-brand-600 hover:underline">
-        Add a rate
+        {t('currency.addRate')}
       </Link>
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear } from 'date-fns';
 import { Search, X } from 'lucide-react';
 import type { TransactionQueryParams } from '../../types';
+import { t } from '../../i18n';
 
 export type DatePreset = 'this-month' | 'last-3' | 'this-year' | 'all';
 
@@ -52,10 +53,10 @@ export function filtersToParams(f: FilterState, accountId?: string): Transaction
 }
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
-  { value: 'this-month', label: 'This Month' },
-  { value: 'last-3', label: 'Last 3 Months' },
-  { value: 'this-year', label: 'This Year' },
-  { value: 'all', label: 'All Time' },
+  { value: 'this-month', label: t('tx.filter.thisMonth') },
+  { value: 'last-3', label: t('tx.filter.last3') },
+  { value: 'this-year', label: t('tx.filter.thisYear') },
+  { value: 'all', label: t('tx.filter.all') },
 ];
 
 interface Props {
@@ -93,11 +94,12 @@ export function TransactionFilters({
           type="text"
           value={rawSearch}
           onChange={handleSearchChange}
-          placeholder="Search payee or notes…"
+          placeholder={t('tx.filter.search')}
           className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-full bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
         />
         {rawSearch && (
           <button
+            aria-label={t('tx.filter.clearSearch')}
             onClick={() => {
               setRawSearch('');
               onChange({ ...state, search: '' });
@@ -111,10 +113,10 @@ export function TransactionFilters({
 
       {state.categoryId && (
         <div className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-brand-50 text-brand-700 rounded-full border border-brand-200">
-          <span>{categoryName || 'Category'}</span>
+          <span>{categoryName || t('tx.filter.category')}</span>
           <button
             onClick={() => onChange({ ...state, categoryId: null })}
-            aria-label="Clear category filter"
+            aria-label={t('tx.filter.clearCategory')}
             className="hover:text-brand-900 max-md:min-w-8 max-md:min-h-8 flex items-center justify-center"
           >
             <X size={12} />

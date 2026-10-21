@@ -12,7 +12,7 @@ async function setup(api: Api) {
 
 const header = (page: Page) => page.getByRole('main').locator('div').first();
 
-const newForm = (page: Page) => page.getByRole('form', { name: 'New transaction' });
+const newForm = (page: Page) => page.getByRole('form', { name: 'Yeni işlem' });
 
 /** The register row for a payee */
 const row = (page: Page, payee: string) =>
@@ -22,15 +22,15 @@ async function fillNewTransaction(
   page: Page,
   fields: { payee?: string; category?: string; notes?: string; outflow?: string; inflow?: string },
 ) {
-  await page.getByRole('button', { name: 'Add Transaction' }).click();
+  await page.getByRole('button', { name: 'İşlem ekle' }).click();
   const form = newForm(page);
-  if (fields.payee) await form.getByRole('textbox', { name: 'Payee' }).fill(fields.payee);
+  if (fields.payee) await form.getByRole('textbox', { name: 'Alıcı' }).fill(fields.payee);
   if (fields.category) {
-    await form.getByRole('combobox', { name: 'Category' }).selectOption({ label: fields.category });
+    await form.getByRole('combobox', { name: 'Kategori' }).selectOption({ label: fields.category });
   }
-  if (fields.notes) await form.getByRole('textbox', { name: 'Notes' }).fill(fields.notes);
-  if (fields.outflow) await form.getByRole('textbox', { name: 'Outflow' }).fill(fields.outflow);
-  if (fields.inflow) await form.getByRole('textbox', { name: 'Inflow' }).fill(fields.inflow);
+  if (fields.notes) await form.getByRole('textbox', { name: 'Notlar' }).fill(fields.notes);
+  if (fields.outflow) await form.getByRole('textbox', { name: 'Çıkış' }).fill(fields.outflow);
+  if (fields.inflow) await form.getByRole('textbox', { name: 'Giriş' }).fill(fields.inflow);
 }
 
 test.describe('account register', () => {
@@ -43,7 +43,7 @@ test.describe('account register', () => {
       notes: 'weekly shop',
       outflow: '42.50',
     });
-    await newForm(page).getByRole('button', { name: 'Save' }).click();
+    await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
 
     await expect(page.getByRole('button', { name: 'Corner Grocery', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: '🛒 Groceries' })).toBeVisible();
@@ -63,20 +63,20 @@ test.describe('account register', () => {
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, { payee: 'Corner Grocery', outflow: 'abc' });
     const form = newForm(page);
-    await form.getByRole('button', { name: 'Save' }).click();
-    await expect(form.getByRole('textbox', { name: 'Outflow' })).toHaveAttribute(
+    await form.getByRole('button', { name: 'Kaydet' }).click();
+    await expect(form.getByRole('textbox', { name: 'Çıkış' })).toHaveAttribute(
       'aria-invalid',
       'true',
     );
     await expect(form.getByRole('alert')).toHaveText(
-      "That isn't an amount. Type it like 12.50 or 12,50.",
+      'Bu bir tutar değil. 12,50 ya da 12.50 gibi yazın.',
     );
     expect(await api.transactions(`?account_id=${checking.id}`)).toHaveLength(0);
 
     // Fixed, it saves
-    await form.getByRole('textbox', { name: 'Outflow' }).fill('4,50');
+    await form.getByRole('textbox', { name: 'Çıkış' }).fill('4,50');
     await expect(form.getByRole('alert')).toBeHidden();
-    await form.getByRole('button', { name: 'Save' }).click();
+    await form.getByRole('button', { name: 'Kaydet' }).click();
     await expect.poll(() => api.balance(checking.id)).toBe(100_000 - 450);
   });
 
@@ -88,7 +88,7 @@ test.describe('account register', () => {
       category: '💵 Paychecks',
       inflow: '2500',
     });
-    await newForm(page).getByRole('button', { name: 'Save' }).click();
+    await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
     await expect(header(page)).toContainText('3.500 ₺');
     expect(await api.balance(checking.id)).toBe(350_000);
   });
@@ -98,15 +98,15 @@ test.describe('account register', () => {
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, { payee: 'Corner Grocery', outflow: '12.34' });
     const form = newForm(page);
-    await form.getByRole('textbox', { name: 'Outflow' }).press('Tab');
-    await expect(form.getByRole('textbox', { name: 'Inflow' })).toBeFocused();
-    await expect(form.getByRole('textbox', { name: 'Outflow' })).toHaveValue('12.34');
+    await form.getByRole('textbox', { name: 'Çıkış' }).press('Tab');
+    await expect(form.getByRole('textbox', { name: 'Giriş' })).toBeFocused();
+    await expect(form.getByRole('textbox', { name: 'Çıkış' })).toHaveValue('12.34');
     // Typing an inflow still replaces the outflow
     await page.keyboard.type('5');
-    await expect(form.getByRole('textbox', { name: 'Outflow' })).toHaveValue('');
-    await form.getByRole('textbox', { name: 'Outflow' }).fill('12.34');
-    await expect(form.getByRole('textbox', { name: 'Inflow' })).toHaveValue('');
-    await form.getByRole('button', { name: 'Save' }).click();
+    await expect(form.getByRole('textbox', { name: 'Çıkış' })).toHaveValue('');
+    await form.getByRole('textbox', { name: 'Çıkış' }).fill('12.34');
+    await expect(form.getByRole('textbox', { name: 'Giriş' })).toHaveValue('');
+    await form.getByRole('button', { name: 'Kaydet' }).click();
     await expect(header(page)).toContainText('987,66 ₺');
   });
 
@@ -115,20 +115,20 @@ test.describe('account register', () => {
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, { payee: 'Big Box Store', outflow: '100' });
     const form = newForm(page);
-    await form.getByRole('button', { name: 'Split transaction' }).click();
+    await form.getByRole('button', { name: 'İşlemi böl' }).click();
     await form
-      .getByRole('combobox', { name: 'Split 1 category' })
+      .getByRole('combobox', { name: 'Parça 1 kategorisi' })
       .selectOption({ label: '🛒 Groceries' });
-    await form.getByRole('textbox', { name: 'Split 1 amount' }).fill('60');
-    await expect(form.getByText('40 ₺ remaining')).toBeVisible();
+    await form.getByRole('textbox', { name: 'Parça 1 tutarı' }).fill('60');
+    await expect(form.getByText('40 ₺ kalan')).toBeVisible();
     await form
-      .getByRole('combobox', { name: 'Split 2 category' })
+      .getByRole('combobox', { name: 'Parça 2 kategorisi' })
       .selectOption({ label: '🏠 Rent / Mortgage' });
-    await form.getByRole('textbox', { name: 'Split 2 amount' }).fill('40');
-    await expect(form.getByText('Balanced')).toBeVisible();
-    await newForm(page).getByRole('button', { name: 'Save' }).click();
+    await form.getByRole('textbox', { name: 'Parça 2 tutarı' }).fill('40');
+    await expect(form.getByText('Dengede')).toBeVisible();
+    await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
 
-    await expect(page.getByRole('button', { name: 'Split (2)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Bölünmüş (2)' })).toBeVisible();
     // 1.000 ₺ − 100 ₺, not − 200 ₺
     await expect(header(page)).toContainText('900 ₺');
     expect(await api.balance(checking.id)).toBe(90_000);
@@ -142,7 +142,7 @@ test.describe('account register', () => {
     const { checking, savings } = await setup(api);
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, { category: 'Transfer: Rainy Day Savings', outflow: '250' });
-    await newForm(page).getByRole('button', { name: 'Save' }).click();
+    await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
 
     await expect(page.getByText('Transfer: Rainy Day Savings')).toBeVisible();
     expect(await api.balance(checking.id)).toBe(75_000);
@@ -167,18 +167,18 @@ test.describe('account register', () => {
     // Rows open with the keyboard too
     await row(page, 'Streamflix').focus();
     await page.keyboard.press('Enter');
-    await expect(page.getByText('Transaction Details')).toBeVisible();
-    const panel = page.getByRole('complementary', { name: 'Transaction details' });
+    await expect(page.getByText('İşlem Ayrıntıları')).toBeVisible();
+    const panel = page.getByRole('complementary', { name: 'İşlem ayrıntıları' });
 
     // Category via the searchable picker
-    await panel.getByRole('button', { name: 'Uncategorized' }).click();
-    await page.getByPlaceholder('Search categories...').fill('stream');
+    await panel.getByRole('button', { name: 'Kategorisiz' }).click();
+    await page.getByPlaceholder('Kategori ara…').fill('stream');
     await page.getByRole('button', { name: /Streaming Services/ }).click();
 
-    await panel.getByRole('textbox', { name: 'Notes' }).fill('family plan');
-    await panel.getByRole('textbox', { name: 'Notes' }).blur();
-    await panel.getByRole('textbox', { name: 'Date' }).fill(otherDayThisMonth());
-    await panel.getByRole('textbox', { name: 'Date' }).blur();
+    await panel.getByRole('textbox', { name: 'Notlar' }).fill('family plan');
+    await panel.getByRole('textbox', { name: 'Notlar' }).blur();
+    await panel.getByRole('textbox', { name: 'Tarih' }).fill(otherDayThisMonth());
+    await panel.getByRole('textbox', { name: 'Tarih' }).blur();
 
     await expect
       .poll(async () => (await api.transactions(`?account_id=${checking.id}`))[0])
@@ -188,8 +188,8 @@ test.describe('account register', () => {
         date: otherDayThisMonth(),
         categoryId: (await api.category('Streaming Services')).id,
       });
-    await page.getByRole('button', { name: 'Close details' }).click();
-    await expect(page.getByText('Transaction Details')).toBeHidden();
+    await page.getByRole('button', { name: 'Ayrıntıları kapat' }).click();
+    await expect(page.getByText('İşlem Ayrıntıları')).toBeHidden();
   });
 
   test('deletes a transaction after confirming', async ({ page, api }) => {
@@ -202,9 +202,9 @@ test.describe('account register', () => {
     });
     await open(page, `/accounts/${checking.id}`);
     await row(page, 'Oops Store').click();
-    await page.getByRole('button', { name: 'Delete Transaction' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).click();
-    await expect(page.getByText('No transactions yet')).toBeVisible();
+    await page.getByRole('button', { name: 'İşlemi Sil' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click();
+    await expect(page.getByText('Henüz işlem yok')).toBeVisible();
     expect(await api.balance(checking.id)).toBe(100_000);
   });
 
@@ -227,10 +227,10 @@ test.describe('account register', () => {
     await expect(page.getByRole('button', { name: 'Coffee Corner', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Old Bookshop', exact: true })).toBeHidden();
 
-    await page.getByRole('button', { name: 'All Time' }).click();
-    await expect(page.getByText('2 transactions')).toBeVisible();
-    await page.getByPlaceholder('Search payee or notes…').fill('book');
-    await expect(page.getByText('1 transactions')).toBeVisible();
+    await page.getByRole('button', { name: 'Tüm zamanlar' }).click();
+    await expect(page.getByText('2 işlem', { exact: true })).toBeVisible();
+    await page.getByPlaceholder('Alıcı veya notlarda ara…').fill('book');
+    await expect(page.getByText('1 işlem', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Old Bookshop', exact: true })).toBeVisible();
   });
 
@@ -251,25 +251,27 @@ test.describe('account register', () => {
     await open(page, '/transactions');
     await expect(page.getByRole('button', { name: 'A-Mart', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'B-Bank', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Go to Rainy Day Savings' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Rainy Day Savings hesabına git' }),
+    ).toBeVisible();
   });
 });
 
 test('the Add transaction dialog makes transfers too', async ({ page, api }) => {
   const { checking, savings } = await setup(api);
   await open(page, '/transactions?add=1');
-  const dialog = page.getByRole('dialog', { name: 'Add transaction' });
+  const dialog = page.getByRole('dialog', { name: 'İşlem ekle' });
 
-  await dialog.getByRole('button', { name: 'Credit' }).click();
-  await typeAmount(dialog.getByLabel('Amount', { exact: true }), '300');
-  await dialog.getByRole('button', { name: /Select account/ }).click();
+  await dialog.getByRole('button', { name: 'Giriş', exact: true }).click();
+  await typeAmount(dialog.getByLabel('Tutar', { exact: true }), '300');
+  await dialog.getByRole('button', { name: /Hesap seçin/ }).click();
   await dialog.getByRole('button', { name: /Everyday Checking/ }).click();
-  await dialog.getByRole('button', { name: /^Category:/ }).click();
+  await dialog.getByRole('button', { name: /^Kategori:/ }).click();
   await dialog.getByRole('button', { name: 'Transfer: Rainy Day Savings' }).click();
 
   // A transfer is named after the other account, so it needs no merchant
-  await expect(dialog.getByText('Merchant')).toBeHidden();
-  await dialog.getByRole('button', { name: 'Add transaction' }).click();
+  await expect(dialog.getByText('Alıcı *')).toBeHidden();
+  await dialog.getByRole('button', { name: 'İşlem ekle' }).click();
   await expect(dialog).toBeHidden();
 
   // A credit brings the money into the chosen account
@@ -285,19 +287,19 @@ test('the Add transaction dialog lists transfers before an account is chosen (#8
 }) => {
   const { checking, savings } = await setup(api);
   await open(page, '/transactions?add=1');
-  const dialog = page.getByRole('dialog', { name: 'Add transaction' });
+  const dialog = page.getByRole('dialog', { name: 'İşlem ekle' });
 
-  await typeAmount(dialog.getByLabel('Amount', { exact: true }), '200');
+  await typeAmount(dialog.getByLabel('Tutar', { exact: true }), '200');
   // The category list ends with every account as "Transfer: name", as the guide says
-  await dialog.getByRole('button', { name: /^Category:/ }).click();
+  await dialog.getByRole('button', { name: /^Kategori:/ }).click();
   await dialog.getByRole('button', { name: 'Transfer: Rainy Day Savings' }).click();
 
   // A debit transfer asks where the money comes from, and can't come from the same account
-  await expect(dialog.getByText('From account *')).toBeVisible();
-  await dialog.getByRole('button', { name: /Select account/ }).click();
+  await expect(dialog.getByText('Gönderen hesap *')).toBeVisible();
+  await dialog.getByRole('button', { name: /Hesap seçin/ }).click();
   await expect(dialog.getByRole('button', { name: /Rainy Day Savings/ })).toHaveCount(1);
   await dialog.getByRole('button', { name: /Everyday Checking/ }).click();
-  await dialog.getByRole('button', { name: 'Add transaction' }).click();
+  await dialog.getByRole('button', { name: 'İşlem ekle' }).click();
   await expect(dialog).toBeHidden();
 
   expect(await api.balance(checking.id)).toBe(80_000);
@@ -311,7 +313,7 @@ test('an inflow marked as a transfer brings the money in from the other account'
   const { checking, savings } = await setup(api);
   await open(page, `/accounts/${checking.id}`);
   await fillNewTransaction(page, { category: 'Transfer: Rainy Day Savings', inflow: '100' });
-  await newForm(page).getByRole('button', { name: 'Save' }).click();
+  await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
 
   await expect(row(page, 'Transfer: Rainy Day Savings')).toBeVisible();
   expect(await api.balance(checking.id)).toBe(110_000);
@@ -341,20 +343,20 @@ test.describe('transfers between existing transactions (#89)', () => {
     ]);
     await open(page, `/accounts/${checking.id}`);
     await row(page, 'ONLINE TRANSFER 0042').click();
-    const panel = page.getByRole('complementary', { name: 'Transaction details' });
+    const panel = page.getByRole('complementary', { name: 'İşlem ayrıntıları' });
 
-    await panel.getByRole('button', { name: 'Uncategorized' }).click();
-    await page.getByPlaceholder('Search categories...').fill('transfer');
+    await panel.getByRole('button', { name: 'Kategorisiz' }).click();
+    await page.getByPlaceholder('Kategori ara…').fill('transfer');
     await page.getByRole('button', { name: 'Transfer: Rainy Day Savings' }).click();
 
     // Nothing matched in savings, so the other side was created there
-    await expect(panel.getByRole('button', { name: 'Not a transfer' })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Transfer değil' })).toBeVisible();
     await expect(row(page, 'Transfer: Rainy Day Savings')).toBeVisible();
     expect(await api.balance(checking.id)).toBe(75_000);
     expect(await api.balance(savings.id)).toBe(525_000);
 
-    await panel.getByRole('button', { name: 'Not a transfer' }).click();
-    await expect(panel.getByRole('button', { name: 'Uncategorized' })).toBeVisible();
+    await panel.getByRole('button', { name: 'Transfer değil' }).click();
+    await expect(panel.getByRole('button', { name: 'Kategorisiz' })).toBeVisible();
     const [tx] = await api.transactions(`?account_id=${checking.id}`);
     expect(tx).toMatchObject({ transferTransactionId: null, payeeName: 'ONLINE TRANSFER 0042' });
   });
@@ -374,18 +376,18 @@ test.describe('transfers between existing transactions (#89)', () => {
     const before = [await api.balance(checking.id), await api.balance(card.id)];
 
     await open(page, `/accounts/${checking.id}`);
-    const banner = page.getByRole('region', { name: 'Possible transfers' });
-    await expect(banner).toContainText('2 possible transfers');
-    await banner.getByRole('button', { name: 'Review' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Possible transfers' });
+    const banner = page.getByRole('region', { name: 'Olası transferler' });
+    await expect(banner).toContainText('2 olası transfer');
+    await banner.getByRole('button', { name: 'İncele' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Olası transferler' });
     // The grocery run and the interest only look alike: say so, and it's not suggested again
     await dialog
-      .getByRole('button', { name: /Not a transfer: 40\s₺ from Everyday Checking/ })
+      .getByRole('button', { name: /Transfer değil: 40\s₺, Everyday Checking hesabından/ })
       .click();
     await expect(dialog.getByRole('listitem')).toHaveCount(1);
-    await dialog.getByRole('button', { name: 'Link 1 transfer' }).click();
+    await dialog.getByRole('button', { name: '1 transferi bağla' }).click();
     await expect(dialog).toBeHidden();
-    await expect(banner).toContainText('Linked 1 transfer.');
+    await expect(banner).toContainText('1 transfer bağlandı.');
 
     await expect(row(page, 'Transfer: Travel Card')).toBeVisible();
     await expect(row(page, 'CORNER GROCERY')).toBeVisible();
@@ -475,26 +477,26 @@ test.describe('long histories', () => {
     const { checking } = await setup(api);
     await seedDaily(api, checking.id, 650);
     await open(page, `/accounts/${checking.id}`);
-    await page.getByRole('button', { name: 'All Time' }).click();
+    await page.getByRole('button', { name: 'Tüm zamanlar' }).click();
 
-    await expect(page.getByText('650 transactions', { exact: true })).toBeVisible();
-    await expect(page.getByText('Showing 300 of 650 transactions')).toBeVisible();
+    await expect(page.getByText('650 işlem', { exact: true })).toBeVisible();
+    await expect(page.getByText('300 / 650 işlem gösteriliyor')).toBeVisible();
     await expect(page.getByTestId('transaction-row')).toHaveCount(300);
-    await page.getByRole('button', { name: 'Show 300 more' }).click();
-    await page.getByRole('button', { name: 'Show 50 more' }).click();
+    await page.getByRole('button', { name: '300 işlem daha göster' }).click();
+    await page.getByRole('button', { name: '50 işlem daha göster' }).click();
     await expect(row(page, 'Shop 649')).toBeVisible();
     await expect(page.getByTestId('transaction-row')).toHaveCount(650);
-    await expect(page.getByRole('button', { name: /^Show \d+ more$/ })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^\d+ işlem daha göster$/ })).toHaveCount(0);
   });
 
   test('search finds transactions that are not drawn yet', async ({ page, api }) => {
     const { checking } = await setup(api);
     await seedDaily(api, checking.id, 650);
     await open(page, `/accounts/${checking.id}`);
-    await page.getByRole('button', { name: 'All Time' }).click();
+    await page.getByRole('button', { name: 'Tüm zamanlar' }).click();
     await expect(row(page, 'Shop 649')).toHaveCount(0);
 
-    await page.getByPlaceholder('Search payee or notes…').fill('Shop 649');
+    await page.getByPlaceholder('Alıcı veya notlarda ara…').fill('Shop 649');
     await expect(row(page, 'Shop 649')).toBeVisible();
     await expect(page.getByTestId('transaction-row')).toHaveCount(1);
   });
@@ -504,10 +506,10 @@ test.describe('long histories', () => {
     await seedDaily(api, checking.id, 250);
     await open(page, `/accounts/${checking.id}/reconcile`);
     // Nothing reconciled yet, so the reconciled part is just the starting balance
-    await expect(page.getByText('Current selected balance in app').locator('..')).toContainText(
+    await expect(page.getByText('Uygulamada seçili güncel bakiye').locator('..')).toContainText(
       '1.000 ₺',
     );
-    await page.getByRole('button', { name: 'Start Reconciliation' }).click();
+    await page.getByRole('button', { name: 'Mutabakatı Başlat' }).click();
     await expect(page.getByText('Shop 249')).toBeVisible();
   });
 });

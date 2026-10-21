@@ -3,6 +3,7 @@ import { Search, Check, Plus, CreditCard } from 'lucide-react';
 import { useCreatePayee } from '../../hooks/usePayees';
 import { PayeeIcon } from '../payees/PayeeIcon';
 import type { PayeeWithCount } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   value: string | null;
@@ -79,7 +80,8 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search merchants..."
+            placeholder={t('txd.payee.search')}
+            aria-label={t('txd.payee.search')}
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-md bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
           />
         </div>
@@ -87,7 +89,7 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
 
       <div className="overflow-y-auto max-h-72">
         <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
-          Your merchants
+          {t('txd.payee.yours')}
         </div>
         {filtered.map((p) => {
           const isSelected = p.id === value;
@@ -112,7 +114,9 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
         })}
 
         {filtered.length === 0 && (
-          <div className="px-3 py-4 text-sm text-text-tertiary text-center">No merchants found</div>
+          <div className="px-3 py-4 text-sm text-text-tertiary text-center">
+            {t('txd.payee.none')}
+          </div>
         )}
       </div>
 
@@ -125,7 +129,7 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
             className="w-full px-3 py-2.5 text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1.5 hover:bg-hover"
           >
             <Plus size={14} />
-            Create new "{query}" merchant
+            {t('txd.payee.createNamed', { name: query })}
           </button>
         </div>
       )}

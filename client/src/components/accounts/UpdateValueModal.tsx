@@ -8,6 +8,7 @@ import { useCreateTransaction } from '../../hooks/useTransactions';
 import { formatMoney } from '../../utils/currency';
 import { isLiabilityType } from '../../utils/accountTypes';
 import type { Account } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   /** Render only while open, so the input starts at the current value */
@@ -29,6 +30,7 @@ export function UpdateValueModal({ account, onClose }: Props) {
 
   const newBalance = liability ? -Math.abs(value) : value;
   const change = newBalance - account.balance;
+  const valueLabel = liability ? t('acc.updateValue.owedToday') : t('acc.updateValue.valueToday');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +39,7 @@ export function UpdateValueModal({ account, onClose }: Props) {
         accountId: account.id,
         date: format(new Date(), 'yyyy-MM-dd'),
         amount: change,
-        notes: liability ? 'Balance update' : 'Value update',
+        notes: liability ? t('acc.updateValue.noteBalance') : t('acc.updateValue.noteValue'),
         adjustment: true,
       });
     }
@@ -45,30 +47,33 @@ export function UpdateValueModal({ account, onClose }: Props) {
   }
 
   return (
-    <Modal isOpen onClose={onClose} title={liability ? 'Update Balance' : 'Update Value'} size="sm">
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={liability ? t('acc.updateBalance.title') : t('acc.updateValue.title')}
+      size="sm"
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">
-            {liability ? 'Amount owed today' : 'Value today'}
-          </label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">{valueLabel}</label>
           <CurrencyInput
             currency={account.currency}
             value={value}
             onChange={setValue}
             allowNegative={!liability}
-            aria-label={liability ? 'Amount owed today' : 'Value today'}
+            aria-label={valueLabel}
           />
           <p className="mt-1 text-xs text-text-tertiary">
-            Currently {formatMoney(current, account.currency)}.
+            {t('acc.updateValue.currently', { amount: formatMoney(current, account.currency) })}
             {change !== 0 && (
               <>
                 {' '}
-                Adds a{' '}
+                {t('acc.updateValue.addsBefore')}{' '}
                 <span className={change > 0 ? 'text-positive' : 'text-negative'}>
                   {change > 0 ? '+' : ''}
                   {formatMoney(change, account.currency)}
                 </span>{' '}
-                adjustment dated today.
+                {t('acc.updateValue.addsAfter')}
               </>
             )}
           </p>
@@ -81,14 +86,14 @@ export function UpdateValueModal({ account, onClose }: Props) {
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-hover transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
             disabled={createTransaction.isPending || !canSave}
             className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {createTransaction.isPending ? 'Saving…' : 'Save'}
+            {createTransaction.isPending ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </form>

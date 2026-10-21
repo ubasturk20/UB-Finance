@@ -43,6 +43,7 @@ import { useAccountCurrency } from '../../hooks/useCurrency';
 import type { ImportPreviewRow } from '../../types';
 import type { ImportRow } from '../../api/transactions';
 import { IS_DEMO } from '../../demo/demoApi';
+import { t, type MessageKey } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -53,20 +54,42 @@ interface Props {
 type Step = 'upload' | 'statement' | 'map' | 'preview' | 'done';
 
 const DELIMITERS: { value: Delimiter; label: string }[] = [
-  { value: ',', label: 'Comma' },
-  { value: ';', label: 'Semicolon' },
-  { value: '\t', label: 'Tab' },
+  { value: ',', label: t('import.delimiter.comma') },
+  { value: ';', label: t('import.delimiter.semicolon') },
+  { value: '\t', label: t('import.delimiter.tab') },
 ];
 
 const DATE_FORMAT_LABELS: Record<DateFormat, string> = {
-  mdy: 'MM/DD/YYYY',
-  dmy: 'DD/MM/YYYY',
-  ymd: 'YY/MM/DD',
+  mdy: t('import.dateFormat.mdy'),
+  dmy: t('import.dateFormat.dmy'),
+  ymd: t('import.dateFormat.ymd'),
 };
 
 const NUMBER_FORMAT_LABELS: Record<NumberFormat, string> = {
   dot: '1,234.56',
   comma: '1.234,56',
+};
+
+const ROLES: ColumnRole[] = [
+  'date',
+  'payee',
+  'amount',
+  'inflow',
+  'outflow',
+  'direction',
+  'notes',
+  'skip',
+];
+
+const ROLE_LABELS: Record<ColumnRole, MessageKey> = {
+  date: 'import.role.date',
+  payee: 'import.role.payee',
+  amount: 'import.role.amount',
+  inflow: 'import.role.inflow',
+  outflow: 'import.role.outflow',
+  direction: 'import.role.direction',
+  notes: 'import.role.notes',
+  skip: 'import.role.skip',
 };
 
 const selectClass = 'w-full text-xs border border-border rounded px-1.5 py-1 bg-surface text-text';
@@ -192,7 +215,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     ) => {
       const all = parseCsvRecords(content, sep);
       if (all.length === 0) {
-        setError('Could not parse CSV file');
+        setError(t('import.error.parseFailed'));
         return;
       }
       setError(null);
@@ -209,9 +232,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     const load = loadId.current;
     // The server's limit: say so, rather than fail the whole file with a generic error
     if (rows.length > MAX_IMPORT_ROWS) {
-      setError(
-        `This file has ${rows.length.toLocaleString()} transactions. FlyBudget imports up to ${MAX_IMPORT_ROWS.toLocaleString()} at a time: split it into smaller files.`,
-      );
+      setError(t('import.error.tooManyRows', { count: rows.length, max: MAX_IMPORT_ROWS }));
       return;
     }
     setLoading(true);
@@ -224,7 +245,9 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       setExcluded(new Set(preview.map((r, i) => (r.isDuplicate ? i : -1)).filter((i) => i >= 0)));
       setStep('preview');
     } catch (e: unknown) {
-      if (load === loadId.current) setError(e instanceof Error ? e.message : 'Preview failed');
+      if (load === loadId.current) {
+        setError(e instanceof Error ? e.message : t('import.error.previewFailed'));
+      }
     } finally {
       if (load === loadId.current) setLoading(false);
     }
@@ -232,7 +255,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
 
   function previewStatement(statement: CamtStatement) {
     if (!statement.transactions.length) {
-      setError('There are no booked transactions in this statement');
+      setError(t('import.error.noBooked'));
       return;
     }
     setError(null);
@@ -246,7 +269,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     try {
       await readFile(file, load);
     } catch {
-      if (load === loadId.current) setError("Couldn't read this file");
+      if (load === loadId.current) setError(t('import.error.unreadable'));
     }
   }
 
@@ -273,7 +296,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     if (/\.xml$/i.test(file.name) || looksLikeCamt(start)) {
       const found = parseCamt(decodeCamtBytes(buffer));
       if (!found?.length) {
-        setError("This file isn't a bank statement FlyBudget can read (CAMT.053)");
+        setError(t('import.error.notCamt'));
         return;
       }
       const known = (await savedImport())?.statementAccount ?? null;
@@ -386,11 +409,14 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
   const fromLastTime = [
     !dateFormatChoice &&
       !detected.dateFormat &&
-      lastTime?.dateFormat && { what: 'dates', format: DATE_FORMAT_LABELS[lastTime.dateFormat] },
+      lastTime?.dateFormat && {
+        what: t('import.map.fromLastTime.dates'),
+        format: DATE_FORMAT_LABELS[lastTime.dateFormat],
+      },
     !numberFormatChoice &&
       !detected.numberFormat &&
       lastTime?.numberFormat && {
-        what: 'amounts',
+        what: t('import.map.fromLastTime.amounts'),
         format: NUMBER_FORMAT_LABELS[lastTime.numberFormat],
       },
   ].filter((f): f is { what: string; format: string } => !!f);
@@ -400,9 +426,9 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
   function handlePreview() {
     setError(null);
     // Never guess: swapped days and months, or amounts off by 100x, would look plausible
-    if (!dateFormat) return setError('Choose how this file writes dates');
-    if (!numberFormat) return setError('Choose how this file writes amounts');
-    if (needsOutWord) return setError('Type the word your bank uses for money going out');
+    if (!dateFormat) return setError(t('import.error.chooseDates'));
+    if (!numberFormat) return setError(t('import.error.chooseAmounts'));
+    if (needsOutWord) return setError(t('import.error.needOutWord'));
     const built = buildImportRows(rawRows, roles, {
       dateFormat,
       numberFormat,
@@ -417,8 +443,8 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     if (!rows.length) {
       setError(
         skipped.length
-          ? `No rows could be imported. ${describeSkippedRows(skipped)}`
-          : 'No valid rows found',
+          ? t('import.error.noRowsImportable', { details: describeSkippedRows(skipped) })
+          : t('import.error.noValidRows'),
       );
       return;
     }
@@ -478,7 +504,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       .map(({ isDuplicate: _, ...row }) => row as ImportRow);
 
     if (!rows.length) {
-      setError('No rows selected');
+      setError(t('import.error.noRowsSelected'));
       return;
     }
 
@@ -493,7 +519,9 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
           setStep('done');
         },
         onError: (e) => {
-          if (load === loadId.current) setError(e instanceof Error ? e.message : 'Import failed');
+          if (load === loadId.current) {
+            setError(e instanceof Error ? e.message : t('import.error.failed'));
+          }
         },
       },
     );
@@ -513,16 +541,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     else setStep(statements.length > 1 ? 'statement' : 'upload');
   }
 
-  const roleOptions: { value: ColumnRole; label: string }[] = [
-    { value: 'date', label: 'Date' },
-    { value: 'payee', label: 'Payee' },
-    { value: 'amount', label: 'Amount' },
-    { value: 'inflow', label: 'Inflow' },
-    { value: 'outflow', label: 'Outflow' },
-    { value: 'direction', label: 'Direction (in/out)' },
-    { value: 'notes', label: 'Notes' },
-    { value: 'skip', label: 'Skip' },
-  ];
+  const roleOptions = ROLES.map((value) => ({ value, label: t(ROLE_LABELS[value]) }));
 
   // A statement for another account than the one imported here last time
   const statementAccount =
@@ -531,14 +550,14 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     statementAccount && knownStatementAccount && statementAccount !== knownStatementAccount
       ? statementAccount
       : null;
-  const entriesLeftOut = `${skippedEntries} ${skippedEntries === 1 ? 'entry is' : 'entries are'} pending or couldn't be read, and left out.`;
+  const entriesLeftOut = t('import.preview.entriesLeftOut', { count: skippedEntries });
   // A statement in another currency than this account's: its amounts would mean something else
   const statementCurrency = source === 'camt' ? (statements[statementIdx]?.currency ?? null) : null;
   const otherCurrency =
     statementCurrency && currency && statementCurrency !== currency ? statementCurrency : null;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Import Transactions" size="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('import.title')} size="lg">
       {error && (
         <div className="mb-4 flex items-center gap-2 px-3 py-2 text-sm bg-negative-subtle text-negative rounded-lg">
           <AlertTriangle size={14} /> {error}
@@ -546,7 +565,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             type="button"
             onClick={() => setError(null)}
             className="ml-auto flex items-center justify-center max-md:min-h-11 max-md:min-w-11"
-            aria-label="Dismiss"
+            aria-label={t('import.dismissError')}
           >
             <X size={14} />
           </button>
@@ -561,21 +580,15 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
           onClick={() => document.getElementById('csv-file-input')?.click()}
         >
           <Upload size={32} className="text-text-tertiary" />
-          <p className="text-sm text-text-secondary">
-            Drag and drop a file from your bank, or click to browse
-          </p>
-          <p className="text-xs text-text-tertiary">CSV, or a CAMT.053 bank statement (XML)</p>
-          {loading && <p className="text-xs text-text-tertiary">Checking…</p>}
-          {IS_DEMO && (
-            <p className="text-xs text-text-tertiary">
-              Demo: your file stays in this browser tab and isn't saved.
-            </p>
-          )}
+          <p className="text-sm text-text-secondary">{t('import.upload.prompt')}</p>
+          <p className="text-xs text-text-tertiary">{t('import.upload.formats')}</p>
+          {loading && <p className="text-xs text-text-tertiary">{t('import.checking')}</p>}
+          {IS_DEMO && <p className="text-xs text-text-tertiary">{t('import.upload.demo')}</p>}
           <input
             id="csv-file-input"
             type="file"
             accept=".csv,.tsv,.txt,.xml"
-            aria-label="Bank file"
+            aria-label={t('import.upload.fileLabel')}
             className="hidden"
             onChange={handleFileInput}
           />
@@ -585,11 +598,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {step === 'statement' && (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">
-            This file has statements for {statements.length} accounts. Which one belongs to this
-            account?
+            {t('import.statement.intro', { count: statements.length })}
           </p>
           <label className={optionLabelClass}>
-            <span>Statement</span>
+            <span>{t('import.statement.label')}</span>
             <select
               value={statementIdx}
               onChange={(e) => setStatementIdx(Number(e.target.value))}
@@ -597,23 +609,26 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             >
               {statements.map((s, i) => (
                 <option key={i} value={i}>
-                  {s.account ?? 'Account without a number'} ({s.transactions.length} transactions)
+                  {t('import.statement.option', {
+                    account: s.account ?? t('import.statement.noNumber'),
+                    count: s.transactions.length,
+                  })}
                   {knownStatementAccount !== null &&
                     statementAccountKey(s.account) === knownStatementAccount &&
-                    ', imported here before'}
+                    t('import.statement.importedBefore')}
                 </option>
               ))}
             </select>
           </label>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setStep('upload')}>
-              Back
+              {t('common.back')}
             </Button>
             <Button
               onClick={() => void previewStatement(statements[statementIdx])}
               disabled={loading}
             >
-              {loading ? 'Checking...' : 'Preview'}
+              {loading ? t('import.checking') : t('import.previewButton')}
             </Button>
           </div>
         </div>
@@ -622,12 +637,12 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {step === 'map' && (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">
-            Map each column to a field. Found {rawRows.length} rows.
-            {usingSaved && ' Using the settings from your last import into this account.'}
+            {t('import.map.intro', { count: rawRows.length })}
+            {usingSaved && t('import.map.usingSaved')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <label className={optionLabelClass}>
-              <span>Separator</span>
+              <span>{t('import.map.separator')}</span>
               <select
                 value={delimiter}
                 onChange={(e) => changeDelimiter(e.target.value as Delimiter)}
@@ -641,7 +656,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               </select>
             </label>
             <label className={optionLabelClass}>
-              <span>Encoding</span>
+              <span>{t('import.map.encoding')}</span>
               <select
                 value={encoding}
                 onChange={(e) => changeEncoding(e.target.value as CsvEncoding)}
@@ -655,7 +670,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               </select>
             </label>
             <label className={optionLabelClass}>
-              <span>Rows above the header</span>
+              <span>{t('import.map.skipRows')}</span>
               <input
                 type="number"
                 min={0}
@@ -675,13 +690,13 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               />
             </label>
             <label className={optionLabelClass}>
-              <span>Dates</span>
+              <span>{t('import.map.dates')}</span>
               <select
                 value={dateFormat ?? ''}
                 onChange={(e) => setDateFormatChoice(e.target.value as DateFormat)}
                 className={selectClass}
               >
-                {!dateFormat && <option value="">Choose…</option>}
+                {!dateFormat && <option value="">{t('import.map.choose')}</option>}
                 {Object.entries(DATE_FORMAT_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -690,13 +705,13 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               </select>
             </label>
             <label className={optionLabelClass}>
-              <span>Amounts</span>
+              <span>{t('import.map.amounts')}</span>
               <select
                 value={numberFormat ?? ''}
                 onChange={(e) => setNumberFormatChoice(e.target.value as NumberFormat)}
                 className={selectClass}
               >
-                {!numberFormat && <option value="">Choose…</option>}
+                {!numberFormat && <option value="">{t('import.map.choose')}</option>}
                 {Object.entries(NUMBER_FORMAT_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -706,12 +721,12 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             </label>
             {hasDirection && (
               <label className={optionLabelClass}>
-                <span>Word for money out</span>
+                <span>{t('import.map.outWord')}</span>
                 <input
                   type="text"
                   value={outWord}
                   maxLength={50}
-                  placeholder="Optional, e.g. Af"
+                  placeholder={t('import.map.outWordPlaceholder')}
                   onChange={(e) => setOutWord(e.target.value)}
                   className={selectClass}
                 />
@@ -724,28 +739,29 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               <span>
                 {!dateFormat &&
                   (detected.dateSample
-                    ? `This file doesn't show in which order ${detected.dateSample} is written. `
-                    : 'Rows in this file write dates in different orders. ')}
+                    ? t('import.map.dateSample', { sample: detected.dateSample })
+                    : t('import.map.datesMixed'))}
                 {!numberFormat &&
                   (detected.amountSample
-                    ? `This file doesn't show whether ${detected.amountSample} uses a decimal point or a decimal comma. `
-                    : 'Rows in this file write amounts in different formats. ')}
-                {(!dateFormat || !numberFormat) && 'Choose the format your bank uses. '}
+                    ? t('import.map.amountSample', { sample: detected.amountSample })
+                    : t('import.map.amountsMixed'))}
+                {(!dateFormat || !numberFormat) && t('import.map.chooseFormat')}
                 {needsOutWord &&
-                  `FlyBudget doesn't know what ${detected.unknownDirections
-                    .slice(0, 3)
-                    .map((w) => `"${w}"`)
-                    .join(
-                      ', ',
-                    )} means in the direction column. Type the word your bank uses for money going out; other words it doesn't know count as money in.`}
+                  t('import.map.unknownDirections', {
+                    words: detected.unknownDirections
+                      .slice(0, 3)
+                      .map((w) => `"${w}"`)
+                      .join(', '),
+                  })}
               </span>
             </div>
           )}
           {fromLastTime.length > 0 && (
             <p className="text-xs text-text-tertiary">
-              This file doesn't show how it writes {fromLastTime.map((f) => f.what).join(' or ')}:
-              using {fromLastTime.map((f) => f.format).join(' and ')}, as in your last import into
-              this account.
+              {t('import.map.fromLastTime', {
+                what: fromLastTime.map((f) => f.what).join(t('import.map.or')),
+                formats: fromLastTime.map((f) => f.format).join(t('import.map.and')),
+              })}
             </p>
           )}
           <div className="overflow-x-auto">
@@ -757,7 +773,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                       <div className="text-xs font-medium text-text-tertiary mb-1">{h}</div>
                       <select
                         value={roles[i]}
-                        aria-label={`Column ${h}`}
+                        aria-label={t('import.map.column', { name: h })}
                         onChange={(e) => setRole(i, e.target.value as ColumnRole)}
                         className={selectClass}
                       >
@@ -789,10 +805,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setStep('upload')}>
-              Back
+              {t('common.back')}
             </Button>
             <Button onClick={handlePreview} disabled={loading}>
-              {loading ? 'Checking...' : 'Preview'}
+              {loading ? t('import.checking') : t('import.previewButton')}
             </Button>
           </div>
         </div>
@@ -801,9 +817,11 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {step === 'preview' && (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">
-            {previewRows.length} transactions found.{' '}
-            {previewRows.filter((r) => r.isDuplicate).length} duplicates detected.{' '}
-            {previewRows.length - excluded.size} will be imported.
+            {t('import.preview.found', { count: previewRows.length })}{' '}
+            {t('import.preview.duplicates', {
+              count: previewRows.filter((r) => r.isDuplicate).length,
+            })}{' '}
+            {t('import.preview.willImport', { count: previewRows.length - excluded.size })}
             {skippedEntries > 0 && ` ${entriesLeftOut}`}
           </p>
           {otherCurrency && (
@@ -813,8 +831,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             >
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>
-                This statement is in {otherCurrency}, but this account is in {currency}. Import it
-                into an account in {otherCurrency} instead (you can add one with that currency).
+                {t('import.preview.otherCurrency', {
+                  statement: otherCurrency,
+                  account: currency ?? '',
+                })}
               </span>
             </p>
           )}
@@ -825,9 +845,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             >
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>
-                This statement is for account {otherStatementAccount}, but the last statement
-                imported into this account was for {knownStatementAccount}. Check that you're
-                importing it into the right account.
+                {t('import.preview.otherAccount', {
+                  account: otherStatementAccount,
+                  known: knownStatementAccount ?? '',
+                })}
               </span>
             </p>
           )}
@@ -838,7 +859,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             >
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>
-                {describeSkippedRows(skippedRows)} Fix the file and import it again to include them.
+                {t('import.preview.skippedFix', { details: describeSkippedRows(skippedRows) })}
               </span>
             </p>
           )}
@@ -848,13 +869,13 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                 <tr>
                   <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary w-8"></th>
                   <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">
-                    Date
+                    {t('import.role.date')}
                   </th>
                   <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">
-                    Payee
+                    {t('import.role.payee')}
                   </th>
                   <th className="px-2 py-1.5 text-right text-xs font-medium text-text-tertiary">
-                    Amount
+                    {t('import.role.amount')}
                   </th>
                 </tr>
               </thead>
@@ -869,7 +890,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                         type="checkbox"
                         checked={!excluded.has(i)}
                         onChange={() => toggleExclude(i)}
-                        aria-label={`Import ${row.payeeName ?? 'row'} on ${row.date}`}
+                        aria-label={t('import.preview.rowLabel', {
+                          payee: row.payeeName ?? t('import.preview.row'),
+                          date: row.date,
+                        })}
                         className="w-3.5 h-3.5 accent-brand-600"
                       />
                     </td>
@@ -878,7 +902,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                       {row.payeeName ?? '—'}
                       {row.isDuplicate && (
                         <span className="text-[10px] px-1 py-0.5 bg-caution-subtle text-caution rounded">
-                          duplicate
+                          {t('import.preview.duplicate')}
                         </span>
                       )}
                     </td>
@@ -895,7 +919,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
           <SavingPausedHint className="text-right" />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={previewBack}>
-              Back
+              {t('common.back')}
             </Button>
             <Button
               onClick={handleConfirm}
@@ -908,8 +932,8 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               }
             >
               {confirmMutation.isPending
-                ? 'Importing...'
-                : `Import ${previewRows.length - excluded.size} Transactions`}
+                ? t('import.preview.importing')
+                : t('import.preview.importButton', { count: previewRows.length - excluded.size })}
             </Button>
           </div>
         </div>
@@ -919,12 +943,12 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
         <div className="flex flex-col items-center gap-4 py-6">
           <CheckCircle size={40} className="text-positive" />
           <div className="text-center">
-            <p className="text-sm font-medium text-text">Import complete</p>
+            <p className="text-sm font-medium text-text">{t('import.done.title')}</p>
             <p className="text-sm text-text-secondary mt-1">
-              {result.imported} imported, {result.skipped} skipped
+              {t('import.done.summary', { imported: result.imported, skipped: result.skipped })}
             </p>
           </div>
-          <Button onClick={handleClose}>Done</Button>
+          <Button onClick={handleClose}>{t('common.done')}</Button>
         </div>
       )}
     </Modal>

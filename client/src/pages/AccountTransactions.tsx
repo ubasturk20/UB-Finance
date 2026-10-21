@@ -12,6 +12,7 @@ import { EditAccountModal } from '../components/accounts/EditAccountModal';
 import { UpdateValueModal } from '../components/accounts/UpdateValueModal';
 import { accountTypeInfo } from '../utils/accountTypes';
 import { CurrencyDifference } from '../components/currency/CurrencyDifference';
+import { t } from '../i18n';
 
 export default function AccountTransactionsPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,9 +27,9 @@ export default function AccountTransactionsPage() {
     return (
       <EmptyState
         icon={<Landmark size={26} />}
-        title="Account not found"
-        description="It may have been closed or deleted, or the link is out of date."
-        actions={<ButtonLink to="/accounts">Go to Accounts</ButtonLink>}
+        title={t('acc.notFound.title')}
+        description={t('acc.notFound.description')}
+        actions={<ButtonLink to="/accounts">{t('acc.notFound.goToAccounts')}</ButtonLink>}
       />
     );
   }
@@ -39,7 +40,7 @@ export default function AccountTransactionsPage() {
       <div className="px-6 py-3 border-b border-border bg-surface shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-1">
           <Link to="/accounts" className="hover:text-brand-600 transition-colors">
-            Accounts
+            {t('acc.page.title')}
           </Link>
           <ChevronRight size={11} />
           <span className="text-text-secondary">{account.name}</span>
@@ -63,12 +64,13 @@ export default function AccountTransactionsPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil size={13} /> Edit
+              <Pencil size={13} /> {t('common.edit')}
             </Button>
             {/* Investments, property and loans are usually tracked by value, not transactions */}
             {!typeInfo.onBudget && (
               <Button variant="secondary" size="sm" onClick={() => setUpdateValueOpen(true)}>
-                <RefreshCw size={13} /> {typeInfo.liability ? 'Update balance' : 'Update value'}
+                <RefreshCw size={13} />{' '}
+                {typeInfo.liability ? t('acc.updateBalance') : t('acc.updateValue')}
               </Button>
             )}
             {typeInfo.group !== 'property' && (
@@ -77,7 +79,7 @@ export default function AccountTransactionsPage() {
                 size="sm"
                 onClick={() => navigate(`/accounts/${account.id}/reconcile`)}
               >
-                <CheckSquare size={13} /> Reconcile
+                <CheckSquare size={13} /> {t('acc.reconcile')}
               </Button>
             )}
           </div>

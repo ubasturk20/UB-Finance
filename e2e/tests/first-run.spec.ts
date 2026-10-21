@@ -5,24 +5,24 @@ import { test, expect, open } from './fixtures';
 
 test('the getting started checklist tracks progress and can be hidden', async ({ page, api }) => {
   await open(page, '/welcome');
-  await page.getByRole('button', { name: 'Skip for now and look around' }).click();
+  await page.getByRole('button', { name: 'Şimdilik geç ve etrafa göz at' }).click();
 
-  const checklist = page.getByRole('heading', { name: 'Get started with FlyBudget' });
+  const checklist = page.getByRole('heading', { name: "UB-Finance'ı kullanmaya başlayın" });
   await expect(checklist).toBeVisible();
-  await expect(page.getByText('0 of 5 done')).toBeVisible();
+  await expect(page.getByText('0/5 adım tamamlandı')).toBeVisible();
 
-  await page.getByRole('main').getByRole('button', { name: 'Add account' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Add Account' });
-  await dialog.getByRole('textbox', { name: 'Account name' }).fill('Everyday Checking');
-  await dialog.getByRole('button', { name: 'Add Account' }).click();
+  await page.getByRole('main').getByRole('button', { name: 'Hesap ekle', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
+  await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Everyday Checking');
+  await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
 
-  await expect(page.getByText('1 of 5 done')).toBeVisible();
+  await expect(page.getByText('1/5 adım tamamlandı')).toBeVisible();
   expect((await api.accounts()).map((a) => a.name)).toEqual(['Everyday Checking']);
 
-  await page.getByRole('button', { name: 'Hide getting started' }).click();
+  await page.getByRole('button', { name: 'Başlarken listesini gizle' }).click();
   await expect(checklist).toBeHidden();
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Budget', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bütçe', exact: true })).toBeVisible();
   await expect(checklist).toBeHidden();
 });
 
@@ -30,21 +30,21 @@ test('empty dashboard cards link to where their data comes from', async ({ page,
   await api.createAccount('Everyday Checking', 100_000);
   await open(page, '/dashboard');
 
-  await expect(page.getByText('No transactions yet')).toBeVisible();
-  await expect(page.getByText('Track your bills and paychecks')).toBeVisible();
+  await expect(page.getByText('Henüz işlem yok')).toBeVisible();
+  await expect(page.getByText('Faturalarınızı ve maaşlarınızı takip edin')).toBeVisible();
 
   // "Add a transaction" in Recent Transactions opens the add dialog on the register
-  await page.getByRole('link', { name: 'Add a transaction' }).last().click();
+  await page.getByRole('link', { name: 'İşlem ekle', exact: true }).last().click();
   await expect(page).toHaveURL(/#\/transactions$/);
-  await expect(page.getByRole('dialog', { name: 'Add transaction' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'İşlem ekle' })).toBeVisible();
 });
 
 test('empty pages explain themselves and offer the first step', async ({ page, api }) => {
   const account = await api.createAccount('Everyday Checking', 100_000);
 
   await open(page, `/accounts/${account.id}`);
-  await expect(page.getByText('No transactions yet')).toBeVisible();
-  await page.getByRole('main').getByRole('button', { name: 'Import a CSV file' }).click();
+  await expect(page.getByText('Henüz işlem yok')).toBeVisible();
+  await page.getByRole('main').getByRole('button', { name: 'CSV dosyası içe aktar' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
 

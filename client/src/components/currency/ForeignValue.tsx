@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
 import type { Transaction } from '../../types';
+import { t } from '../../i18n';
 
 /**
  * Under an amount in another currency than the budget's: what the budget counts it as
@@ -18,10 +19,10 @@ export function ForeignValue({
     return (
       <span
         className={`inline-flex items-center gap-1 text-xs text-caution ${className}`}
-        title="No exchange rate for this day yet: the budget counts it as nothing until there is one"
+        title={t('currency.noRate.title')}
       >
         <AlertTriangle size={11} aria-hidden />
-        No rate
+        {t('currency.noRate')}
       </span>
     );
   }

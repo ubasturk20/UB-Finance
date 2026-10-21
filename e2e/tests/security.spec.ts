@@ -131,8 +131,8 @@ test.describe('the page', () => {
     await expect(row).toContainText(nasty);
     await row.click();
     await expect(
-      page.getByRole('complementary', { name: 'Transaction details' }).getByRole('textbox', {
-        name: 'Notes',
+      page.getByRole('complementary', { name: 'İşlem ayrıntıları' }).getByRole('textbox', {
+        name: 'Notlar',
       }),
     ).toHaveValue('<script>window.__xss=2</script>');
     expect(

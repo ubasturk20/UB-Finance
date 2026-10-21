@@ -107,7 +107,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
 
 test('the welcome screen fits a phone screen', async ({ page }, testInfo) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: "UB-Finance'a hoş geldiniz" })).toBeVisible();
   await screenshot(page, testInfo, 'welcome');
   expect(await sidewaysOverflow(page)).toEqual([]);
 });
@@ -153,11 +153,11 @@ test('the sidebar is a drawer behind a menu button', async ({ page, api }) => {
 test('adding a transaction works on a phone', async ({ page, api }) => {
   const account = await api.createAccount('Everyday Checking', 150_000);
   await open(page, `/accounts/${account.id}`);
-  await page.getByRole('button', { name: 'Add Transaction' }).click();
-  const form = page.getByRole('form', { name: 'New transaction' });
-  await form.getByRole('textbox', { name: 'Payee' }).fill('Corner Grocery');
-  await form.getByRole('textbox', { name: 'Outflow' }).fill('12.34');
-  await form.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'İşlem ekle' }).click();
+  const form = page.getByRole('form', { name: 'Yeni işlem' });
+  await form.getByRole('textbox', { name: 'Alıcı' }).fill('Corner Grocery');
+  await form.getByRole('textbox', { name: 'Çıkış' }).fill('12.34');
+  await form.getByRole('button', { name: 'Kaydet' }).click();
   await expect(
     page.getByTestId('transaction-card').filter({ hasText: 'Corner Grocery' }),
   ).toBeVisible();

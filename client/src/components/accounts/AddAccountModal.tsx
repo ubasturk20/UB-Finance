@@ -12,6 +12,7 @@ import { CurrencySelect } from '../currency/CurrencySelect';
 import { useBudgetCurrency, useCurrencySettings } from '../../hooks/useCurrency';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { guessCurrency } from '../../utils/currency';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -63,31 +64,33 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
   }
 
   const amountLabel = info.liability
-    ? 'Amount Owed'
+    ? t('acc.form.amountOwed')
     : info.group === 'property'
-      ? 'Current Value'
-      : 'Current Balance';
+      ? t('acc.form.currentValue')
+      : t('acc.form.currentBalance');
   const amountHint = info.liability
-    ? 'What you owe as of today.'
+    ? t('acc.form.amountOwedHint')
     : info.group === 'property'
-      ? "What it's worth today. You can update it any time from the account page."
-      : 'Enter your balance as of today.';
+      ? t('acc.form.currentValueHint')
+      : t('acc.form.currentBalanceHint');
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add Account" size="sm">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('acc.add')} size="sm">
       <AmountFields report={report}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1">
-              Account Name
+              {t('acc.form.name')}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              aria-label="Account name"
+              aria-label={t('acc.form.nameAria')}
               placeholder={
-                info.group === 'property' ? 'e.g. 2021 Honda Civic' : 'e.g. Chase Checking'
+                info.group === 'property'
+                  ? t('acc.form.namePlaceholderProperty')
+                  : t('acc.form.namePlaceholder')
               }
               autoFocus
               className="block w-full rounded-lg border border-border px-3 py-2 text-sm bg-surface text-text placeholder-text-tertiary focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
@@ -102,7 +105,7 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
                 htmlFor="add-account-currency"
                 className="block text-sm font-medium text-text-secondary mb-1"
               >
-                Currency
+                {t('acc.form.currency')}
               </label>
               <CurrencySelect
                 id="add-account-currency"
@@ -116,10 +119,10 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
               />
               <p id="add-account-currency-hint" className="mt-1 text-xs text-text-secondary">
                 {!budgetCurrency
-                  ? "This also becomes your budget's currency."
+                  ? t('acc.form.currencyBecomesBudget')
                   : currency
-                    ? `Its amounts stay in ${currency}; your budget counts them in ${budgetCurrency} at each day's rate.`
-                    : "Can't be changed once the account has transactions."}
+                    ? t('acc.form.currencyForeign', { currency, budget: budgetCurrency })
+                    : t('acc.form.currencyLocked')}
               </p>
             </div>
           ) : (
@@ -128,7 +131,7 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
               onClick={() => setCurrency(guessCurrency(legacySymbol))}
               className="text-sm font-medium text-brand-600 hover:underline max-md:min-h-11"
             >
-              Choose a currency
+              {t('acc.form.chooseCurrency')}
             </button>
           )}
 
@@ -154,10 +157,9 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
               className="mt-0.5 h-4 w-4 rounded border-border text-brand-600 focus:ring-brand-500"
             />
             <span className="text-sm text-text-secondary">
-              Off budget
+              {t('acc.form.offBudget')}
               <span className="block text-xs text-text-tertiary">
-                Counts toward net worth but not your budget. Recommended for investments, property
-                and loans.
+                {t('acc.form.offBudgetHint')}
               </span>
             </span>
           </label>
@@ -169,14 +171,14 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
               onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface border border-border rounded-lg hover:bg-hover transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={!name.trim() || !amountValid || createAccount.isPending || !canSave}
               className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {createAccount.isPending ? 'Adding…' : 'Add Account'}
+              {createAccount.isPending ? t('acc.adding') : t('acc.add')}
             </button>
           </div>
         </form>

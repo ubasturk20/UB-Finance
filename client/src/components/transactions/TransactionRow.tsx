@@ -14,6 +14,7 @@ import { ForeignValue } from '../currency/ForeignValue';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { AccountIcon } from '../accounts/AccountIcon';
 import type { Transaction, CategoryGroup, PayeeWithCount } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   tx: Transaction;
@@ -66,7 +67,7 @@ export function TransactionRow({
   const canEditCategory = !tx.reconciled && !isTransfer && !isSplitParent;
   const canEditPayee = !tx.reconciled && !isTransfer;
 
-  const payeeName = tx.payeeName || (isTransfer ? 'Transfer' : '—');
+  const payeeName = tx.payeeName || (isTransfer ? t('tx.transfer') : '—');
   const payee = useMemo(
     () => (tx.payeeId ? payees.find((p) => p.id === tx.payeeId) : undefined),
     [payees, tx.payeeId],
@@ -139,7 +140,7 @@ export function TransactionRow({
                 e.stopPropagation();
                 onFilterSearch(tx.payeeName!);
               }}
-              title={`Show all "${tx.payeeName}" transactions`}
+              title={t('tx.showAllFor', { name: tx.payeeName })}
             >
               <ArrowRight size={12} />
             </button>
@@ -167,10 +168,10 @@ export function TransactionRow({
               className="flex items-center gap-1 text-brand-600 hover:text-brand-700"
             >
               {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              <span className="text-sm">Split ({tx.children!.length})</span>
+              <span className="text-sm">{t('tx.split', { count: tx.children!.length })}</span>
             </button>
           ) : isTransfer ? (
-            <span className="text-sm text-brand-500">Transfer</span>
+            <span className="text-sm text-brand-500">{t('tx.transfer')}</span>
           ) : (
             <>
               <button
@@ -211,7 +212,7 @@ export function TransactionRow({
                     e.stopPropagation();
                     onFilterCategory(tx.categoryId!);
                   }}
-                  title={`Show all "${categoryEntry?.name}" transactions`}
+                  title={t('tx.showAllFor', { name: categoryEntry?.name ?? '' })}
                 >
                   <ArrowRight size={12} />
                 </button>
@@ -248,7 +249,7 @@ export function TransactionRow({
                 e.stopPropagation();
                 navigate(`/accounts/${tx.accountId}`);
               }}
-              title={`Go to ${accountName}`}
+              title={t('tx.goToAccount', { name: accountName ?? '' })}
             >
               <ArrowRight size={12} />
             </button>
