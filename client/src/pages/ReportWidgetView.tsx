@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { Pin, Save, Snowflake } from 'lucide-react';
+import { t } from '../i18n';
 import { NetworkError } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -104,17 +105,17 @@ function BuiltinView({
         title={widget.meta.name || report.label}
         subtitle={report.description}
         breadcrumbs={[
-          { label: 'Reports', to: '/reports' },
-          { label: page?.name ?? 'Dashboard', to: dashboardPath },
+          { label: t('rep.title'), to: '/reports' },
+          { label: page?.name ?? t('rep.dashboard'), to: dashboardPath },
         ]}
         actions={
           <Button
             size="sm"
             disabled={!changed || updateWidget.isPending}
-            title="Show these settings on the dashboard widget"
+            title={t('rep.view.saveToWidgetTitle')}
             onClick={save}
           >
-            <Save size={13} /> Save to widget
+            <Save size={13} /> {t('rep.view.saveToWidget')}
           </Button>
         }
       />
@@ -122,7 +123,7 @@ function BuiltinView({
       <div className="flex-1 overflow-y-auto bg-page">
         <div className="max-w-[1400px] mx-auto px-6 py-6 space-y-4">
           <div className="flex items-center gap-x-3 gap-y-1 flex-wrap">
-            <span className="text-xs font-medium text-text-secondary">Date range</span>
+            <span className="text-xs font-medium text-text-secondary">{t('rep.range.label')}</span>
             <DateRangeControl value={range} onChange={setRange} />
             <RangeNote
               source={saved.source}
@@ -161,25 +162,23 @@ function RangeNote({
   onFollowDashboard?: () => void;
 }) {
   if (changed) {
-    return (
-      <span className="text-xs text-caution">Not saved: the dashboard widget is unchanged</span>
-    );
+    return <span className="text-xs text-caution">{t('rep.view.notSaved')}</span>;
   }
   return (
     <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
       {source === 'frozen' && <Snowflake size={11} className="text-brand-500" />}
       {source === 'own' && <Pin size={11} className="text-brand-500" />}
       {source === 'dashboard'
-        ? `Following the dashboard (${formatDateRange(dashboardRange)})`
+        ? t('rep.view.following', { range: formatDateRange(dashboardRange) })
         : source === 'frozen'
-          ? 'This widget keeps these dates'
-          : 'This widget has its own date range'}
+          ? t('rep.view.keepsDates')
+          : t('rep.view.ownRange')}
       {onFollowDashboard && (
         <button
           onClick={onFollowDashboard}
           className="text-brand-600 hover:text-brand-700 font-medium cursor-pointer"
         >
-          Use dashboard range
+          {t('rep.widget.useDashboardRange')}
         </button>
       )}
     </span>

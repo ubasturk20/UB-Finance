@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pin, Snowflake } from 'lucide-react';
+import { t } from '../../../i18n';
 import RowMenu from '../../ui/RowMenu';
 import type { RowMenuItem } from '../../ui/RowMenu';
 import { Modal, useModalValue } from '../../ui/Modal';
@@ -71,27 +72,38 @@ export default function WidgetCard({ widget, report, pages, dashboardRange, edit
   }
 
   const menu: RowMenuItem[] = [
-    { label: isCustom ? 'Edit report' : 'Open', onClick: () => navigate(openPath) },
-    { label: 'Rename…', onClick: () => setRenameOpen(true), hidden: isCustom },
-    { label: 'Date range…', onClick: () => setRangeOpen(true) },
     {
-      label: 'Freeze dates',
+      label: isCustom ? t('rep.widget.editReport') : t('rep.widget.open'),
+      onClick: () => navigate(openPath),
+    },
+    { label: t('rep.widget.renameMenu'), onClick: () => setRenameOpen(true), hidden: isCustom },
+    { label: t('rep.widget.dateRangeMenu'), onClick: () => setRangeOpen(true) },
+    {
+      label: t('rep.widget.freeze'),
       onClick: () => setOwnRange(freezeDateRange(range)),
       hidden: source === 'frozen',
     },
-    { label: 'Unfreeze', onClick: () => setOwnRange(undefined), hidden: source !== 'frozen' },
     {
-      label: 'Use dashboard range',
+      label: t('rep.widget.unfreeze'),
+      onClick: () => setOwnRange(undefined),
+      hidden: source !== 'frozen',
+    },
+    {
+      label: t('rep.widget.useDashboardRange'),
       onClick: () => setOwnRange(undefined),
       hidden: source !== 'own',
     },
     ...pages
       .filter((p) => p.id !== widget.pageId)
       .map((p) => ({
-        label: `Move to ${p.name}`,
+        label: t('rep.widget.moveTo', { name: p.name }),
         onClick: () => updateWidget.mutate({ widget, data: { pageId: p.id } }),
       })),
-    { label: 'Remove from dashboard', danger: true, onClick: () => deleteWidget.mutate(widget) },
+    {
+      label: t('rep.widget.remove'),
+      danger: true,
+      onClick: () => deleteWidget.mutate(widget),
+    },
   ];
 
   return (
@@ -115,10 +127,14 @@ export default function WidgetCard({ widget, report, pages, dashboardRange, edit
             </p>
             <p className="flex items-center gap-1 text-[11px] text-text-tertiary">
               {source === 'frozen' && (
-                <Snowflake size={10} className="text-brand-500" aria-label="Frozen" />
+                <Snowflake
+                  size={10}
+                  className="text-brand-500"
+                  aria-label={t('rep.range.frozen')}
+                />
               )}
               {source === 'own' && (
-                <Pin size={10} className="text-brand-500" aria-label="Own date range" />
+                <Pin size={10} className="text-brand-500" aria-label={t('rep.widget.ownRange')} />
               )}
               {formatDateRange(range)}
             </p>
@@ -168,10 +184,10 @@ export default function WidgetCard({ widget, report, pages, dashboardRange, edit
         {renameModal.value && (
           <NameModal
             isOpen={renameModal.isOpen}
-            title="Rename widget"
-            label="Name"
+            title={t('rep.widget.rename')}
+            label={t('rep.widget.name')}
             initialName={title}
-            submitLabel="Rename"
+            submitLabel={t('rep.dashboard.renameAction')}
             onClose={() => setRenameOpen(false)}
             onSave={(name) => {
               updateWidget.mutate({ widget, data: { meta: { ...widget.meta, name } } });
@@ -238,32 +254,30 @@ function DateRangeModal({
     }`;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Date range" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('rep.range.label')} size="md">
       <div className="flex gap-2 mb-4">
         <button className={option(follow)} onClick={() => setFollow(true)}>
-          <p className="font-medium">Follow dashboard</p>
+          <p className="font-medium">{t('rep.widget.followDashboard')}</p>
           <p className="text-xs text-text-tertiary">{formatDateRange(dashboardRange)}</p>
         </button>
         <button className={option(!follow)} onClick={() => setFollow(false)}>
-          <p className="font-medium">Own date range</p>
-          <p className="text-xs text-text-tertiary">Ignores the dashboard's range</p>
+          <p className="font-medium">{t('rep.widget.ownRange')}</p>
+          <p className="text-xs text-text-tertiary">{t('rep.widget.ignoresDashboard')}</p>
         </button>
       </div>
       {!follow && (
         <>
           <DateRangeControl value={value} onChange={setValue} />
           <p className="text-xs text-text-tertiary mt-3">
-            {isFrozen(value)
-              ? 'Frozen: this widget keeps showing these months.'
-              : 'Live: this widget moves forward with the current month.'}
+            {isFrozen(value) ? t('rep.widget.frozenNote') : t('rep.widget.liveNote')}
           </p>
         </>
       )}
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
-        <Button onClick={() => onSave(follow ? undefined : value)}>Save</Button>
+        <Button onClick={() => onSave(follow ? undefined : value)}>{t('common.save')}</Button>
       </div>
     </Modal>
   );

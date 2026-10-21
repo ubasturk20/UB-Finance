@@ -49,7 +49,7 @@ test('empty pages explain themselves and offer the first step', async ({ page, a
   await page.keyboard.press('Escape');
 
   await open(page, '/rules');
-  await expect(page.getByText('Let rules do the sorting')).toBeVisible();
+  await expect(page.getByText('Sınıflandırmayı kurallara bırakın')).toBeVisible();
 
   await open(page, '/goals');
   await expect(page.getByText('Önemli olan için biriktirin')).toBeVisible();

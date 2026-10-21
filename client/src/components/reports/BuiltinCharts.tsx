@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { formatPercent, t } from '../../i18n';
 import {
   AreaChart,
   Area,
@@ -60,7 +61,9 @@ export function netWorthChange(data: NetWorthPoint[]) {
 export function formatChange(change: number, percent: number | null): string {
   const sign = change > 0 ? '+' : '';
   const pct =
-    percent === null ? '' : ` (${sign}${percent.toFixed(Math.abs(percent) < 10 ? 1 : 0)}%)`;
+    percent === null
+      ? ''
+      : ` (${sign}${formatPercent(percent / 100, Math.abs(percent) < 10 ? 1 : 0)})`;
   return `${sign}${formatCurrency(change)}${pct}`;
 }
 
@@ -71,13 +74,22 @@ function NetWorthTooltip({ active, payload, label }: any) {
     <div className={TOOLTIP_CLASS}>
       <p className="text-xs text-text-tertiary mb-1">{formatDateLabel(label)}</p>
       <p className="text-xs font-semibold" style={{ color: chartColors.brand }}>
-        Net worth: {formatCurrency(d.netWorth)}
+        {t('rep.chart.tooltipLine', {
+          name: t('rep.chart.netWorth'),
+          amount: formatCurrency(d.netWorth),
+        })}
       </p>
       <p className="text-xs font-medium mt-1" style={{ color: chartColors.positive }}>
-        Assets: {formatCurrency(d.assets)}
+        {t('rep.chart.tooltipLine', {
+          name: t('rep.chart.assets'),
+          amount: formatCurrency(d.assets),
+        })}
       </p>
       <p className="text-xs font-medium" style={{ color: chartColors.negative }}>
-        Liabilities: {formatCurrency(d.liabilities)}
+        {t('rep.chart.tooltipLine', {
+          name: t('rep.chart.liabilities'),
+          amount: formatCurrency(d.liabilities),
+        })}
       </p>
     </div>
   );
@@ -159,9 +171,11 @@ export function NetWorthChart({
         </div>
       )}
       <div className="flex items-center gap-3 flex-wrap px-1 pb-1 text-[11px] text-text-secondary">
-        <LegendKey color={chartColors.brand} label="Net worth" line />
-        <LegendKey color={chartColors.positiveLight} label="Assets" line />
-        {showDebt && <LegendKey color={chartColors.negativeLight} label="Liabilities" />}
+        <LegendKey color={chartColors.brand} label={t('rep.chart.netWorth')} line />
+        <LegendKey color={chartColors.positiveLight} label={t('rep.chart.assets')} line />
+        {showDebt && (
+          <LegendKey color={chartColors.negativeLight} label={t('rep.chart.liabilities')} />
+        )}
       </div>
 
       <div className="flex-[3] min-h-0">
@@ -186,7 +200,7 @@ export function NetWorthChart({
             <Line
               type="monotone"
               dataKey="assets"
-              name="Assets"
+              name={t('rep.chart.assets')}
               stroke={chartColors.positiveLight}
               strokeWidth={2}
               dot={false}
@@ -195,7 +209,7 @@ export function NetWorthChart({
             <Area
               type="monotone"
               dataKey="netWorth"
-              name="Net Worth"
+              name={t('rep.chart.netWorth')}
               stroke={chartColors.brand}
               strokeWidth={2.5}
               fill="url(#gNet)"
@@ -221,7 +235,7 @@ export function NetWorthChart({
               <Area
                 type="monotone"
                 dataKey="liabilities"
-                name="Liabilities"
+                name={t('rep.chart.liabilities')}
                 stroke={chartColors.negativeLight}
                 strokeWidth={2}
                 fill={chartColors.negativeLight}
@@ -264,20 +278,23 @@ export function IncomeExpensesChart({ from, to }: { from: string; to: string }) 
           <Tooltip
             content={
               <CurrencyTooltip
-                summary={(payload: any[]) => ({ label: 'Net', value: payload[0].payload.net })}
+                summary={(payload: any[]) => ({
+                  label: t('rep.chart.net'),
+                  value: payload[0].payload.net,
+                })}
               />
             }
           />
           <Bar
             dataKey="income"
-            name="Income"
+            name={t('rep.chart.income')}
             fill={chartColors.positive}
             radius={[3, 3, 0, 0]}
             maxBarSize={32}
           />
           <Bar
             dataKey="expenses"
-            name="Expenses"
+            name={t('rep.chart.expenses')}
             fill={chartColors.negativeLight}
             radius={[3, 3, 0, 0]}
             maxBarSize={32}
@@ -297,7 +314,7 @@ export function SpendingChart({ from, to }: { from: string; to: string }) {
         .sort((a, b) => b.totalSpent - a.totalSpent)
         .slice(0, 10)
         .map((d, i) => {
-          const full = `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`;
+          const full = `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? t('rep.uncategorized')}`;
           return {
             name: full.length > 22 ? full.slice(0, 21) + '…' : full,
             fullName: full,
@@ -338,7 +355,7 @@ export function SpendingChart({ from, to }: { from: string; to: string }) {
           interval={0}
         />
         <Tooltip content={<ShareTooltip total={total} />} />
-        <Bar dataKey="value" name="Spent" radius={[0, 3, 3, 0]} maxBarSize={20}>
+        <Bar dataKey="value" name={t('rep.chart.spent')} radius={[0, 3, 3, 0]} maxBarSize={20}>
           {chartData.map((d, i) => (
             <Cell key={i} fill={d.color} />
           ))}
@@ -379,12 +396,14 @@ export function MonthlySpendingChart({ from, to }: { from: string; to: string })
           />
           <Tooltip
             content={
-              <CurrencyTooltip summary={() => ({ label: 'Monthly average', value: average })} />
+              <CurrencyTooltip
+                summary={() => ({ label: t('rep.chart.monthlyAverage'), value: average })}
+              />
             }
           />
           <Bar
             dataKey="spending"
-            name="Expenses"
+            name={t('rep.chart.expenses')}
             fill={chartColors.negativeLight}
             radius={[3, 3, 0, 0]}
             maxBarSize={40}
@@ -395,7 +414,7 @@ export function MonthlySpendingChart({ from, to }: { from: string; to: string })
               stroke={chartColors.label}
               strokeDasharray="4 4"
               label={{
-                value: `Avg ${formatCurrency(Math.round(average))}`,
+                value: t('rep.chart.avg', { amount: formatCurrency(Math.round(average)) }),
                 position: 'insideTopRight',
                 fontSize: 11,
                 fill: chartColors.label,
@@ -412,7 +431,7 @@ export function MonthlySpendingChart({ from, to }: { from: string; to: string })
 export function categoryLabel(
   c: { name?: string | null; icon?: string | null } | undefined,
   showIcons: boolean,
-  fallback = 'Uncategorized',
+  fallback = t('rep.uncategorized'),
 ) {
   if (!c?.name) return fallback;
   return `${showIcons && c.icon ? c.icon + ' ' : ''}${c.name}`;
@@ -449,7 +468,7 @@ export function SpendingTrendsChart({
   const names = useMemo(() => {
     const byId = new Map(groups.flatMap((g) => g.categories).map((c) => [c.id, c]));
     return categoryIds.map((id) =>
-      categoryLabel(byId.get(id), showCategoryIcons, 'Deleted category'),
+      categoryLabel(byId.get(id), showCategoryIcons, t('rep.deletedCategory')),
     );
   }, [groups, categoryIds, showCategoryIcons]);
 
@@ -511,8 +530,8 @@ export function SpendingTrendsChart({
           {(caption || daily) && (
             <p className="text-[11px] text-text-tertiary px-1 pb-1 shrink-0">
               {caption
-                ? `${caption}${daily ? ' · running total' : ''}`
-                : 'Running total this month'}
+                ? `${caption}${daily ? t('rep.trends.runningSuffix') : ''}`
+                : t('rep.trends.runningThisMonth')}
             </p>
           )}
           <div className="flex-1 min-h-0">

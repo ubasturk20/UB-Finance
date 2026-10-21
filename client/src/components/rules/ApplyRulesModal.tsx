@@ -9,6 +9,7 @@ import { useRuleLookups } from './useRuleLookups';
 import { formatCurrency } from '../../utils/currency';
 import type { RuleApplyScope, RulePreviewItem } from '../../types';
 import { formatDay } from '../../utils/dates';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -20,8 +21,8 @@ interface Props {
 }
 
 const SCOPES: Array<{ value: RuleApplyScope; label: string }> = [
-  { value: 'uncategorized', label: 'Uncategorized only' },
-  { value: 'all', label: 'All transactions' },
+  { value: 'uncategorized', label: t('rules.apply.uncategorizedOnly') },
+  { value: 'all', label: t('rules.apply.allTransactions') },
 ];
 
 /** Preview what rules would change on existing transactions, then apply the ticked ones */
@@ -70,19 +71,17 @@ export function ApplyRulesModal({
   }
 
   const category = (id: string | null) =>
-    id ? (lookups.category(id) ?? '(deleted)') : 'Uncategorized';
+    id ? (lookups.category(id) ?? t('rules.summary.deleted')) : t('txd.uncategorized');
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="xl">
       {done !== null ? (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary py-4 text-center">
-            Updated <span className="font-semibold text-text">{done.toLocaleString()}</span>{' '}
-            transaction
-            {done === 1 ? '' : 's'}.
+            {t('rules.apply.updated', { count: done })}
           </p>
           <div className="flex justify-end">
-            <Button onClick={onClose}>Done</Button>
+            <Button onClick={onClose}>{t('common.done')}</Button>
           </div>
         </div>
       ) : (
@@ -91,7 +90,7 @@ export function ApplyRulesModal({
             <div
               className="flex rounded-lg border border-border overflow-hidden"
               role="radiogroup"
-              aria-label="Which transactions"
+              aria-label={t('rules.apply.which')}
             >
               {SCOPES.map((s) => (
                 <button
@@ -110,17 +109,18 @@ export function ApplyRulesModal({
                 </button>
               ))}
             </div>
-            <p className="text-xs text-text-tertiary">
-              Reconciled, transfer and split transactions are never changed.
-            </p>
+            <p className="text-xs text-text-tertiary">{t('rules.apply.neverChanged')}</p>
           </div>
 
           {isLoading || !items ? (
-            <p className="text-sm text-text-tertiary py-8 text-center">Checking transactions…</p>
+            <p className="text-sm text-text-tertiary py-8 text-center">
+              {t('rules.apply.checking')}
+            </p>
           ) : items.length === 0 ? (
             <p className="text-sm text-text-secondary py-8 text-center">
-              Nothing to change: no {scope === 'uncategorized' ? 'uncategorized ' : ''}transactions
-              would be updated.
+              {scope === 'uncategorized'
+                ? t('rules.apply.nothingUncategorized')
+                : t('rules.apply.nothing')}
             </p>
           ) : (
             <div className="rounded-lg border border-border-light overflow-hidden">
@@ -138,13 +138,15 @@ export function ApplyRulesModal({
                             )
                           }
                           className="accent-brand-600"
-                          aria-label="Select all"
+                          aria-label={t('rules.apply.selectAll')}
                         />
                       </th>
-                      <th className="px-2 py-2 font-medium">Date</th>
-                      <th className="px-2 py-2 font-medium">Payee</th>
-                      <th className="px-2 py-2 font-medium text-right">Amount</th>
-                      <th className="px-3 py-2 font-medium">Changes</th>
+                      <th className="px-2 py-2 font-medium">{t('rules.apply.date')}</th>
+                      <th className="px-2 py-2 font-medium">{t('rules.apply.payee')}</th>
+                      <th className="px-2 py-2 font-medium text-right">
+                        {t('rules.apply.amount')}
+                      </th>
+                      <th className="px-3 py-2 font-medium">{t('rules.apply.changes')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light">
@@ -161,7 +163,7 @@ export function ApplyRulesModal({
                             onChange={() => toggle(item.transactionId)}
                             onClick={(e) => e.stopPropagation()}
                             className="accent-brand-600"
-                            aria-label="Include this transaction"
+                            aria-label={t('rules.apply.include')}
                           />
                         </td>
                         <td className="px-2 py-2 text-text-tertiary whitespace-nowrap">
@@ -186,12 +188,12 @@ export function ApplyRulesModal({
 
           <div className="flex justify-end gap-3 pt-1">
             <Button variant="secondary" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleApply} disabled={!selected.length || apply.isPending}>
               {apply.isPending
-                ? 'Applying…'
-                : `Apply to ${selected.length.toLocaleString()} transaction${selected.length === 1 ? '' : 's'}`}
+                ? t('rules.apply.applying')
+                : t('rules.apply.applyTo', { count: selected.length })}
             </Button>
           </div>
         </div>
@@ -221,15 +223,21 @@ function Changes({
   category: (id: string | null) => string;
 }) {
   const { payee, category: cat, notes, split } = item.changes;
-  const blank = (s: string | null) => s || '(empty)';
+  const blank = (s: string | null) => s || t('rules.apply.empty');
   return (
     <div className="space-y-0.5 max-w-80">
-      {payee && <Change label="Payee" from={blank(payee.from)} to={blank(payee.to)} />}
-      {cat && <Change label="Category" from={category(cat.from)} to={category(cat.to)} />}
-      {notes && <Change label="Notes" from={blank(notes.from)} to={blank(notes.to)} />}
+      {payee && (
+        <Change label={t('rules.apply.payee')} from={blank(payee.from)} to={blank(payee.to)} />
+      )}
+      {cat && (
+        <Change label={t('rules.apply.category')} from={category(cat.from)} to={category(cat.to)} />
+      )}
+      {notes && (
+        <Change label={t('rules.apply.notes')} from={blank(notes.from)} to={blank(notes.to)} />
+      )}
       {split && (
         <div className="text-text">
-          <span className="text-text-tertiary">Split </span>
+          <span className="text-text-tertiary">{t('rules.apply.split')} </span>
           {split.map((s) => `${formatCurrency(s.amount)} ${category(s.categoryId)}`).join(' · ')}
         </div>
       )}

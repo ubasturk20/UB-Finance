@@ -96,17 +96,17 @@ const SHOTS: Shot[] = [
     prepare: (page) => page.getByRole('button', { name: 'All recurring' }).click(),
   },
   { name: 'reports', route: '/reports', waitFor: 'Where the money goes' },
-  { name: 'report-net-worth', route: '/reports/widget/demo-widget-2', waitFor: 'Net Worth' },
-  { name: 'report-calendar', route: '/reports/widget/demo-widget-7', waitFor: 'Calendar' },
+  { name: 'report-net-worth', route: '/reports/widget/demo-widget-2', waitFor: 'Net Değer' },
+  { name: 'report-calendar', route: '/reports/widget/demo-widget-7', waitFor: 'Takvim' },
   {
     name: 'custom-report',
     route: '/reports/custom/demo-report-whereItGoes',
     waitFor: 'Where the money goes',
   },
-  { name: 'cash-flow', route: '/cash-flow', waitFor: 'Total income' },
+  { name: 'cash-flow', route: '/cash-flow', waitFor: 'Toplam gelir' },
   { name: 'goals', route: '/goals', waitFor: 'Emergency fund' },
   { name: 'payees', route: '/payees', waitFor: 'Daily Grind Coffee' },
-  { name: 'rules', route: '/rules', waitFor: 'Rename payee to Daily Grind Coffee' },
+  { name: 'rules', route: '/rules', waitFor: 'Alıcıyı ayarla: Daily Grind Coffee' },
   { name: 'settings', route: '/settings', waitFor: 'Paychecks' },
 
   // --- The user guide: dialogs and details ---
@@ -175,9 +175,9 @@ const SHOTS: Shot[] = [
   {
     name: 'rule-editor',
     route: '/rules',
-    waitFor: 'Rename payee to Daily Grind Coffee',
+    waitFor: 'Alıcıyı ayarla: Daily Grind Coffee',
     prepare: async (page) => {
-      await clickText(page, 'Imported description contains "DAILY GRIND"');
+      await clickText(page, 'İçe aktarılan alıcı metni içerir: "DAILY GRIND"');
       await dialog(page).waitFor();
     },
     element: dialog,
@@ -185,8 +185,8 @@ const SHOTS: Shot[] = [
   {
     name: 'rules-apply',
     route: '/rules',
-    waitFor: 'Rename payee to Daily Grind Coffee',
-    prepare: (page) => openDialog(page, 'Run rules'),
+    waitFor: 'Alıcıyı ayarla: Daily Grind Coffee',
+    prepare: (page) => openDialog(page, 'Kuralları uygula'),
     element: dialog,
   },
   {
@@ -232,7 +232,7 @@ const SHOTS: Shot[] = [
     name: 'reports-edit-layout',
     route: '/reports',
     waitFor: 'Where the money goes',
-    prepare: (page) => page.getByRole('button', { name: 'Edit layout' }).click(),
+    prepare: (page) => page.getByRole('button', { name: 'Düzeni düzenle' }).click(),
   },
   {
     name: 'goal-add',

@@ -1,19 +1,20 @@
 import { BarChart3, LineChart, AreaChart, PieChart, Table2, Layers } from 'lucide-react';
 import type { ChartType, ReportMode } from '../../types';
+import { t as msg } from '../../i18n';
 
 const MODE_LABELS: Record<ReportMode, string> = {
-  total: 'Total',
-  time: 'Over Time',
+  total: msg('rb.mode.total'),
+  time: msg('rb.mode.time'),
 };
 
 const CHART_TYPES: { id: ChartType; icon: typeof BarChart3; label: string; modes: ReportMode[] }[] =
   [
-    { id: 'bar', icon: BarChart3, label: 'Bar', modes: ['total', 'time'] },
-    { id: 'stacked-bar', icon: Layers, label: 'Stacked', modes: ['time'] },
-    { id: 'line', icon: LineChart, label: 'Line', modes: ['total', 'time'] },
-    { id: 'area', icon: AreaChart, label: 'Area', modes: ['total', 'time'] },
-    { id: 'donut', icon: PieChart, label: 'Donut', modes: ['total'] },
-    { id: 'table', icon: Table2, label: 'Table', modes: ['total', 'time'] },
+    { id: 'bar', icon: BarChart3, label: msg('rb.chart.bar'), modes: ['total', 'time'] },
+    { id: 'stacked-bar', icon: Layers, label: msg('rb.chart.stackedBar'), modes: ['time'] },
+    { id: 'line', icon: LineChart, label: msg('rb.chart.line'), modes: ['total', 'time'] },
+    { id: 'area', icon: AreaChart, label: msg('rb.chart.area'), modes: ['total', 'time'] },
+    { id: 'donut', icon: PieChart, label: msg('rb.chart.donut'), modes: ['total'] },
+    { id: 'table', icon: Table2, label: msg('rb.chart.table'), modes: ['total', 'time'] },
   ];
 
 interface Props {
@@ -35,7 +36,10 @@ export default function ChartTypeSelector({ value, mode, onChange }: Props) {
             onClick={() => onChange(t.id)}
             title={
               disabled
-                ? `${t.label} is only available in '${t.modes.map((m) => MODE_LABELS[m]).join("' and '")}' mode`
+                ? msg('rb.chart.onlyIn', {
+                    chart: t.label,
+                    mode: t.modes.map((m) => MODE_LABELS[m]).join(' / '),
+                  })
                 : t.label
             }
             className={`flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${

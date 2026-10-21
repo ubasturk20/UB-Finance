@@ -28,18 +28,16 @@ async function seedCoffee(api: Api) {
 }
 
 async function buildCoffeeRule(page: Page, expectedMatches: number) {
-  await page.getByRole('main').getByRole('button', { name: 'Add rule' }).click();
-  const dialog = page.getByRole('dialog', { name: 'New rule' });
-  await dialog.getByRole('combobox', { name: 'Field' }).selectOption({ label: 'Payee name' });
-  await dialog.getByRole('combobox', { name: 'Operator' }).selectOption({ label: 'contains' });
-  await dialog.getByRole('textbox', { name: 'Text…' }).fill('coffee');
+  await page.getByRole('main').getByRole('button', { name: 'Kural ekle' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Yeni kural' });
+  await dialog.getByRole('combobox', { name: 'Alan' }).selectOption({ label: 'Alıcı adı' });
+  await dialog.getByRole('combobox', { name: 'Operatör' }).selectOption({ label: 'içerir' });
+  await dialog.getByRole('textbox', { name: 'Metin…' }).fill('coffee');
   // Live preview of what the conditions match
   await expect(dialog).toContainText(
-    expectedMatches
-      ? new RegExp(`${expectedMatches} (matching )?transactions?`)
-      : 'No transactions match yet',
+    expectedMatches ? `${expectedMatches} işlemle eşleşiyor` : 'Henüz eşleşen işlem yok',
   );
-  await dialog.getByRole('button', { name: 'Choose a category…' }).click();
+  await dialog.getByRole('button', { name: 'Kategori seçin…' }).click();
   await page.getByPlaceholder('Kategori ara…').fill('coffee');
   await page.getByRole('button', { name: /Coffee Shops/ }).click();
   return dialog;
@@ -51,17 +49,17 @@ test.describe('rules', () => {
     await open(page, '/rules');
     const dialog = await buildCoffeeRule(page, 3);
     await dialog
-      .getByRole('checkbox', { name: 'Apply to existing transactions after saving' })
+      .getByRole('checkbox', { name: 'Kaydettikten sonra mevcut işlemlere uygula' })
       .check();
-    await dialog.getByRole('button', { name: 'Save rule' }).click();
+    await dialog.getByRole('button', { name: 'Kuralı kaydet' }).click();
 
-    const apply = page.getByRole('dialog', { name: 'Apply rule to existing transactions' });
-    await expect(apply.getByRole('checkbox', { name: 'Include this transaction' })).toHaveCount(3);
+    const apply = page.getByRole('dialog', { name: 'Kuralı mevcut işlemlere uygula' });
+    await expect(apply.getByRole('checkbox', { name: 'Bu işlemi dahil et' })).toHaveCount(3);
     // Leave one out
-    await apply.getByRole('checkbox', { name: 'Include this transaction' }).first().uncheck();
-    await apply.getByRole('button', { name: 'Apply to 2 transactions' }).click();
-    await expect(apply).toContainText('Updated 2 transactions');
-    await apply.getByRole('button', { name: 'Done' }).click();
+    await apply.getByRole('checkbox', { name: 'Bu işlemi dahil et' }).first().uncheck();
+    await apply.getByRole('button', { name: '2 işleme uygula' }).click();
+    await expect(apply).toContainText('2 işlem güncellendi');
+    await apply.getByRole('button', { name: 'Bitti' }).click();
 
     const coffee = (await api.category('Coffee Shops')).id;
     const txs = await api.transactions();
@@ -75,7 +73,7 @@ test.describe('rules', () => {
     const checking = await api.createAccount('Checking', 100_000);
     await open(page, '/rules');
     const dialog = await buildCoffeeRule(page, 0);
-    await dialog.getByRole('button', { name: 'Save rule' }).click();
+    await dialog.getByRole('button', { name: 'Kuralı kaydet' }).click();
     await expect(dialog).toBeHidden();
     await expect(page.getByRole('main')).toContainText('Coffee Shops');
 
@@ -109,8 +107,8 @@ test.describe('rules', () => {
     });
 
     await open(page, '/rules');
-    await page.getByRole('switch', { name: 'Disable rule' }).nth(1).click();
-    await expect(page.getByRole('switch', { name: 'Enable rule' })).not.toBeChecked();
+    await page.getByRole('switch', { name: 'Kuralı kapat' }).nth(1).click();
+    await expect(page.getByRole('switch', { name: 'Kuralı aç' })).not.toBeChecked();
 
     const rules = await api.call<any[]>('GET', '/rules');
     expect(rules.map((r) => r.id)).toEqual([expect.any(String), second.id]);
@@ -124,12 +122,12 @@ test.describe('rules', () => {
       actions: [{ type: 'set_notes', value: 'fitness' }],
     });
     await open(page, '/rules');
-    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await page.getByRole('button', { name: 'Sil', exact: true }).click();
     await page
-      .getByRole('dialog', { name: 'Delete rule' })
-      .getByRole('button', { name: 'Delete' })
+      .getByRole('dialog', { name: 'Kuralı sil' })
+      .getByRole('button', { name: 'Sil' })
       .click();
-    await expect(page.getByRole('button', { name: 'Add your first rule' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'İlk kuralı ekle' })).toBeVisible();
     expect(await api.call('GET', '/rules')).toEqual([]);
   });
 });

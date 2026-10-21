@@ -24,7 +24,7 @@ async function seed(api: Api) {
 }
 
 const row = (page: import('@playwright/test').Page, name: string) =>
-  page.getByRole('row').filter({ has: page.getByRole('checkbox', { name: `Select ${name}` }) });
+  page.getByRole('row').filter({ has: page.getByRole('checkbox', { name: `Seç: ${name}` }) });
 
 test.describe('payees', () => {
   test('lists payees with their transaction counts; a split counts once', async ({ page, api }) => {
@@ -42,7 +42,7 @@ test.describe('payees', () => {
     await open(page, '/payees');
     await expect(row(page, 'Amazon').getByRole('cell').nth(3)).toHaveText('2');
     await expect(row(page, 'Costco').getByRole('cell').nth(3)).toHaveText('1');
-    await page.getByPlaceholder('Search payees…').fill('amz');
+    await page.getByPlaceholder('Alıcı ara…').fill('amz');
     await expect(row(page, 'AMZN Mktp')).toBeVisible();
     await expect(row(page, 'Amazon')).toBeHidden();
   });
@@ -50,13 +50,13 @@ test.describe('payees', () => {
   test('merges payees and moves their transactions', async ({ page, api }) => {
     await seed(api);
     await open(page, '/payees');
-    await page.getByRole('checkbox', { name: 'Select AMZN Mktp' }).check();
-    await page.getByRole('checkbox', { name: 'Select Amazon' }).check();
-    await page.getByRole('button', { name: 'Merge 2 payees' }).click();
+    await page.getByRole('checkbox', { name: 'Seç: AMZN Mktp' }).check();
+    await page.getByRole('checkbox', { name: 'Seç: Amazon' }).check();
+    await page.getByRole('button', { name: '2 alıcıyı birleştir' }).click();
 
-    const dialog = page.getByRole('dialog', { name: 'Merge Payees' });
+    const dialog = page.getByRole('dialog', { name: 'Alıcıları birleştir' });
     await dialog.getByRole('radio', { name: /Amazon/ }).check();
-    await dialog.getByRole('button', { name: 'Merge' }).click();
+    await dialog.getByRole('button', { name: 'Birleştir' }).click();
 
     await expect(row(page, 'AMZN Mktp')).toBeHidden();
     await expect(row(page, 'Amazon').getByRole('cell').nth(3)).toHaveText('3');
@@ -69,7 +69,7 @@ test.describe('payees', () => {
     const shopping = await api.category('Groceries');
     await open(page, '/payees');
     await page
-      .getByRole('combobox', { name: 'Default category for Amazon' })
+      .getByRole('combobox', { name: 'Amazon için varsayılan kategori' })
       .selectOption(shopping.id);
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/payees')).find((p) => p.name === 'Amazon'))
@@ -87,8 +87,11 @@ test.describe('payees', () => {
   test('renames a payee in place', async ({ page, api }) => {
     await seed(api);
     await open(page, '/payees');
-    await page.getByTitle('Double-click to rename').filter({ hasText: 'AMZN Mktp' }).dblclick();
-    const input = page.getByRole('textbox', { name: 'Rename AMZN Mktp' });
+    await page
+      .getByTitle('Yeniden adlandırmak için çift tıklayın')
+      .filter({ hasText: 'AMZN Mktp' })
+      .dblclick();
+    const input = page.getByRole('textbox', { name: 'Yeniden adlandır: AMZN Mktp' });
     await input.fill('Amazon Marketplace');
     await input.press('Enter');
     await expect(row(page, 'Amazon Marketplace')).toBeVisible();
@@ -100,10 +103,10 @@ test.describe('payees', () => {
   test('deletes a payee, keeping its transactions', async ({ page, api }) => {
     await seed(api);
     await open(page, '/payees');
-    await page.getByRole('button', { name: 'Delete AMZN Mktp' }).click();
+    await page.getByRole('button', { name: 'Sil: AMZN Mktp' }).click();
     await page
-      .getByRole('dialog', { name: 'Delete Payee' })
-      .getByRole('button', { name: 'Delete' })
+      .getByRole('dialog', { name: 'Alıcıyı sil' })
+      .getByRole('button', { name: 'Sil' })
       .click();
     await expect(row(page, 'AMZN Mktp')).toBeHidden();
     expect(await api.transactions()).toHaveLength(3);

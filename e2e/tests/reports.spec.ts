@@ -49,16 +49,16 @@ test.describe('reports', () => {
     await expect(page.getByRole('button', { name: 'Overview' })).toBeVisible();
     const main = page.getByRole('main');
     // A new budget's reports start on this month
-    await expect(main.getByRole('button', { name: '1M', pressed: true })).toBeVisible();
+    await expect(main.getByRole('button', { name: 'Bu ay', pressed: true })).toBeVisible();
     // Every dollar spent, uncategorized included; no transfer, no double-counted split
-    await expect(main).toContainText(/2\.000\s₺\s*Total Income/);
-    await expect(main).toContainText(/52,50\s₺\s*Total Expenses/);
+    await expect(main).toContainText(/2\.000\s₺\s*Toplam Gelir/);
+    await expect(main).toContainText(/52,50\s₺\s*Toplam Gider/);
     for (const widget of [
-      'Net Worth',
-      'Income & Expenses',
-      'Spending by Category',
-      'Spending Trends',
-      'Transaction Calendar',
+      'Net Değer',
+      'Gelir ve Gider',
+      'Harcama',
+      'Harcama Eğilimleri',
+      'İşlem Takvimi',
     ]) {
       await expect(main.getByText(widget, { exact: true })).toBeVisible();
     }
@@ -67,24 +67,24 @@ test.describe('reports', () => {
   test('builds, saves and reopens a custom report', async ({ page, api }) => {
     await seed(api);
     await open(page, '/reports');
-    await page.getByRole('link', { name: 'Custom Report' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Custom Report' })).toBeVisible();
+    await page.getByRole('link', { name: 'Özel rapor' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Özel Rapor' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Table' }).click();
-    await page.getByRole('combobox', { name: 'Group by' }).selectOption('category');
+    await page.getByRole('button', { name: 'Tablo' }).click();
+    await page.getByRole('combobox', { name: 'Gruplama' }).selectOption('category');
     const table = page.getByRole('table');
     await expect(table.getByRole('row', { name: 'Groceries 48,50 ₺' })).toBeVisible();
     await expect(table.getByRole('row', { name: 'Uncategorized 4 ₺' })).toBeVisible();
-    await expect(table.getByRole('row', { name: 'Total 52,50 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Toplam 52,50 ₺' })).toBeVisible();
 
-    await page.getByRole('combobox', { name: 'Group by' }).selectOption('payee');
+    await page.getByRole('combobox', { name: 'Gruplama' }).selectOption('payee');
     await expect(table.getByRole('row', { name: 'Market 42,50 ₺' })).toBeVisible();
     await expect(table.getByRole('row', { name: 'Corner Shop 10 ₺' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Save' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Save Report' });
-    await dialog.getByRole('textbox', { name: 'Report name' }).fill('Spending by payee');
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Raporu kaydet' });
+    await dialog.getByRole('textbox', { name: 'Rapor adı' }).fill('Spending by payee');
+    await dialog.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Spending by payee' })).toBeVisible();
 
     const [saved] = await api.call<any[]>('GET', '/custom-reports');
@@ -105,8 +105,8 @@ test.describe('reports', () => {
   test('switching the report to income shows income', async ({ page, api }) => {
     await seed(api);
     await open(page, '/reports/custom');
-    await page.getByRole('button', { name: 'Table' }).click();
-    await page.getByRole('button', { name: 'Income', exact: true }).click();
+    await page.getByRole('button', { name: 'Tablo' }).click();
+    await page.getByRole('button', { name: 'Gelir', exact: true }).click();
     await expect(
       page.getByRole('table').getByRole('row', { name: 'Paychecks 2.000 ₺' }),
     ).toBeVisible();
@@ -115,10 +115,10 @@ test.describe('reports', () => {
   test('a new dashboard can be added', async ({ page, api }) => {
     await seed(api);
     await open(page, '/reports');
-    await page.getByRole('button', { name: 'New dashboard' }).click();
+    await page.getByRole('button', { name: 'Yeni pano' }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('textbox').fill('Taxes');
-    await dialog.getByRole('button', { name: /Create|Save|Add/ }).click();
+    await dialog.getByRole('button', { name: 'Oluştur' }).click();
     await expect(page.getByRole('button', { name: 'Taxes' })).toBeVisible();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/dashboards')).map((d) => d.name))
@@ -168,7 +168,7 @@ test.describe('frozen months', () => {
     await seed(api);
     await open(page, '/reports');
     const main = page.getByRole('main');
-    await main.getByRole('button', { name: 'Frozen' }).click();
+    await main.getByRole('button', { name: 'Sabitlenmiş' }).click();
     await pickFromJanuaryLastYear(page);
 
     const range = `Oca ${year() - 1} – ${monthLabel(thisMonth())}`;
@@ -176,7 +176,7 @@ test.describe('frozen months', () => {
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/dashboards'))[0].dateRange)
       .toEqual({ preset: 'custom', from: `${year() - 1}-01`, to: thisMonth() });
-    await expect(main).toContainText(/52,50\s₺\s*Total Expenses/);
+    await expect(main).toContainText(/52,50\s₺\s*Toplam Gider/);
 
     // Cancel keeps the months
     await main.getByRole('button', { name: range }).click();
@@ -198,17 +198,17 @@ test.describe('frozen months', () => {
     const card = page
       .getByRole('main')
       .locator('div')
-      .filter({ has: page.getByText('Spending by Category', { exact: true }) })
+      .filter({ has: page.getByText('Harcama', { exact: true }) })
       .filter({ has: page.getByRole('button', { name: 'Diğer işlemler' }) })
       .last();
     // Scroll first: the menu closes on scroll, and the scroll from clicking a widget below the
     // fold can land just after the menu opens
     await card.scrollIntoViewIfNeeded();
     await card.getByRole('button', { name: 'Diğer işlemler' }).click();
-    await page.getByRole('menuitem', { name: 'Date range…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Date range' });
-    await dialog.getByRole('button', { name: 'Own date range' }).click();
-    await dialog.getByRole('button', { name: 'Frozen' }).click();
+    await page.getByRole('menuitem', { name: 'Tarih aralığı…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Tarih aralığı' });
+    await dialog.getByRole('button', { name: 'Kendi tarih aralığı' }).click();
+    await dialog.getByRole('button', { name: 'Sabitlenmiş' }).click();
 
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: 'Ayları seçin' })).toBeHidden();
@@ -216,7 +216,7 @@ test.describe('frozen months', () => {
 
     await dialog.getByRole('button', { name: monthLabel(thisMonth()) }).click();
     await pickFromJanuaryLastYear(page);
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect(dialog).toBeHidden();
 
     const [board] = await api.call<any[]>('GET', '/dashboards');
@@ -231,12 +231,14 @@ test.describe('frozen months', () => {
   test('the report builder picks custom months', async ({ page, api }) => {
     await seed(api);
     await open(page, '/reports/custom');
-    await page.getByRole('button', { name: 'Table' }).click();
-    await page.getByRole('button', { name: 'Custom', exact: true }).click();
+    await page.getByRole('button', { name: 'Tablo' }).click();
+    await page.getByRole('button', { name: 'Özel', exact: true }).click();
     await pickFromJanuaryLastYear(page);
     await expect(
       page.getByRole('button', { name: `Oca ${year() - 1} – ${monthLabel(thisMonth())}` }),
     ).toBeVisible();
-    await expect(page.getByRole('table').getByRole('row', { name: 'Total 52,50 ₺' })).toBeVisible();
+    await expect(
+      page.getByRole('table').getByRole('row', { name: 'Toplam 52,50 ₺' }),
+    ).toBeVisible();
   });
 });

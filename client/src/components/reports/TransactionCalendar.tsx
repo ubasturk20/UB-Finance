@@ -17,6 +17,7 @@ import { ChartSkeleton, TOOLTIP_CLASS } from './ChartHelpers';
 import type { DailyFlowPoint } from '../../types';
 import { formatWeekday } from '../../utils/dates';
 import { WEEKDAYS_NARROW } from '../../utils/locale';
+import { t } from '../../i18n';
 
 // Money in and out on each day. Up to CALENDAR_MONTHS_MAX months show as month grids, each
 // day with a green bar (money in, from the left) and a red one (money out, from the right).
@@ -94,7 +95,11 @@ export function TransactionCalendar({ from, to, fit, selected, onSelect }: Props
   const dayProps = (day: string) => {
     const flow = byDay.get(day) ?? EMPTY;
     // With the year: an All time heatmap has the same day in several years
-    const label = `${formatWeekday(day, { long: true })}: ${formatCurrency(flow.income)} in, ${formatCurrency(flow.expenses)} out`;
+    const label = t('rb.cal.dayLabel', {
+      day: formatWeekday(day, { long: true }),
+      income: formatCurrency(flow.income),
+      expenses: formatCurrency(flow.expenses),
+    });
     return {
       onMouseEnter: (e: React.MouseEvent<HTMLElement>) => showTooltip(day, e.currentTarget),
       onMouseLeave: () => setHover(null),
@@ -120,11 +125,18 @@ export function TransactionCalendar({ from, to, fit, selected, onSelect }: Props
     <div className={`relative w-full flex flex-col ${fit ? 'h-full' : ''}`}>
       <div className="flex items-center justify-end gap-3 flex-wrap text-xs tabular-nums shrink-0 pb-2">
         {heatmap && <HeatmapLegend />}
-        <span className="inline-flex items-center gap-0.5 text-positive">
-          <ArrowUp size={12} /> {formatCurrency(totals.income)}
+        <span
+          className="inline-flex items-center gap-0.5 text-positive"
+          title={t('rb.cal.moneyIn')}
+        >
+          <ArrowUp size={12} aria-label={t('rb.cal.moneyIn')} /> {formatCurrency(totals.income)}
         </span>
-        <span className="inline-flex items-center gap-0.5 text-negative">
-          <ArrowDown size={12} /> {formatCurrency(totals.expenses)}
+        <span
+          className="inline-flex items-center gap-0.5 text-negative"
+          title={t('rb.cal.moneyOut')}
+        >
+          <ArrowDown size={12} aria-label={t('rb.cal.moneyOut')} />{' '}
+          {formatCurrency(totals.expenses)}
         </span>
       </div>
       <div ref={ref} className={`relative ${fit ? 'flex-1 min-h-0' : ''}`}>
@@ -494,11 +506,11 @@ function HeatmapLegend() {
   );
   return (
     <span className="inline-flex items-center gap-1 text-[10px] text-text-tertiary">
-      More out
+      {t('rb.cal.moreOut')}
       {[4, 3, 2, 1].map((l) => swatch(mix('negative', LEVEL_MIX[l])))}
       {swatch()}
       {[1, 2, 3, 4].map((l) => swatch(mix('positive', LEVEL_MIX[l])))}
-      More in
+      {t('rb.cal.moreIn')}
     </span>
   );
 }
@@ -540,17 +552,21 @@ function DayTooltip({
       <p className="text-xs text-text-tertiary mb-1">{formatWeekday(hover.day)}</p>
       {flow && flow.count > 0 ? (
         <>
-          <p className="text-xs font-medium text-positive">In: {formatCurrency(flow.income)}</p>
-          <p className="text-xs font-medium text-negative">Out: {formatCurrency(flow.expenses)}</p>
+          <p className="text-xs font-medium text-positive">
+            {t('rb.cal.in', { amount: formatCurrency(flow.income) })}
+          </p>
+          <p className="text-xs font-medium text-negative">
+            {t('rb.cal.out', { amount: formatCurrency(flow.expenses) })}
+          </p>
           <p className="text-xs font-semibold text-text mt-1 pt-1 border-t border-border-light">
-            Net: {formatCurrency(net)}
+            {t('rb.cal.net', { amount: formatCurrency(net) })}
           </p>
           <p className="text-[11px] text-text-tertiary mt-0.5">
-            {flow.count} {flow.count === 1 ? 'transaction' : 'transactions'}
+            {t('rb.cal.count', { count: flow.count })}
           </p>
         </>
       ) : (
-        <p className="text-xs text-text-secondary">No transactions</p>
+        <p className="text-xs text-text-secondary">{t('rb.cal.none')}</p>
       )}
     </div>
   );

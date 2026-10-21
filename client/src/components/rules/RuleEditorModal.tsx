@@ -36,6 +36,7 @@ import type {
   RuleSplitPart,
 } from '../../types';
 import { formatDay } from '../../utils/dates';
+import { t } from '../../i18n';
 
 const fieldClass =
   'text-sm border border-border rounded-lg px-2 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-400';
@@ -85,17 +86,17 @@ export function RuleEditorModal({
         <div className="space-y-6">
           <section>
             <div className="flex items-center gap-2 mb-2 text-sm text-text-secondary">
-              <span className="font-medium">If</span>
+              <span className="font-medium">{t('rules.row.if')}</span>
               <select
                 value={conditionsOp}
                 onChange={(e) => setConditionsOp(e.target.value as 'and' | 'or')}
                 className={`${fieldClass} py-1`}
-                aria-label="How conditions combine"
+                aria-label={t('rules.editor.combine')}
               >
-                <option value="and">all</option>
-                <option value="or">any</option>
+                <option value="and">{t('rules.editor.all')}</option>
+                <option value="or">{t('rules.editor.any')}</option>
               </select>
-              <span>of these conditions match</span>
+              <span>{t('rules.editor.match')}</span>
             </div>
             <div className="space-y-2">
               {conditions.map((c, i) => (
@@ -109,7 +110,7 @@ export function RuleEditorModal({
               ))}
               {!conditions.length && (
                 <p className="text-xs text-caution bg-surface-alt rounded-lg px-3 py-2">
-                  No conditions: this rule applies to every transaction.
+                  {t('rules.editor.noConditions')}
                 </p>
               )}
             </div>
@@ -118,12 +119,12 @@ export function RuleEditorModal({
               onClick={() => setConditions((cs) => [...cs, newCondition()])}
               className="mt-2 flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 cursor-pointer"
             >
-              <Plus size={12} /> Add condition
+              <Plus size={12} /> {t('rules.editor.addCondition')}
             </button>
           </section>
 
           <section>
-            <p className="text-sm font-medium text-text-secondary mb-2">Then</p>
+            <p className="text-sm font-medium text-text-secondary mb-2">{t('rules.row.then')}</p>
             <div className="space-y-2">
               {actions.map((a, i) => (
                 <ActionRow
@@ -140,7 +141,7 @@ export function RuleEditorModal({
               onClick={() => setActions((as) => [...as, newAction()])}
               className="mt-2 flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 cursor-pointer"
             >
-              <Plus size={12} /> Add action
+              <Plus size={12} /> {t('rules.editor.addAction')}
             </button>
           </section>
 
@@ -154,18 +155,18 @@ export function RuleEditorModal({
                 onChange={(e) => setApplyExisting(e.target.checked)}
                 className="h-4 w-4 rounded border-border accent-brand-600"
               />
-              Apply to existing transactions after saving
+              {t('rules.editor.applyAfterSave')}
             </label>
             <div className="flex items-center gap-3 ml-auto">
               <SavingPausedHint />
               <Button variant="secondary" onClick={onClose}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={() => onSave(rule, applyExisting)}
                 disabled={!complete || !amountsValid || saving || !canSave}
               >
-                {saving ? 'Saving…' : 'Save rule'}
+                {saving ? t('common.saving') : t('rules.editor.save')}
               </Button>
             </div>
           </div>
@@ -202,7 +203,7 @@ function ConditionRow({
           onChange(makeCondition(field, ops.includes(c.op) ? c.op : ops[0], c));
         }}
         className={`${fieldClass} w-44`}
-        aria-label="Field"
+        aria-label={t('rules.editor.field')}
       >
         {CONDITION_FIELDS.map((f) => (
           <option key={f.value} value={f.value}>
@@ -215,7 +216,7 @@ function ConditionRow({
           value={c.op}
           onChange={(e) => onChange(makeCondition(c.field, e.target.value as RuleConditionOp, c))}
           className={`${fieldClass} w-40`}
-          aria-label="Operator"
+          aria-label={t('rules.editor.operator')}
         >
           {fieldDef.ops.map((op) => (
             <option key={op} value={op}>
@@ -231,7 +232,7 @@ function ConditionRow({
         type="button"
         onClick={onRemove}
         className="p-1.5 text-text-tertiary hover:text-negative transition-colors cursor-pointer"
-        aria-label="Remove condition"
+        aria-label={t('rules.editor.removeCondition')}
       >
         <Trash2 size={14} />
       </button>
@@ -258,8 +259,8 @@ function ConditionValue({
         onChange={(e) => set(e.target.value)}
         className={`${fieldClass} w-40`}
       >
-        <option value="outflow">Is an outflow</option>
-        <option value="inflow">Is an inflow</option>
+        <option value="outflow">{t('rules.summary.outflow')}</option>
+        <option value="inflow">{t('rules.summary.inflow')}</option>
       </select>
     );
   }
@@ -272,7 +273,7 @@ function ConditionValue({
       return (
         <>
           {money(lo, (n) => set([n, hi]))}
-          <span className="text-xs text-text-tertiary">and</span>
+          <span className="text-xs text-text-tertiary">{t('rules.editor.and')}</span>
           {money(hi, (n) => set([lo, n]))}
         </>
       );
@@ -293,7 +294,7 @@ function ConditionValue({
       return (
         <>
           {input(a, (v) => set([v, b]))}
-          <span className="text-xs text-text-tertiary">and</span>
+          <span className="text-xs text-text-tertiary">{t('rules.editor.and')}</span>
           {input(b, (v) => set([a, v]))}
         </>
       );
@@ -314,10 +315,15 @@ function ConditionValue({
         options={pickFrom}
         value={c.value}
         onChange={set}
-        placeholder="Choose one or more…"
+        placeholder={t('rules.editor.chooseMany')}
       />
     ) : (
-      <OptionPicker options={pickFrom} value={c.value} onChange={set} placeholder="Choose…" />
+      <OptionPicker
+        options={pickFrom}
+        value={c.value}
+        onChange={set}
+        placeholder={t('rules.editor.choose')}
+      />
     );
   }
   if (Array.isArray(c.value)) return <TagInput value={c.value} onChange={set} />;
@@ -325,7 +331,7 @@ function ConditionValue({
     <input
       value={c.value}
       onChange={(e) => set(e.target.value)}
-      placeholder={c.op === 'regex' ? 'e.g. ^(amzn|amazon)' : 'Text…'}
+      placeholder={c.op === 'regex' ? t('rules.editor.regexPlaceholder') : t('rules.editor.text')}
       maxLength={c.op === 'regex' ? 200 : 500}
       className={`${fieldClass} w-full ${c.op === 'regex' ? 'font-mono' : ''}`}
     />
@@ -336,8 +342,10 @@ function ConditionValue({
 function TagInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const [draft, setDraft] = useState('');
   const add = () => {
-    const t = draft.trim();
-    if (t && !value.some((v) => v.toLowerCase() === t.toLowerCase())) onChange([...value, t]);
+    const text = draft.trim();
+    if (text && !value.some((v) => v.toLowerCase() === text.toLowerCase())) {
+      onChange([...value, text]);
+    }
     setDraft('');
   };
   return (
@@ -354,7 +362,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (v: string[]
             type="button"
             onClick={() => onChange(value.filter((x) => x !== v))}
             className="text-text-tertiary hover:text-negative cursor-pointer"
-            aria-label={`Remove ${v}`}
+            aria-label={t('rules.editor.removeTag', { value: v })}
           >
             <X size={11} />
           </button>
@@ -372,7 +380,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (v: string[]
           }
         }}
         onBlur={add}
-        placeholder={value.length ? '' : 'Type and press Enter…'}
+        placeholder={value.length ? '' : t('rules.editor.typeEnter')}
         className="flex-1 min-w-24 bg-transparent outline-none text-sm py-0.5"
       />
     </div>
@@ -398,11 +406,11 @@ function ActionRow({
           value={a.type}
           onChange={(e) => onChange(makeAction(e.target.value as RuleAction['type'], a))}
           className={`${fieldClass} w-52`}
-          aria-label="Action"
+          aria-label={t('rules.editor.action')}
         >
-          {ACTION_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
+          {ACTION_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
             </option>
           ))}
         </select>
@@ -411,14 +419,14 @@ function ActionRow({
             <CategorySelectButton
               value={a.value || null}
               onChange={(id) => onChange({ ...a, value: id ?? '' })}
-              placeholder="Choose a category…"
+              placeholder={t('rules.editor.chooseCategory')}
             />
           )}
           {a.type === 'set_payee' && (
             <MerchantSelect
               value={{ id: a.value || null, name: (a.value && lookups.payee(a.value)) || '' }}
               onChange={(v) => onChange({ ...a, value: v.id ?? '' })}
-              placeholder="Choose or create a payee…"
+              placeholder={t('rules.editor.choosePayee')}
             />
           )}
           {(a.type === 'set_notes' || a.type === 'prepend_notes' || a.type === 'append_notes') && (
@@ -426,16 +434,16 @@ function ActionRow({
               value={a.value}
               onChange={(e) => onChange({ ...a, value: e.target.value })}
               placeholder={
-                a.type === 'set_notes' ? 'Leave empty to clear notes' : 'e.g. #business '
+                a.type === 'set_notes'
+                  ? t('rules.editor.clearNotesHint')
+                  : t('rules.editor.notesExample')
               }
               maxLength={5000}
               className={`${fieldClass} w-full`}
             />
           )}
           {a.type === 'split' && (
-            <p className="text-xs text-text-tertiary pt-2">
-              Splits the transaction into parts, each with its own category.
-            </p>
+            <p className="text-xs text-text-tertiary pt-2">{t('rules.editor.splitHint')}</p>
           )}
         </div>
         {canRemove && (
@@ -443,7 +451,7 @@ function ActionRow({
             type="button"
             onClick={onRemove}
             className="p-1.5 text-text-tertiary hover:text-negative transition-colors cursor-pointer"
-            aria-label="Remove action"
+            aria-label={t('rules.editor.removeAction')}
           >
             <Trash2 size={14} />
           </button>
@@ -479,11 +487,11 @@ function SplitEditor({
               set(i, { kind, value: kind === 'percent' ? 50 : 0 });
             }}
             className={`${fieldClass} w-32`}
-            aria-label="Split amount type"
+            aria-label={t('rules.editor.splitKind')}
           >
-            <option value="fixed">Amount</option>
-            <option value="percent">Percent</option>
-            <option value="remainder">Remainder</option>
+            <option value="fixed">{t('rules.editor.kindFixed')}</option>
+            <option value="percent">{t('rules.editor.kindPercent')}</option>
+            <option value="remainder">{t('rules.editor.kindRemainder')}</option>
           </select>
           <div className="w-28">
             {p.kind === 'fixed' && (
@@ -512,20 +520,20 @@ function SplitEditor({
               </div>
             )}
             {p.kind === 'remainder' && (
-              <span className="text-xs text-text-tertiary">What's left</span>
+              <span className="text-xs text-text-tertiary">{t('rules.editor.whatsLeft')}</span>
             )}
           </div>
           <div className="flex-1 min-w-40">
             <CategorySelectButton
               value={p.categoryId}
               onChange={(id) => set(i, { categoryId: id })}
-              placeholder="Category…"
+              placeholder={t('rules.editor.category')}
             />
           </div>
           <input
             value={p.notes ?? ''}
             onChange={(e) => set(i, { notes: e.target.value || null })}
-            placeholder="Notes"
+            placeholder={t('rules.editor.notes')}
             maxLength={5000}
             className={`${fieldClass} w-32`}
           />
@@ -534,7 +542,7 @@ function SplitEditor({
             onClick={() => onChange(parts.filter((_, j) => j !== i))}
             disabled={parts.length === 1}
             className="p-1.5 text-text-tertiary hover:text-negative disabled:opacity-30 transition-colors cursor-pointer"
-            aria-label="Remove split"
+            aria-label={t('rules.editor.removeSplit')}
           >
             <Trash2 size={14} />
           </button>
@@ -546,14 +554,14 @@ function SplitEditor({
           onClick={() => onChange([...parts, newSplitPart(hasRemainder ? 'fixed' : 'remainder')])}
           className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 cursor-pointer"
         >
-          <Plus size={12} /> Add split
+          <Plus size={12} /> {t('rules.editor.addSplit')}
         </button>
         {pctTotal > 100 ? (
-          <span className="text-xs text-negative">Percents add up to more than 100%.</span>
+          <span className="text-xs text-negative">{t('rules.editor.percentOver')}</span>
         ) : (
           !hasRemainder && (
             <span className="text-xs text-text-tertiary">
-              Anything left over stays uncategorized.
+              {t('rules.editor.leftoverUncategorized')}
             </span>
           )
         )}
@@ -588,13 +596,18 @@ function MatchPreview({
     <section className="rounded-lg border border-border-light overflow-hidden">
       <div className="px-3 py-2 bg-surface-alt border-b border-border-light text-xs font-medium text-text-secondary">
         {!ready
-          ? 'Fill in every condition to see matching transactions'
+          ? t('rules.editor.fillConditions')
           : !data
-            ? 'Checking…'
+            ? t('rules.editor.checking')
             : data.count === 0
-              ? 'No transactions match yet'
-              : `Matches ${data.count.toLocaleString()} transaction${data.count === 1 ? '' : 's'}${data.count > shown.length ? ` · showing the latest ${shown.length}` : ''}`}
-        {isFetching && data && <span className="ml-2 text-text-tertiary">updating…</span>}
+              ? t('rules.editor.noMatches')
+              : t('rules.editor.matches', { count: data.count }) +
+                (data.count > shown.length
+                  ? t('rules.editor.showingLatest', { count: shown.length })
+                  : '')}
+        {isFetching && data && (
+          <span className="ml-2 text-text-tertiary">{t('rules.editor.updating')}</span>
+        )}
       </div>
       {ready &&
         shown.map((tx) => (
@@ -605,7 +618,7 @@ function MatchPreview({
             <span className="w-20 shrink-0 text-text-tertiary">{formatDay(tx.date)}</span>
             <span className="flex-1 truncate text-text">{tx.payeeName ?? '—'}</span>
             <span className="hidden sm:block w-40 truncate text-text-tertiary">
-              {(tx.categoryId && options.lookups.category(tx.categoryId)) || 'Uncategorized'}
+              {(tx.categoryId && options.lookups.category(tx.categoryId)) || t('txd.uncategorized')}
             </span>
             <span
               className={`w-24 text-right tabular-nums ${tx.amount < 0 ? 'text-text' : 'text-positive'}`}

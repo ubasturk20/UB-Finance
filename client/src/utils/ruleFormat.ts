@@ -9,6 +9,7 @@ import type {
   RuleSplitPart,
 } from '../types';
 import { formatDay } from './dates';
+import { formatPercent, t } from '../i18n';
 
 const TEXT_OPS: RuleConditionOp[] = [
   'is',
@@ -30,64 +31,65 @@ export const CONDITION_FIELDS: Array<{
   label: string;
   ops: RuleConditionOp[];
 }> = [
-  { value: 'payee', label: 'Payee', ops: [...ID_OPS, 'is_empty', 'is_not_empty'] },
-  { value: 'payee_name', label: 'Payee name', ops: TEXT_OPS },
-  { value: 'imported_payee', label: 'Imported description', ops: TEXT_OPS },
-  { value: 'notes', label: 'Notes', ops: TEXT_OPS },
+  { value: 'payee', label: t('rules.field.payee'), ops: [...ID_OPS, 'is_empty', 'is_not_empty'] },
+  { value: 'payee_name', label: t('rules.field.payeeName'), ops: TEXT_OPS },
+  { value: 'imported_payee', label: t('rules.field.importedPayee'), ops: TEXT_OPS },
+  { value: 'notes', label: t('rules.field.notes'), ops: TEXT_OPS },
   {
     value: 'amount',
-    label: 'Amount',
+    label: t('rules.field.amount'),
     ops: ['is', 'is_not', 'gt', 'gte', 'lt', 'lte', 'between', 'approx'],
   },
-  { value: 'direction', label: 'Inflow / outflow', ops: ['is'] },
-  { value: 'category', label: 'Category', ops: [...ID_OPS, 'is_empty', 'is_not_empty'] },
-  { value: 'account', label: 'Account', ops: ID_OPS },
-  { value: 'date', label: 'Date', ops: ['is', 'before', 'after', 'between'] },
+  { value: 'direction', label: t('rules.field.direction'), ops: ['is'] },
+  {
+    value: 'category',
+    label: t('rules.field.category'),
+    ops: [...ID_OPS, 'is_empty', 'is_not_empty'],
+  },
+  { value: 'account', label: t('rules.field.account'), ops: ID_OPS },
+  { value: 'date', label: t('rules.field.date'), ops: ['is', 'before', 'after', 'between'] },
 ];
 
 export const FIELD_HINTS: Partial<Record<RuleConditionField, string>> = {
-  payee_name: 'The payee name as shown on the transaction',
-  imported_payee: 'The original text from your bank or CSV, before any renaming',
-  amount: 'Compares the amount without its sign; add "Inflow / outflow" to tell them apart',
+  payee_name: t('rules.hint.payeeName'),
+  imported_payee: t('rules.hint.importedPayee'),
+  amount: t('rules.hint.amount'),
 };
 
 export function opLabel(field: RuleConditionField, op: RuleConditionOp): string {
-  if (field === 'date') {
-    if (op === 'is') return 'is on';
-  }
-  if (field === 'category' && op === 'is_empty') return 'is uncategorized';
-  if (field === 'category' && op === 'is_not_empty') return 'is categorized';
+  if (field === 'category' && op === 'is_empty') return t('rules.op.uncategorized');
+  if (field === 'category' && op === 'is_not_empty') return t('rules.op.categorized');
   const labels: Record<RuleConditionOp, string> = {
-    is: 'is',
-    is_not: 'is not',
-    contains: 'contains',
-    not_contains: "doesn't contain",
-    starts_with: 'starts with',
-    ends_with: 'ends with',
-    regex: 'matches regex',
-    one_of: 'is one of',
-    not_one_of: 'is not one of',
-    is_empty: 'is empty',
-    is_not_empty: 'is not empty',
-    gt: 'is more than',
-    gte: 'is at least',
-    lt: 'is less than',
-    lte: 'is at most',
-    between: 'is between',
-    approx: 'is about',
-    before: 'is before',
-    after: 'is after',
+    is: t('rules.op.is'),
+    is_not: t('rules.op.isNot'),
+    contains: t('rules.op.contains'),
+    not_contains: t('rules.op.notContains'),
+    starts_with: t('rules.op.startsWith'),
+    ends_with: t('rules.op.endsWith'),
+    regex: t('rules.op.regex'),
+    one_of: t('rules.op.oneOf'),
+    not_one_of: t('rules.op.notOneOf'),
+    is_empty: t('rules.op.isEmpty'),
+    is_not_empty: t('rules.op.isNotEmpty'),
+    gt: t('rules.op.gt'),
+    gte: t('rules.op.gte'),
+    lt: t('rules.op.lt'),
+    lte: t('rules.op.lte'),
+    between: t('rules.op.between'),
+    approx: t('rules.op.approx'),
+    before: t('rules.op.before'),
+    after: t('rules.op.after'),
   };
   return labels[op];
 }
 
 export const ACTION_TYPES: Array<{ value: RuleAction['type']; label: string }> = [
-  { value: 'set_category', label: 'Set category' },
-  { value: 'set_payee', label: 'Rename payee' },
-  { value: 'set_notes', label: 'Set notes' },
-  { value: 'prepend_notes', label: 'Add text before notes' },
-  { value: 'append_notes', label: 'Add text after notes' },
-  { value: 'split', label: 'Split transaction' },
+  { value: 'set_category', label: t('rules.action.setCategory') },
+  { value: 'set_payee', label: t('rules.action.setPayee') },
+  { value: 'set_notes', label: t('rules.action.setNotes') },
+  { value: 'prepend_notes', label: t('rules.action.prependNotes') },
+  { value: 'append_notes', label: t('rules.action.appendNotes') },
+  { value: 'split', label: t('rules.action.split') },
 ];
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -191,12 +193,14 @@ const shortDate = (d: string) => (/^\d{4}-\d{2}-\d{2}$/.test(d) ? formatDay(d) :
 function nameOf(field: RuleConditionField, id: string, l: RuleLookups): string {
   const name =
     field === 'payee' ? l.payee(id) : field === 'account' ? l.account(id) : l.category(id);
-  return name ?? '(deleted)';
+  return name ?? t('rules.summary.deleted');
 }
 
 export function conditionText(c: RuleCondition, l: RuleLookups): string {
   const field = CONDITION_FIELDS.find((f) => f.value === c.field)?.label ?? c.field;
-  if (c.field === 'direction') return c.value === 'inflow' ? 'Is an inflow' : 'Is an outflow';
+  if (c.field === 'direction') {
+    return c.value === 'inflow' ? t('rules.summary.inflow') : t('rules.summary.outflow');
+  }
   const op = opLabel(c.field, c.op);
   if (!('value' in c)) return `${field} ${op}`;
   const isId = c.field === 'payee' || c.field === 'account' || c.field === 'category';
@@ -204,19 +208,23 @@ export function conditionText(c: RuleCondition, l: RuleLookups): string {
 
   let value: string;
   if (c.field === 'amount') {
-    value = Array.isArray(c.value)
-      ? `${formatCurrency(c.value[0])} and ${formatCurrency(c.value[1])}`
-      : formatCurrency(c.value);
+    if (Array.isArray(c.value)) {
+      const [from, to] = c.value.map((v) => formatCurrency(v));
+      return t('rules.summary.between', { field, from, to });
+    }
+    value = formatCurrency(c.value);
   } else if (c.field === 'date') {
-    value = Array.isArray(c.value)
-      ? `${shortDate(c.value[0])} and ${shortDate(c.value[1])}`
-      : shortDate(c.value);
+    if (Array.isArray(c.value)) {
+      const [from, to] = c.value.map(shortDate);
+      return t('rules.summary.between', { field, from, to });
+    }
+    value = shortDate(c.value);
   } else if (Array.isArray(c.value)) {
     value = c.value.map(one).join(', ');
   } else {
     value = c.op === 'regex' ? `/${c.value}/` : one(c.value);
   }
-  return `${field} ${op} ${value}`;
+  return t('rules.summary.condition', { field, op, value });
 }
 
 function splitPartText(p: RuleSplitPart, l: RuleLookups): string {
@@ -224,25 +232,36 @@ function splitPartText(p: RuleSplitPart, l: RuleLookups): string {
     p.kind === 'fixed'
       ? formatCurrency(p.value)
       : p.kind === 'percent'
-        ? `${p.value}%`
-        : 'the rest';
-  return `${amount} to ${p.categoryId ? (l.category(p.categoryId) ?? '(deleted)') : 'uncategorized'}`;
+        ? formatPercent(p.value / 100, 2)
+        : t('rules.summary.rest');
+  const category = p.categoryId
+    ? (l.category(p.categoryId) ?? t('rules.summary.deleted'))
+    : t('txd.uncategorized');
+  return t('rules.summary.splitPart', { amount, category });
 }
 
 export function actionText(a: RuleAction, l: RuleLookups): string {
   switch (a.type) {
     case 'set_category':
-      return `Set category to ${l.category(a.value) ?? '(deleted)'}`;
+      return t('rules.summary.setCategory', {
+        name: l.category(a.value) ?? t('rules.summary.deleted'),
+      });
     case 'set_payee':
-      return `Rename payee to ${l.payee(a.value) ?? '(deleted)'}`;
+      return t('rules.summary.setPayee', {
+        name: l.payee(a.value) ?? t('rules.summary.deleted'),
+      });
     case 'set_notes':
-      return a.value ? `Set notes to ${quote(a.value)}` : 'Clear notes';
+      return a.value
+        ? t('rules.summary.setNotes', { text: quote(a.value) })
+        : t('rules.summary.clearNotes');
     case 'prepend_notes':
-      return `Add ${quote(a.value)} before notes`;
+      return t('rules.summary.prependNotes', { text: quote(a.value) });
     case 'append_notes':
-      return `Add ${quote(a.value)} after notes`;
+      return t('rules.summary.appendNotes', { text: quote(a.value) });
     case 'split':
-      return `Split: ${a.parts.map((p) => splitPartText(p, l)).join(', ')}`;
+      return t('rules.summary.split', {
+        parts: a.parts.map((p) => splitPartText(p, l)).join(', '),
+      });
   }
 }
 

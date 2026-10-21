@@ -16,6 +16,7 @@ import { downloadCsv } from '../utils/exportCsv';
 import { computeDateRange, decodeRangeParam, resolveDateRange } from '../utils/dateRange';
 import { Button } from '../components/ui/Button';
 import type { CustomReportConfig } from '../types';
+import { t } from '../i18n';
 
 const defaultConfig = (): CustomReportConfig => ({
   chartType: 'bar',
@@ -89,17 +90,17 @@ export default function CustomReportBuilder() {
 
   function handleExport() {
     if (!data) return;
-    const filename = `custom-report-${config.dateRange.from}-${config.dateRange.to}.csv`;
+    const filename = t('rb.csv.filename', { from: config.dateRange.from, to: config.dateRange.to });
     if (data.mode === 'total') {
       downloadCsv(
         filename,
-        data.data.map((d) => ({ name: d.name, amount_cents: d.value })),
+        data.data.map((d) => ({ [t('rb.csv.name')]: d.name, [t('rb.csv.amountMinor')]: d.value })),
       );
     } else {
       downloadCsv(
         filename,
         data.data.map((d) => {
-          const row: Record<string, unknown> = { month: d.month };
+          const row: Record<string, unknown> = { [t('rb.csv.month')]: d.month };
           for (const g of data.groups) row[g] = d[g] ?? 0;
           return row;
         }),
@@ -114,18 +115,20 @@ export default function CustomReportBuilder() {
           <Link
             to={dashboardPageId ? `/reports?dashboard=${dashboardPageId}` : '/reports'}
             className="text-text-tertiary hover:text-text-secondary transition-colors"
+            aria-label={t('rb.backToReports')}
+            title={t('rb.backToReports')}
           >
             <ArrowLeft size={16} />
           </Link>
-          <h1 className="text-lg font-semibold text-text">{reportName || 'Custom Report'}</h1>
+          <h1 className="text-lg font-semibold text-text">{reportName || t('rb.title')}</h1>
           <SavedReportsList activeId={id} />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" onClick={handleExport} disabled={!data}>
-            <Download size={13} /> Export
+            <Download size={13} /> {t('rb.export')}
           </Button>
           <Button size="sm" onClick={() => setSaveOpen(true)}>
-            <Save size={13} /> {id ? 'Update' : 'Save'}
+            <Save size={13} /> {id ? t('rb.update') : t('common.save')}
           </Button>
         </div>
       </div>

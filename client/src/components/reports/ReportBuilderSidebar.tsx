@@ -11,6 +11,7 @@ import type {
   BalanceType,
   DatePresetCustom,
 } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   config: CustomReportConfig;
@@ -18,22 +19,22 @@ interface Props {
 }
 
 const MODE_OPTIONS: { id: ReportMode; label: string }[] = [
-  { id: 'total', label: 'Total' },
-  { id: 'time', label: 'Over Time' },
+  { id: 'total', label: t('rb.mode.total') },
+  { id: 'time', label: t('rb.mode.time') },
 ];
 
 const GROUP_BY_OPTIONS: { id: ReportGroupBy; label: string; modes: ReportMode[] }[] = [
-  { id: 'category', label: 'Category', modes: ['total', 'time'] },
-  { id: 'categoryGroup', label: 'Category Group', modes: ['total', 'time'] },
-  { id: 'payee', label: 'Payee', modes: ['total', 'time'] },
-  { id: 'account', label: 'Account', modes: ['total', 'time'] },
-  { id: 'month', label: 'Month', modes: ['total'] },
+  { id: 'category', label: t('rb.groupBy.category'), modes: ['total', 'time'] },
+  { id: 'categoryGroup', label: t('rb.groupBy.categoryGroup'), modes: ['total', 'time'] },
+  { id: 'payee', label: t('rb.groupBy.payee'), modes: ['total', 'time'] },
+  { id: 'account', label: t('rb.groupBy.account'), modes: ['total', 'time'] },
+  { id: 'month', label: t('rb.groupBy.month'), modes: ['total'] },
 ];
 
 const BALANCE_OPTIONS: { id: BalanceType; label: string }[] = [
-  { id: 'expense', label: 'Expenses' },
-  { id: 'income', label: 'Income' },
-  { id: 'net', label: 'Net' },
+  { id: 'expense', label: t('rb.balance.expense') },
+  { id: 'income', label: t('rb.balance.income') },
+  { id: 'net', label: t('rb.balance.net') },
 ];
 
 function set<K extends keyof CustomReportConfig>(
@@ -75,7 +76,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
 
   return (
     <div className="w-72 max-md:w-full shrink-0 bg-surface border-r max-md:border-r-0 max-md:border-t border-border overflow-y-auto max-md:overflow-visible p-4 space-y-5">
-      <Section label="Chart Type">
+      <Section label={t('rb.section.chartType')}>
         <ChartTypeSelector
           value={config.chartType}
           mode={config.mode}
@@ -83,7 +84,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         />
       </Section>
 
-      <Section label="Mode">
+      <Section label={t('rb.section.mode')}>
         <div className="flex gap-1">
           {MODE_OPTIONS.map((m) => (
             <button
@@ -101,9 +102,9 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         </div>
       </Section>
 
-      <Section label="Group By">
+      <Section label={t('rb.section.groupBy')}>
         <select
-          aria-label="Group by"
+          aria-label={t('rb.groupBy.label')}
           value={config.groupBy}
           onChange={(e) => onChange(set(config, 'groupBy', e.target.value as ReportGroupBy))}
           className="w-full rounded-md border border-border text-sm py-1.5 px-2 bg-surface text-text focus:border-brand-600 focus:ring-1 focus:ring-brand-600 focus:outline-none"
@@ -116,7 +117,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         </select>
       </Section>
 
-      <Section label="Balance Type">
+      <Section label={t('rb.section.balanceType')}>
         <div className="flex gap-1">
           {BALANCE_OPTIONS.map((b) => (
             <button
@@ -134,7 +135,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         </div>
       </Section>
 
-      <Section label="Date Range">
+      <Section label={t('rb.section.dateRange')}>
         <div className="flex flex-wrap gap-1 mb-2">
           {DATE_PRESETS.map((p) => (
             <button
@@ -161,13 +162,11 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
           />
         )}
         <p className="text-[11px] text-text-tertiary mt-1.5">
-          {config.dateRange.preset === 'custom'
-            ? 'Frozen: these dates stay fixed.'
-            : 'Live: moves forward with the current month.'}
+          {config.dateRange.preset === 'custom' ? t('rb.range.frozen') : t('rb.range.live')}
         </p>
       </Section>
 
-      <Section label="Accounts">
+      <Section label={t('rb.section.accounts')}>
         <AccountMultiSelect
           selected={config.filters.accountIds}
           onChange={(ids) =>
@@ -176,7 +175,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         />
       </Section>
 
-      <Section label="Categories">
+      <Section label={t('rb.section.categories')}>
         <CategoryTreePicker
           selectedCategoryIds={config.filters.categoryIds}
           selectedGroupIds={config.filters.categoryGroupIds}

@@ -1,4 +1,5 @@
 import { useAccounts } from '../../hooks/useAccounts';
+import { t } from '../../i18n';
 
 interface Props {
   selected: string[];
@@ -29,7 +30,7 @@ export default function AccountMultiSelect({ selected, onChange }: Props) {
         onClick={() => onChange([])}
         className={`text-xs px-1.5 py-0.5 rounded ${allSelected ? 'text-brand-600 font-medium' : 'text-text-tertiary hover:text-text-secondary'}`}
       >
-        {allSelected ? 'All selected' : 'Select all'}
+        {allSelected ? t('rb.picker.allSelected') : t('rb.picker.selectAll')}
       </button>
       {open.map((a) => {
         const checked = allSelected || selected.includes(a.id);

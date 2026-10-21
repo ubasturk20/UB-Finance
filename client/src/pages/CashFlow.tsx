@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { format, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
 import { useSpendingByCategory, useIncomeByCategory } from '../hooks/useReports';
 import { formatCurrency } from '../utils/currency';
+import { t, formatPercent } from '../i18n';
 import { cashFlowSelection } from '../utils/cashFlowSelection';
 import { downloadCsv } from '../utils/exportCsv';
 import { usePreferencesStore } from '../store/preferencesStore';
@@ -26,12 +27,12 @@ type Preset = '1m' | '3m' | '6m' | 'ytd' | 'last-year' | 'custom';
 type NodeType = 'income' | 'hub' | 'expense-group' | 'subcategory' | 'savings';
 
 const PRESETS: { id: Preset; label: string }[] = [
-  { id: '1m', label: '1M' },
-  { id: '3m', label: '3M' },
-  { id: '6m', label: '6M' },
-  { id: 'ytd', label: 'This Year' },
-  { id: 'last-year', label: 'Last Year' },
-  { id: 'custom', label: 'Custom' },
+  { id: '1m', label: t('cf.preset.1m') },
+  { id: '3m', label: t('cf.preset.3m') },
+  { id: '6m', label: t('cf.preset.6m') },
+  { id: 'ytd', label: t('cf.preset.ytd') },
+  { id: 'last-year', label: t('cf.preset.lastYear') },
+  { id: 'custom', label: t('cf.preset.custom') },
 ];
 
 const MIN_SAVINGS_CENTS = 500;
@@ -115,6 +116,9 @@ interface SankeyDiagramProps {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** A share given in percent (12.5 → %12,5) */
+const percentOf = (n: number, digits = 1) => formatPercent(n / 100, digits);
 
 /** A whole amount, without cents: node labels are short. Halves round away from zero either way. */
 const formatDollars = (cents: number) =>
@@ -228,7 +232,7 @@ function buildSankeyGraph(
   const incomeNodes: SankeyNode[] = validIncome
     .sort((a, b) => b.totalReceived - a.totalReceived)
     .map((c) => ({
-      name: `${icon(c)}${c.categoryName ?? 'Income'}`,
+      name: `${icon(c)}${c.categoryName ?? t('cf.node.income')}`,
       nodeType: 'income',
       amount: c.totalReceived,
       color: chartColors.positive,
@@ -238,7 +242,7 @@ function buildSankeyGraph(
 
   // Layer 1: Hub
   const hubNode: SankeyNode = {
-    name: 'Total Income',
+    name: t('cf.node.totalIncome'),
     nodeType: 'hub',
     amount: totalIncome,
     color: chartColors.brand,
@@ -251,7 +255,7 @@ function buildSankeyGraph(
     { total: number; groupId: string | null; items: SpendingByCat[] }
   >();
   for (const item of validSpending) {
-    const key = item.groupName ?? 'Uncategorized';
+    const key = item.groupName ?? t('cf.node.uncategorized');
     const ex = groupMap.get(key);
     if (ex) {
       ex.total += item.totalSpent;
@@ -263,9 +267,10 @@ function buildSankeyGraph(
   // Assign group colors
   const gColorMap = new Map<string, string>();
   sortedGroups.forEach(([name], i) => {
+    const uncategorized = name === t('cf.node.uncategorized');
     gColorMap.set(
       name,
-      name === 'Uncategorized' ? chartColors.axis : EXPENSE_COLORS[i % EXPENSE_COLORS.length],
+      uncategorized ? chartColors.axis : EXPENSE_COLORS[i % EXPENSE_COLORS.length],
     );
   });
 
@@ -287,7 +292,7 @@ function buildSankeyGraph(
     savings > MIN_SAVINGS_CENTS
       ? [
           {
-            name: 'Savings',
+            name: t('cf.node.savings'),
             nodeType: 'savings',
             amount: savings,
             color: chartColors.positive,
@@ -307,7 +312,7 @@ function buildSankeyGraph(
     const sorted = [...items].sort((a, b) => b.totalSpent - a.totalSpent);
 
     const subs: SankeyNode[] = sorted.map((item, ci) => ({
-      name: `${icon(item)}${item.categoryName ?? 'Uncategorized'}`,
+      name: `${icon(item)}${item.categoryName ?? t('cf.node.uncategorized')}`,
       nodeType: 'subcategory' as NodeType,
       amount: item.totalSpent,
       color: lighten(gColor, sorted.length > 1 ? Math.min(ci * 0.12, 0.4) : 0),
@@ -721,13 +726,13 @@ function SankeyDiagram({ from, to, selectedNode, onNodeClick }: SankeyDiagramPro
               const amtStr = formatDollars(n.amount);
               let pctStr = '';
               if (n.nodeType === 'income' && n.pctOfIncome != null) {
-                pctStr = ` · ${n.pctOfIncome.toFixed(1)}%`;
+                pctStr = ` · ${percentOf(n.pctOfIncome)}`;
               } else if (n.nodeType === 'expense-group' && n.pctOfIncome != null) {
-                pctStr = ` · ${n.pctOfIncome.toFixed(1)}%`;
+                pctStr = ` · ${percentOf(n.pctOfIncome)}`;
               } else if (n.nodeType === 'subcategory' && n.pctOfGroup != null) {
-                pctStr = ` · ${n.pctOfGroup.toFixed(1)}%`;
+                pctStr = ` · ${percentOf(n.pctOfGroup)}`;
               } else if (n.nodeType === 'savings' && n.savingsRate != null) {
-                pctStr = ` · ${n.savingsRate.toFixed(1)}%`;
+                pctStr = ` · ${percentOf(n.savingsRate)}`;
               }
               const hitW =
                 NODE_W +
@@ -746,7 +751,7 @@ function SankeyDiagram({ from, to, selectedNode, onNodeClick }: SankeyDiagramPro
                   onMouseMove={(e) => handleNodeMove(e, n)}
                   onMouseLeave={handleLeave}
                   role={clickable ? 'button' : undefined}
-                  aria-label={clickable ? `Show transactions: ${n.name}` : undefined}
+                  aria-label={clickable ? t('cf.showTransactions', { name: n.name }) : undefined}
                   tabIndex={clickable ? 0 : undefined}
                   onKeyDown={(e) => {
                     if (clickable && (e.key === 'Enter' || e.key === ' ')) {
@@ -813,10 +818,7 @@ function SankeyDiagram({ from, to, selectedNode, onNodeClick }: SankeyDiagramPro
       {graph.hasNegativeFlows && (
         <div className="mt-1 px-4 flex items-center gap-1.5 text-xs text-text-tertiary">
           <Info size={12} className="shrink-0" />
-          <span>
-            Some flows excluded — Sankey diagrams cannot represent negative values (e.g. refunds).
-            Summary totals may differ slightly.
-          </span>
+          <span>{t('cf.negativeFlows')}</span>
         </div>
       )}
     </div>
@@ -852,7 +854,9 @@ function SankeyTooltip({
         <p className="text-xs font-medium text-text">{n.name}</p>
         <p className="text-xs text-positive font-semibold">{amt}</p>
         {n.pctOfIncome != null && (
-          <p className="text-xs text-text-tertiary">{n.pctOfIncome.toFixed(1)}% of total income</p>
+          <p className="text-xs text-text-tertiary">
+            {t('cf.tooltip.ofTotalIncome', { pct: percentOf(n.pctOfIncome) })}
+          </p>
         )}
       </>
     );
@@ -864,7 +868,9 @@ function SankeyTooltip({
         <p className="text-xs font-medium text-text">{n.name}</p>
         <p className="text-xs text-positive font-semibold">{amt}</p>
         {n.savingsRate != null && (
-          <p className="text-xs text-text-tertiary">{n.savingsRate.toFixed(1)}% savings rate</p>
+          <p className="text-xs text-text-tertiary">
+            {t('cf.tooltip.savingsRate', { pct: percentOf(n.savingsRate) })}
+          </p>
         )}
       </>
     );
@@ -878,11 +884,13 @@ function SankeyTooltip({
           {amt}
         </p>
         {n.pctOfIncome != null && (
-          <p className="text-xs text-text-tertiary">{n.pctOfIncome.toFixed(1)}% of total income</p>
+          <p className="text-xs text-text-tertiary">
+            {t('cf.tooltip.ofTotalIncome', { pct: percentOf(n.pctOfIncome) })}
+          </p>
         )}
         {n.pctOfSpending != null && (
           <p className="text-xs text-text-tertiary">
-            {n.pctOfSpending.toFixed(1)}% of total spending
+            {t('cf.tooltip.ofTotalSpending', { pct: percentOf(n.pctOfSpending) })}
           </p>
         )}
       </>
@@ -899,12 +907,12 @@ function SankeyTooltip({
       </p>
       {n.pctOfGroup != null && n.groupName && (
         <p className="text-xs text-text-tertiary">
-          {n.pctOfGroup.toFixed(1)}% of {n.groupName}
+          {t('cf.tooltip.ofGroup', { group: n.groupName, pct: percentOf(n.pctOfGroup) })}
         </p>
       )}
       {n.pctOfSpending != null && (
         <p className="text-xs text-text-tertiary">
-          {n.pctOfSpending.toFixed(1)}% of total spending
+          {t('cf.tooltip.ofTotalSpending', { pct: percentOf(n.pctOfSpending) })}
         </p>
       )}
     </>
@@ -913,8 +921,7 @@ function SankeyTooltip({
 
 // ─── Phone list ──────────────────────────────────────────────────────────────
 
-const pct = (n: number | undefined) =>
-  n == null ? '' : `${n < 10 ? n.toFixed(1) : Math.round(n)}%`;
+const pct = (n: number | undefined) => (n == null ? '' : percentOf(n, n < 10 ? 1 : 0));
 
 /**
  * Phones: the same numbers as the diagram, as a list. Money in, then where it went: savings and
@@ -980,7 +987,9 @@ function CashFlowList({ from, to, selectedNode, onNodeClick }: SankeyDiagramProp
   return (
     <div className="space-y-4">
       <section className="bg-surface rounded-lg shadow-card border border-border-light">
-        <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-text-secondary">Money in</h3>
+        <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-text-secondary">
+          {t('cf.list.moneyIn')}
+        </h3>
         {income.map((n) => (
           <div
             key={n.name}
@@ -998,11 +1007,13 @@ function CashFlowList({ from, to, selectedNode, onNodeClick }: SankeyDiagramProp
       </section>
 
       <section className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-        <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-text-secondary">Where it went</h3>
+        <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-text-secondary">
+          {t('cf.list.whereItWent')}
+        </h3>
         {savings && (
           <div className="px-4 py-2.5">
             <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="text-text font-medium">Saved</span>
+              <span className="text-text font-medium">{t('cf.list.saved')}</span>
               <span className="tabular-nums font-medium text-positive">
                 {formatCurrency(savings.amount)}
                 <span className="ml-1.5 text-xs font-normal text-text-tertiary">
@@ -1041,7 +1052,7 @@ function CashFlowList({ from, to, selectedNode, onNodeClick }: SankeyDiagramProp
                     <span className="ml-1.5 text-xs text-text-tertiary">
                       {' '}
                       {pct(g.pctOfIncome)}
-                      <span className="sr-only"> of income</span>
+                      <span className="sr-only"> {t('cf.list.ofIncome')}</span>
                     </span>
                   </span>
                 </div>
@@ -1071,7 +1082,9 @@ function CashFlowList({ from, to, selectedNode, onNodeClick }: SankeyDiagramProp
                       onClick={() => select(g)}
                       className="w-full min-h-11 pl-9 pr-4 text-left text-sm font-medium text-brand-600 cursor-pointer"
                     >
-                      {isSelected(g) ? 'Hide transactions' : `All ${g.name} transactions`}
+                      {isSelected(g)
+                        ? t('cf.list.hideTransactions')
+                        : t('cf.list.allTransactions', { name: g.name })}
                     </button>
                   </li>
                 </ul>
@@ -1130,16 +1143,16 @@ export default function CashFlowPage() {
     const net = totalIncome - totalExpenses;
     const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
     return [
-      { label: 'Total income', value: formatCurrency(totalIncome), tone: 'positive' },
-      { label: 'Total expenses', value: formatCurrency(totalExpenses), tone: 'negative' },
+      { label: t('cf.stat.totalIncome'), value: formatCurrency(totalIncome), tone: 'positive' },
+      { label: t('cf.stat.totalExpenses'), value: formatCurrency(totalExpenses), tone: 'negative' },
       {
-        label: 'Total net income',
+        label: t('cf.stat.net'),
         value: formatCurrency(net),
         tone: net < 0 ? 'negative' : undefined,
       },
       {
-        label: 'Savings rate',
-        value: `${savingsRate.toFixed(1)}%`,
+        label: t('cf.stat.savingsRate'),
+        value: percentOf(savingsRate),
         tone: savingsRate < 0 ? 'negative' : undefined,
       },
     ];
@@ -1158,7 +1171,7 @@ export default function CashFlowPage() {
     downloadCsv(
       `cash-flow-${from}-${to}.csv`,
       spData.map((d) => ({
-        category: `${showIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+        category: `${showIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? t('cf.node.uncategorized')}`,
         group: d.groupName ?? '',
         total_cents: d.totalSpent,
       })),
@@ -1169,7 +1182,7 @@ export default function CashFlowPage() {
     <div className="flex flex-col h-full bg-surface">
       <div className="px-6 py-4 border-b border-border shrink-0">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-lg font-semibold text-text shrink-0">Cash Flow</h1>
+          <h1 className="text-lg font-semibold text-text shrink-0">{t('shell.nav.cashFlow')}</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex flex-wrap gap-0">
               {PRESETS.map((p) => (
@@ -1190,15 +1203,15 @@ export default function CashFlowPage() {
               <MonthRangePicker
                 from={from}
                 to={to}
-                onChange={(f, t) => {
-                  setFrom(f);
-                  setTo(t);
+                onChange={(start, end) => {
+                  setFrom(start);
+                  setTo(end);
                 }}
                 defaultOpen
               />
             )}
             <Button variant="secondary" size="sm" onClick={handleExport}>
-              <Download size={13} /> Export CSV
+              <Download size={13} /> {t('cf.exportCsv')}
             </Button>
           </div>
         </div>
@@ -1210,13 +1223,13 @@ export default function CashFlowPage() {
           <div className="flex items-center justify-between gap-3 mt-5 mb-3">
             <div
               role="group"
-              aria-label="Show as"
+              aria-label={t('cf.view.showAs')}
               className="flex border border-border rounded-md overflow-hidden"
             >
               {(
                 [
-                  ['list', 'List'],
-                  ['diagram', 'Diagram'],
+                  ['list', t('cf.view.list')],
+                  ['diagram', t('cf.view.diagram')],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -1233,7 +1246,7 @@ export default function CashFlowPage() {
               ))}
             </div>
             {!showList && (
-              <p className="text-xs text-text-tertiary text-right">Swipe to see it all</p>
+              <p className="text-xs text-text-tertiary text-right">{t('cf.view.swipe')}</p>
             )}
           </div>
         )}
@@ -1264,13 +1277,13 @@ export default function CashFlowPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 id="cash-flow-transactions-heading" className="text-sm font-semibold text-text">
-                Transactions: {selectedNode.name}
+                {t('cf.transactions.heading', { name: selectedNode.name })}
               </h2>
               <button
                 onClick={() => setSelectedNode(null)}
                 className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary cursor-pointer transition-colors"
               >
-                <X size={14} /> Clear
+                <X size={14} /> {t('cf.transactions.clear')}
               </button>
             </div>
             <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
