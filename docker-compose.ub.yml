@@ -1,0 +1,34 @@
+# UB-Finance: bu depodaki kaynak koddan imaj derleyip çalıştırır.
+# (docker-compose.yml, orijinal FlyBudget'ın yayınlanmış imajını kullanır.)
+#
+# İlk kurulum ve komutlar: CALISTIRMA.md
+services:
+  ub-finance:
+    build: .
+    image: ub-finance:local
+    container_name: ub-finance
+    ports:
+      # Yalnızca bu bilgisayardan erişim. Ağdaki başka cihazlardan erişim için
+      # '3001:3001' yapın ve FLYBUDGET_ALLOWED_HOSTS ayarlayın (bkz. CALISTIRMA.md).
+      - '127.0.0.1:3001:3001'
+    environment:
+      - FLYBUDGET_DATA_KEY_FILE=/run/secrets/flybudget_data_key
+    secrets:
+      - flybudget_data_key
+    volumes:
+      - ub-finance-data:/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+secrets:
+  flybudget_data_key:
+    file: ./flybudget_data_key.txt
+
+volumes:
+  ub-finance-data:
