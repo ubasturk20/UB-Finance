@@ -211,18 +211,12 @@ export function cardSummaryFor(accountId: string, today: string): CardSummaryRes
         ),
       )
       .all();
-    periodTransactions = rows.map(
-      (row): PeriodTransaction => ({
-        amount: row.amount,
-        // Payments and transfers move money onto the card; corrections aren't spending either
-        kind:
-          row.transferId !== null || row.isAdjustment === 1
-            ? 'transfer'
-            : installmentTxIds.has(row.id)
-              ? 'installment'
-              : 'spending',
-      }),
-    );
+    // Payments and transfers move money onto the card; corrections aren't spending either
+    const kindOf = (row: (typeof rows)[number]): PeriodTransaction['kind'] => {
+      if (row.transferId !== null || row.isAdjustment === 1) return 'transfer';
+      return installmentTxIds.has(row.id) ? 'installment' : 'spending';
+    };
+    periodTransactions = rows.map((row) => ({ amount: row.amount, kind: kindOf(row) }));
 
     // Everything that came onto the card since the statement: payments, transfers, refunds
     paymentsSinceStatement =
