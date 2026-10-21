@@ -25,8 +25,7 @@ export interface AssetPriceSaved {
 }
 
 export type AssetPriceResult =
-  | AssetPriceSaved
-  | { ok: false; reason: 'not_found' | 'no_quantity' | 'too_large' };
+  AssetPriceSaved | { ok: false; reason: 'not_found' | 'no_quantity' | 'too_large' };
 
 /**
  * Saves a new unit price and its day, and brings the account's balance to quantity × price
