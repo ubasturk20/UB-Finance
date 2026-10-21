@@ -7,6 +7,9 @@ export interface RestoreResult {
   safetyCopy: string | null;
 }
 
+/** The full backup (what `GET /export/backup` downloads), to encrypt in the browser. */
+export const fetchBackup = () => apiFetch<unknown>('/export/backup');
+
 /** Replaces all data with a backup file's contents (the parsed JSON). */
 export const restoreBackup = (backup: unknown) =>
   apiFetch<RestoreResult>('/export/restore', { method: 'POST', body: JSON.stringify(backup) });

@@ -115,7 +115,7 @@ export async function handleRequest(request: DemoRequest): Promise<DemoResponse>
     try {
       body = JSON.parse(request.body);
     } catch {
-      return json(400, { error: 'Invalid JSON' });
+      return json(400, { error: 'Geçersiz JSON' });
     }
   }
   const req: ShimRequest = {
@@ -132,11 +132,11 @@ export async function handleRequest(request: DemoRequest): Promise<DemoResponse>
 
   try {
     await app.handle(req, res, () => {
-      res.status(404).json({ error: 'Not found' });
+      res.status(404).json({ error: 'Bulunamadı' });
     });
   } catch (err) {
     // A malformed %-escape in the path: Express answers 400 too
-    if (err instanceof URIError) return json(400, { error: 'Bad request' });
+    if (err instanceof URIError) return json(400, { error: 'Geçersiz istek' });
     // Like errorHandler: log the details, send a generic message
     console.error('Demo API error:', err);
     return json(500, { error: 'Something went wrong' });

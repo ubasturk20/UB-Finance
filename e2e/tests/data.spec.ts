@@ -629,6 +629,86 @@ test.describe('export, backup and restore', () => {
     await expect(page.getByRole('complementary')).toContainText('475 ₺');
   });
 
+  test('a password-protected backup is encrypted and restores with its password', async ({
+    page,
+    api,
+  }) => {
+    const checking = await api.createAccount('Gizli Hesap', 50_000);
+    await api.createTransaction({
+      accountId: checking.id,
+      date: isoDay(),
+      amount: -2_500,
+      payeeName: 'Before Encrypted Backup',
+    });
+
+    await open(page, '/settings');
+    await page.getByRole('button', { name: 'Veriler' }).click();
+    await page.getByRole('button', { name: 'Parolalı yedek indir…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Parolalı yedek', exact: true });
+    await expect(dialog).toContainText('Parolayı unutursanız bu yedek açılamaz.');
+    const save = dialog.getByRole('button', { name: 'Şifrele ve indir' });
+    await dialog.getByLabel('Yedek parolası', { exact: true }).fill('kısa');
+    await expect(dialog).toContainText('en az 8 karakter');
+    await expect(save).toBeDisabled();
+    await dialog.getByLabel('Yedek parolası', { exact: true }).fill('doğru parola 123');
+    await dialog.getByLabel('Yedek parolası (tekrar)').fill('başka parola 123');
+    await expect(dialog).toContainText('Parolalar eşleşmiyor.');
+    await expect(save).toBeDisabled();
+    await dialog.getByLabel('Yedek parolası (tekrar)').fill('doğru parola 123');
+    const download = page.waitForEvent('download');
+    await save.click();
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(/^ub-finance-yedek-\d{4}-\d{2}-\d{2}\.ubfbackup$/);
+    const backupFile = await file.path();
+    const text = fs.readFileSync(backupFile, 'utf8');
+    expect(JSON.parse(text)).toMatchObject({
+      format: 'ub-finance-encrypted-backup',
+      version: 1,
+      kdf: 'PBKDF2-SHA256',
+      iterations: 600_000,
+    });
+    // Nothing of the budget can be read from the file
+    expect(text).not.toContain('Gizli Hesap');
+    expect(text).not.toContain('Before Encrypted Backup');
+    expect(text).not.toContain('flybudget-backup');
+    await dialog.getByRole('button', { name: 'Kapat' }).last().click();
+    await expect(dialog).toBeHidden();
+
+    // Things change after the backup…
+    await api.createTransaction({
+      accountId: checking.id,
+      date: isoDay(),
+      amount: -99_999,
+      payeeName: 'After Encrypted Backup',
+    });
+    await api.createAccount('New Account', 1);
+
+    // …a wrong password opens nothing and changes nothing…
+    await page.getByLabel('Yedek dosyası').setInputFiles(backupFile);
+    const unlock = page.getByRole('dialog', { name: 'Parolalı yedeği aç' });
+    await unlock.getByLabel('Yedek parolası').fill('yanlış parola 123');
+    await unlock.getByRole('button', { name: 'Yedeği aç' }).click();
+    await expect(unlock.getByRole('alert')).toHaveText('Parola yanlış ya da dosya bozulmuş.');
+    expect((await api.accounts()).map((a) => a.name).sort()).toEqual([
+      'Gizli Hesap',
+      'New Account',
+    ]);
+
+    // …and the right one restores it, after the usual confirmation
+    await unlock.getByLabel('Yedek parolası').fill('doğru parola 123');
+    await unlock.getByRole('button', { name: 'Yedeği aç' }).click();
+    const confirm = page.getByRole('dialog', { name: 'Bu yedek geri yüklensin mi?' });
+    await expect(confirm).toContainText('Tüm mevcut verileriniz');
+    await confirm.getByRole('button', { name: 'Verilerimi değiştir' }).click();
+    await expect(page.getByRole('status')).toContainText('geri yüklendi');
+    await expect(page.getByRole('status')).toContainText('1 işlem');
+
+    expect((await api.accounts()).map((a) => a.name)).toEqual(['Gizli Hesap']);
+    expect(await api.balance(checking.id)).toBe(47_500);
+    const payees = (await api.transactions()).map((t) => t.payeeName);
+    expect(payees).toEqual(['Before Encrypted Backup']);
+  });
+
   test('restoring a file that is not a backup changes nothing', async ({ page, api }) => {
     await api.createAccount('Checking', 50_000);
     await open(page, '/settings');

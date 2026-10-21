@@ -38,3 +38,6 @@ export const db = new Proxy({} as SQLJsDatabase<typeof schema>, {
 export const sqlite = {
   backup: async () => {},
 };
+
+/** The demo's database lives in memory: there are no files to protect. */
+export function restrictToOwner(_file: string, _folder?: string): void {}

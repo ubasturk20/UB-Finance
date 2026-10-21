@@ -49,7 +49,7 @@ export const hostGuard: RequestHandler = (req, res, next) => {
       !allowedHosts.includes(host) &&
       !allowedHosts.includes(hostname)
     ) {
-      res.status(403).json({ error: 'Forbidden host' });
+      res.status(403).json({ error: 'Bu sunucu adına izin verilmiyor' });
       return;
     }
     return next();
@@ -57,7 +57,7 @@ export const hostGuard: RequestHandler = (req, res, next) => {
   const port = req.socket.localPort;
   const allowed = LOCAL_HOSTNAMES.map((h) => `${h}:${port}`);
   if (!allowed.includes(req.headers.host ?? '')) {
-    res.status(403).json({ error: 'Forbidden host' });
+    res.status(403).json({ error: 'Bu sunucu adına izin verilmiyor' });
     return;
   }
   next();
@@ -77,13 +77,13 @@ export const originGuard: RequestHandler = (req, res, next) => {
   const sameHost = serverMode && origin !== undefined && originHost(origin) === req.host;
 
   if (origin !== undefined && !allowedOrigins.includes(origin) && !sameHost) {
-    res.status(403).json({ error: 'Forbidden origin' });
+    res.status(403).json({ error: 'Başka sitelerden gelen isteklere izin verilmiyor' });
     return;
   }
   // Browsers mark cross-site requests even when they omit Origin (e.g. GET navigations).
   // Other localhost ports count as "same-site", so those must carry an allowed Origin.
   if (site === 'cross-site' || (site === 'same-site' && origin === undefined)) {
-    res.status(403).json({ error: 'Forbidden cross-site request' });
+    res.status(403).json({ error: 'Siteler arası isteklere izin verilmiyor' });
     return;
   }
   next();
@@ -119,7 +119,7 @@ export function apiTokenGuard(token: string | undefined): RequestHandler {
     if (isBankCallback(req)) return next(); // opened by the bank in the system browser
     const given = Buffer.from(readCookie(req.headers.cookie, API_TOKEN_COOKIE) ?? '');
     if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Yetkisiz erişim' });
       return;
     }
     next();
@@ -182,7 +182,7 @@ export const bankRateLimit = rateLimit({
   skip: (req) => req.method === 'GET',
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { error: 'Too many bank requests. Wait a minute and try again.' },
+  message: { error: 'Çok fazla banka isteği yapıldı. Bir dakika bekleyip tekrar deneyin.' },
 });
 
 /** The bank's redirect needs no login, so it gets its own limit (each one is checked against a random state) */
@@ -191,7 +191,7 @@ export const bankCallbackRateLimit = rateLimit({
   limit: 30,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: 'Too many requests. Wait a minute and try again.',
+  message: 'Çok fazla istek yapıldı. Bir dakika bekleyip tekrar deneyin.',
 });
 
 /**
@@ -214,7 +214,7 @@ export const proxyConfigWarning: RequestHandler = (req, _res, next) => {
 
 /** Unknown API routes get a JSON 404 instead of Express's HTML page. */
 export const apiNotFound: RequestHandler = (_req, res) => {
-  res.status(404).json({ error: 'Not found' });
+  res.status(404).json({ error: 'Bulunamadı' });
 };
 
 /**
@@ -229,11 +229,11 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (status >= 500) console.error('Error on %s %s:', req.method, JSON.stringify(req.path), err);
   const message =
     err?.type === 'entity.parse.failed'
-      ? 'Invalid JSON'
+      ? 'Geçersiz JSON'
       : err?.type === 'entity.too.large'
-        ? 'Request too large'
+        ? 'İstek çok büyük'
         : status < 500
-          ? 'Bad request'
-          : 'Internal server error';
+          ? 'Geçersiz istek'
+          : 'Sunucu hatası';
   res.status(status).json({ error: message });
 };

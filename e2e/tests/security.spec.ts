@@ -46,7 +46,7 @@ test.describe('API access', () => {
   test('refuses other host names (DNS rebinding)', async () => {
     const res = await rawRequest('/api/accounts', { host: 'evil.example', cookie: token() });
     expect(res.status).toBe(403);
-    expect(JSON.parse(res.body)).toEqual({ error: 'Forbidden host' });
+    expect(JSON.parse(res.body)).toEqual({ error: 'Bu sunucu adına izin verilmiyor' });
   });
 
   test('refuses requests from other websites, even simple form posts', async () => {
@@ -73,7 +73,7 @@ test.describe('API access', () => {
     expect(res.status).toBe(400);
     expect(res.body).not.toMatch(/at \w+ \(|node_modules|\.ts:\d+/);
     const missing = await rawRequest('/api/nope', { host: localHost, cookie: token() });
-    expect(missing).toEqual({ status: 404, body: '{"error":"Not found"}' });
+    expect(missing).toEqual({ status: 404, body: '{"error":"Bulunamadı"}' });
   });
 });
 
