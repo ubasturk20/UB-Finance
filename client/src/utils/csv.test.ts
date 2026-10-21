@@ -410,21 +410,9 @@ describe('decodeCsvBytes', () => {
     expect(decodeCsvBytes(new TextEncoder().encode('Müller;Café').buffer)).toBe('Müller;Café');
     expect(decodeCsvBytes(bytes(0x4d, 0xfc, 0x6c, 0x6c, 0x65, 0x72))).toBe('Müller');
     // "Işık Ödeme Şğ" as Turkish banks export it
-    const turkish = bytes(
-      0x49,
-      0xfe,
-      0xfd,
-      0x6b,
-      0x20,
-      0xd6,
-      0x64,
-      0x65,
-      0x6d,
-      0x65,
-      0x20,
-      0xde,
-      0xf0,
-    );
+    const turkish = new Uint8Array([
+      0x49, 0xfe, 0xfd, 0x6b, 0x20, 0xd6, 0x64, 0x65, 0x6d, 0x65, 0x20, 0xde, 0xf0,
+    ]).buffer;
     expect(decodeCsvBytes(turkish)).toBe('Işık Ödeme Şğ');
     expect(decodeCsvBytes(turkish, 'windows-1254')).toBe('Işık Ödeme Şğ');
   });

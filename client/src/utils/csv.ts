@@ -449,14 +449,7 @@ const COLUMN_HINTS: Record<string, ColumnRole> = {
 };
 
 export type ColumnRole =
-  | 'date'
-  | 'payee'
-  | 'amount'
-  | 'inflow'
-  | 'outflow'
-  | 'direction'
-  | 'notes'
-  | 'skip';
+  'date' | 'payee' | 'amount' | 'inflow' | 'outflow' | 'direction' | 'notes' | 'skip';
 
 // What banks write in a direction column, lowercased and without dots
 const MONEY_OUT = new Set(['af', 'debit', 'dbit', 'd', 'dr', 'db', 'soll', 's', 'out']);
