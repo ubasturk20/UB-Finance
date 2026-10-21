@@ -17,15 +17,10 @@ import {
 } from './creditCard.js';
 
 // Database side of credit card tracking (the math is in creditCard.ts). Every write to
-// account_details and installment_plans goes through here.
+// account_details (card and loan details) and installment_plans goes through here.
 
 export type AccountDetails = typeof accountDetails.$inferSelect;
-export type DetailsPatch = Partial<
-  Pick<
-    AccountDetails,
-    'creditLimit' | 'statementDay' | 'dueDay' | 'minPaymentRate' | 'interestRate'
-  >
->;
+export type DetailsPatch = Partial<Omit<AccountDetails, 'accountId' | 'updatedAt'>>;
 
 /** A card's details; every field null when none were entered */
 export function getDetails(accountId: string): AccountDetails {
@@ -37,6 +32,12 @@ export function getDetails(accountId: string): AccountDetails {
       dueDay: null,
       minPaymentRate: null,
       interestRate: null,
+      loanPrincipal: null,
+      loanRate: null,
+      loanTerm: null,
+      loanFirstPayment: null,
+      loanBsmvRate: null,
+      loanKkdfRate: null,
       updatedAt: '',
     }
   );
@@ -52,6 +53,7 @@ export function saveDetails(accountId: string, patch: DetailsPatch): AccountDeta
   return getDetails(accountId);
 }
 
+/** Whether any card detail was entered (loan details don't count) */
 const hasDetails = (d: AccountDetails) =>
   d.creditLimit !== null ||
   d.statementDay !== null ||

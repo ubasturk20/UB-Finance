@@ -1,12 +1,8 @@
 import { apiFetch } from './client';
-import type { AccountDetails, CardSummary, InstallmentPlan } from '../types';
+import type { AccountDetails, CardSummary, InstallmentPlan, LoanSchedule } from '../types';
 
-export type AccountDetailsPatch = Partial<
-  Pick<
-    AccountDetails,
-    'creditLimit' | 'statementDay' | 'dueDay' | 'minPaymentRate' | 'interestRate'
-  >
->;
+/** Card fields (credit cards, KMH) or loan fields (loans); a field left out keeps its value */
+export type AccountDetailsPatch = Partial<Omit<AccountDetails, 'accountId' | 'updatedAt'>>;
 
 export interface NewInstallmentPlan {
   description: string;
@@ -30,6 +26,9 @@ export const saveAccountDetails = (accountId: string, data: AccountDetailsPatch)
 
 export const getCardSummary = (accountId: string, today: string) =>
   apiFetch<CardSummary>(`/accounts/${accountId}/card-summary${todayQuery(today)}`);
+
+export const getLoanSchedule = (accountId: string, today: string) =>
+  apiFetch<LoanSchedule>(`/accounts/${accountId}/loan-schedule${todayQuery(today)}`);
 
 export const getInstallments = (accountId: string, today: string) =>
   apiFetch<InstallmentPlan[]>(`/accounts/${accountId}/installments${todayQuery(today)}`);

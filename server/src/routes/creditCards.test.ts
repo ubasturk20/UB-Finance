@@ -259,3 +259,91 @@ describe('installments', () => {
     expect(after).toMatchObject({ id: plan.id, transactionId: null });
   });
 });
+
+describe('loan details', () => {
+  const loan = {
+    loanPrincipal: 10_000_000,
+    loanRate: 300,
+    loanTerm: 12,
+    loanFirstPayment: '2026-11-21',
+  };
+
+  it('are saved on loans, and only on loans', async () => {
+    const credit = await newAccount('loan', -10_000_000);
+    const saved = await send('PUT', `/accounts/${credit}/details`, loan);
+    expect(saved.status).toBe(200);
+    expect(saved.body).toMatchObject({ ...loan, loanBsmvRate: null, loanKkdfRate: null });
+    // Only the fields sent change
+    const term = await send('PUT', `/accounts/${credit}/details`, { loanTerm: 24 });
+    expect(term.body).toMatchObject({ loanPrincipal: 10_000_000, loanRate: 300, loanTerm: 24 });
+
+    for (const type of ['mortgage', 'auto_loan', 'student_loan']) {
+      const id = await newAccount(type);
+      expect((await send('PUT', `/accounts/${id}/details`, loan)).status).toBe(200);
+    }
+    // Card fields don't go on a loan, loan fields don't go on a card or anything else
+    const cardField = await send('PUT', `/accounts/${credit}/details`, { creditLimit: 1 });
+    expect(cardField.status).toBe(422);
+    const card = await newAccount('credit');
+    const onCard = await send('PUT', `/accounts/${card}/details`, { loanTerm: 12 });
+    expect(onCard.status).toBe(422);
+    expect(typeof onCard.body.error).toBe('string');
+    const savings = await newAccount('savings');
+    expect((await send('PUT', `/accounts/${savings}/details`, loan)).status).toBe(422);
+  });
+
+  it.each([
+    ['a term of 0', { loanTerm: 0 }],
+    ['a term over 30 years', { loanTerm: 361 }],
+    ['a date that does not exist', { loanFirstPayment: '2026-02-30' }],
+    ['a date in another format', { loanFirstPayment: '21.11.2026' }],
+    ['a negative principal', { loanPrincipal: -1 }],
+    ['a rate over 100%', { loanRate: 10_001 }],
+    ['a fractional tax rate', { loanBsmvRate: 15.5 }],
+  ])('rejects %s', async (_label, body) => {
+    const id = await newAccount('loan');
+    expect((await send('PUT', `/accounts/${id}/details`, body)).status).toBe(400);
+  });
+
+  it('gives the payment plan and where the loan stands', async () => {
+    const id = await newAccount('loan', -10_000_000);
+    const empty = await send('GET', `/accounts/${id}/loan-schedule?today=${TODAY}`);
+    expect(empty.status).toBe(200);
+    expect(empty.body).toMatchObject({ schedule: null, status: null, balance: -10_000_000 });
+
+    await send('PUT', `/accounts/${id}/details`, loan);
+    // Three installments paid by 21 January 2027
+    const { body } = await send('GET', `/accounts/${id}/loan-schedule?today=2027-01-21`);
+    expect(body.schedule).toHaveLength(12);
+    // An ihtiyaç kredisi pays %15 BSMV and %15 KKDF unless told otherwise
+    expect(body).toMatchObject({ bsmvRate: 1_500, kkdfRate: 1_500 });
+    expect(body.schedule[0]).toMatchObject({
+      n: 1,
+      date: '2026-11-21',
+      payment: 1_059_348,
+      interest: 300_000,
+      kkdf: 45_000,
+      bsmv: 45_000,
+    });
+    expect(body.status).toMatchObject({
+      paidCount: 3,
+      remainingCount: 9,
+      remainingPrincipal: body.schedule[2].balance,
+    });
+    expect(body.status.nextPayment).toMatchObject({ n: 4, date: '2027-02-21' });
+
+    expect((await send('GET', '/accounts/missing/loan-schedule')).status).toBe(404);
+  });
+
+  it('a konut kredisi pays no BSMV or KKDF unless they are entered', async () => {
+    const id = await newAccount('mortgage');
+    await send('PUT', `/accounts/${id}/details`, loan);
+    const { body } = await send('GET', `/accounts/${id}/loan-schedule?today=${TODAY}`);
+    expect(body).toMatchObject({ bsmvRate: 0, kkdfRate: 0 });
+    expect(body.schedule[0]).toMatchObject({ kkdf: 0, bsmv: 0 });
+    await send('PUT', `/accounts/${id}/details`, { loanBsmvRate: 500 });
+    const taxed = await send('GET', `/accounts/${id}/loan-schedule?today=${TODAY}`);
+    expect(taxed.body.bsmvRate).toBe(500);
+    expect(taxed.body.schedule[0].bsmv).toBe(15_000);
+  });
+});

@@ -8,6 +8,7 @@ import { common } from './messages/common';
 import { creditCards } from './messages/creditCards';
 import { dashboard } from './messages/dashboard';
 import { importing } from './messages/importing';
+import { loans } from './messages/loans';
 import { recurring } from './messages/recurring';
 import { cashFlow } from './messages/cashFlow';
 import { reportBuilder } from './messages/reportBuilder';
@@ -25,6 +26,7 @@ const MESSAGES = {
   ...dashboard,
   ...accounts,
   ...creditCards,
+  ...loans,
   ...transactions,
   ...transactionDetail,
   ...importing,

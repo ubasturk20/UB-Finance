@@ -59,3 +59,18 @@ const CARD_TYPES = new Set<string>(['credit', 'line_of_credit']);
 export function isCardType(type: string): boolean {
   return CARD_TYPES.has(type);
 }
+
+/** Loans with a payment plan: ihtiyaç, konut, taşıt and eğitim kredisi */
+const LOAN_TYPES = new Set<string>(['mortgage', 'auto_loan', 'student_loan', 'loan']);
+
+export function isLoanType(type: string): boolean {
+  return LOAN_TYPES.has(type);
+}
+
+/**
+ * BSMV and KKDF (basis points) when a loan has none entered: konut kredisi is exempt from
+ * both, other consumer loans pay %15 of each on the interest.
+ */
+export function defaultLoanTaxBp(type: string): number {
+  return type === 'mortgage' ? 0 : 1_500;
+}

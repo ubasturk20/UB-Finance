@@ -949,6 +949,17 @@ export interface AccountDetails {
   dueDay: number | null;
   minPaymentRate: number | null;
   interestRate: number | null;
+  /** Loans: the principal drawn (minor units) */
+  loanPrincipal: number | null;
+  /** Loans: the monthly contract rate, basis points (349 = %3,49) */
+  loanRate: number | null;
+  /** Loans: the term in months (1-360) */
+  loanTerm: number | null;
+  /** Loans: the first installment's day (yyyy-MM-dd) */
+  loanFirstPayment: string | null;
+  /** Loans: BSMV and KKDF on the interest, basis points (null = the loan type's usual) */
+  loanBsmvRate: number | null;
+  loanKkdfRate: number | null;
   updatedAt: string;
 }
 
@@ -997,4 +1008,49 @@ export interface InstallmentPlan {
   current: number;
   remainingCount: number;
   remainingAmount: number;
+}
+
+// Loans (ihtiyaç, konut, taşıt, eğitim kredisi): an equal-installment payment plan
+
+export interface LoanRow {
+  /** 1 for the first installment */
+  n: number;
+  date: string;
+  /** The whole installment: principal + interest + KKDF + BSMV */
+  payment: number;
+  principal: number;
+  interest: number;
+  kkdf: number;
+  bsmv: number;
+  /** The principal still owed after this installment */
+  balance: number;
+}
+
+export interface LoanStatus {
+  /** Installments dated today or earlier (taken as paid) */
+  paidCount: number;
+  remainingCount: number;
+  remainingPrincipal: number;
+  nextPayment: LoanRow | null;
+  monthlyPayment: number;
+  totalRemainingPayment: number;
+  /** Interest, KKDF and BSMV still to pay */
+  totalInterestAndTaxes: number;
+  /** Interest, KKDF and BSMV over the whole loan */
+  loanInterestAndTaxes: number;
+}
+
+export interface LoanSchedule {
+  accountId: string;
+  currency: string | null;
+  /** Negative while money is owed */
+  balance: number;
+  details: AccountDetails;
+  /** The BSMV and KKDF used (the saved ones, or the loan type's usual ones) */
+  bsmvRate: number;
+  kkdfRate: number;
+  /** Null until the principal, rate, term and first installment are entered */
+  schedule: LoanRow[] | null;
+  status: LoanStatus | null;
+  today: string;
 }

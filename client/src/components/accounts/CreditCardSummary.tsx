@@ -79,7 +79,7 @@ export function CreditCardSummary({ account, onEditDetails }: Props) {
   );
 }
 
-function Tile({
+export function Tile({
   label,
   value,
   note,

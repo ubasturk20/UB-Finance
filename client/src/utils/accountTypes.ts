@@ -19,3 +19,13 @@ export function accountTypeLabel(type: string): string {
 export function isCardType(type: string): boolean {
   return type === 'credit' || type === 'line_of_credit';
 }
+
+/** Loans with a payment plan: ihtiyaç, konut, taşıt and eğitim kredisi */
+export function isLoanType(type: string): boolean {
+  return type === 'mortgage' || type === 'auto_loan' || type === 'student_loan' || type === 'loan';
+}
+
+/** BSMV and KKDF (basis points) suggested for a loan: konut kredisi 0, others %15 each */
+export function defaultLoanTaxBp(type: string): number {
+  return type === 'mortgage' ? 0 : 1_500;
+}

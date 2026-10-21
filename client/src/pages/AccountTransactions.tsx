@@ -10,8 +10,9 @@ import { TransactionTable } from '../components/transactions/TransactionTable';
 import { AccountIcon } from '../components/accounts/AccountIcon';
 import { EditAccountModal } from '../components/accounts/EditAccountModal';
 import { UpdateValueModal } from '../components/accounts/UpdateValueModal';
-import { accountTypeInfo, isCardType } from '../utils/accountTypes';
+import { accountTypeInfo, isCardType, isLoanType } from '../utils/accountTypes';
 import { CreditCardSummary } from '../components/accounts/CreditCardSummary';
+import { LoanSummary } from '../components/accounts/LoanSummary';
 import { CurrencyDifference } from '../components/currency/CurrencyDifference';
 import { t } from '../i18n';
 
@@ -63,7 +64,7 @@ export default function AccountTransactionsPage() {
             )}
             <CurrencyDifference account={account} />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
               <Pencil size={13} /> {t('common.edit')}
             </Button>
@@ -88,6 +89,9 @@ export default function AccountTransactionsPage() {
       </div>
       {isCardType(account.type) && (
         <CreditCardSummary account={account} onEditDetails={() => setEditOpen(true)} />
+      )}
+      {isLoanType(account.type) && (
+        <LoanSummary account={account} onEditDetails={() => setEditOpen(true)} />
       )}
       <TransactionTable accountId={account.id} />
       <EditAccountModal account={editOpen ? account : null} onClose={() => setEditOpen(false)} />

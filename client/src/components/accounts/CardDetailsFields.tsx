@@ -51,14 +51,14 @@ export function cardFormPatch(form: CardForm): AccountDetailsPatch | null {
   };
 }
 
-const inputClass = (invalid: boolean) =>
+export const inputClass = (invalid: boolean) =>
   `block w-full rounded-md border px-3 py-2 text-sm bg-surface text-text placeholder-text-disabled focus:outline-none focus:ring-1 ${
     invalid
       ? 'border-negative focus:border-negative focus:ring-negative'
       : 'border-border focus:border-brand-600 focus:ring-brand-600'
   }`;
 
-interface FieldProps {
+export interface FieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -66,9 +66,20 @@ interface FieldProps {
   error: string;
   placeholder?: string;
   inputMode: 'numeric' | 'decimal';
+  /** A native date field (yyyy-MM-dd) instead of text */
+  type?: 'text' | 'date';
 }
 
-function TextField({ label, value, onChange, invalid, error, placeholder, inputMode }: FieldProps) {
+export function TextField({
+  label,
+  value,
+  onChange,
+  invalid,
+  error,
+  placeholder,
+  inputMode,
+  type = 'text',
+}: FieldProps) {
   const id = useId();
   return (
     <div className="min-w-0">
@@ -77,8 +88,8 @@ function TextField({ label, value, onChange, invalid, error, placeholder, inputM
       </label>
       <input
         id={id}
-        type="text"
-        inputMode={inputMode}
+        type={type}
+        inputMode={type === 'text' ? inputMode : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

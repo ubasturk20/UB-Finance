@@ -89,6 +89,14 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
     installmentCount: 12,
     firstMonth: thisMonth(),
   });
+  // A loan with its details: the loan summary must fit too
+  const loan = await api.createAccount('Konut Kredisi (120 ay)', -250_000_000, 'mortgage');
+  await api.call('PUT', `/accounts/${loan.id}/details`, {
+    loanPrincipal: 300_000_000,
+    loanRate: 289,
+    loanTerm: 120,
+    loanFirstPayment: `${thisMonth()}-28`,
+  });
 
   const routes: [string, string][] = [
     ['dashboard', '/dashboard'],
@@ -96,6 +104,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
     ['account', `/accounts/${checking.id}`],
     ['reconcile', `/accounts/${checking.id}/reconcile`],
     ['credit-card', `/accounts/${card.id}`],
+    ['loan', `/accounts/${loan.id}`],
     ['transactions', '/transactions'],
     ['budget', '/budget'],
     ['budget-category', `/budget/category/${groceries.id}`],

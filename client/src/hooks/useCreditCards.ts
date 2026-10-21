@@ -25,6 +25,16 @@ export function useCardSummary(accountId: string, enabled = true) {
   });
 }
 
+/** A loan's payment plan and where it stands today */
+export function useLoanSchedule(accountId: string, enabled = true) {
+  const day = today();
+  return useQuery({
+    queryKey: ['accounts', accountId, 'loan-schedule', day],
+    queryFn: () => cardsApi.getLoanSchedule(accountId, day),
+    enabled,
+  });
+}
+
 export function useInstallments(accountId: string, enabled = true) {
   const day = today();
   return useQuery({
