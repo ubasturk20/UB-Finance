@@ -93,10 +93,7 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
 
   await page.getByRole('link', { name: 'Alıcılar' }).click();
   await page.getByRole('button', { name: 'Sil: Corner Grocer' }).click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /Sil/ })
-    .click();
+  await page.getByRole('dialog').getByRole('button', { name: /Sil/ }).click();
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Baştan başla' }).click();
