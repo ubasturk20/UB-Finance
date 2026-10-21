@@ -97,6 +97,29 @@ export const settings = {
     'Tüm mevcut verileriniz {name} içeriğiyle değiştirilecek. Banka bağlantıları bağlı kalır.',
   'settings.data.theBackup': 'yedeğin',
   'settings.data.confirmLabel': 'Verilerimi değiştir',
+  'settings.data.encryptedButton': 'Parolalı yedek indir…',
+  'settings.data.encryptedTitle': 'Parolalı yedek',
+  'settings.data.encryptedHint':
+    'Yedek bu tarayıcıda parolanızla şifrelenir; dosyayı parola olmadan kimse okuyamaz. ' +
+    'Bulut ya da USB bellek gibi başka bir yerde saklayacağınız yedekler için kullanın.',
+  'settings.data.encryptedWarning': 'Parolayı unutursanız bu yedek açılamaz.',
+  'settings.data.backupPassword': 'Yedek parolası',
+  'settings.data.backupPasswordAgain': 'Yedek parolası (tekrar)',
+  'settings.data.passwordTooShort': 'Parola en az {min} karakter olmalı.',
+  'settings.data.passwordMismatch': 'Parolalar eşleşmiyor.',
+  'settings.data.encrypting': 'Şifreleniyor…',
+  'settings.data.encryptedDownload': 'Şifrele ve indir',
+  'settings.data.encryptedSaved': 'Parolalı yedek {file} olarak indirildi.',
+  'settings.data.encryptFailed': 'Parolalı yedek oluşturulamadı.',
+  'settings.data.cryptoUnavailable':
+    'Parolalı yedekler yalnızca HTTPS bağlantısında ya da bu bilgisayardan (localhost) açılan ' +
+    'uygulamada kullanılabilir. Tarayıcılar şifreleme araçlarını düz HTTP üzerinde sunmaz.',
+  'settings.data.unlockTitle': 'Parolalı yedeği aç',
+  'settings.data.unlockMessage':
+    '{name} parolayla şifrelenmiş. Açmak için yedeğin parolasını girin.',
+  'settings.data.unlockButton': 'Yedeği aç',
+  'settings.data.unlocking': 'Açılıyor…',
+  'settings.data.wrongPassword': 'Parola yanlış ya da dosya bozulmuş.',
 
   // Account order
   'settings.accounts.empty': 'Henüz hesap yok. Hesaplar sayfasından ekleyin.',

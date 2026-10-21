@@ -16,9 +16,9 @@ export function isRealDate(value: string): boolean {
   return d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day;
 }
 
-export const isoDate = z.string().refine(isRealDate, 'Expected a date as YYYY-MM-DD');
+export const isoDate = z.string().refine(isRealDate, 'Tarih YYYY-AA-GG biçiminde olmalı');
 
-export const isoMonth = z.string().regex(MONTH_RE, 'Expected a month as YYYY-MM');
+export const isoMonth = z.string().regex(MONTH_RE, 'Ay YYYY-AA biçiminde olmalı');
 
 export const isMonth = (value: unknown): value is string =>
   typeof value === 'string' && MONTH_RE.test(value);
@@ -27,4 +27,4 @@ export const isMonth = (value: unknown): value is string =>
 export const currencySchema = z
   .string()
   .transform((s) => s.toUpperCase())
-  .refine(isCurrencyCode, 'Expected an ISO 4217 currency code, like EUR');
+  .refine(isCurrencyCode, 'ISO 4217 para birimi kodu olmalı (ör. EUR)');

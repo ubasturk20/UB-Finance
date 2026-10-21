@@ -33,9 +33,30 @@ services:
     cap_drop:
       - ALL
 
+  # HTTPS ile ev dışından erişim (bkz. CALISTIRMA.md, bölüm 7). Açmak için bu servisi ve en
+  # alttaki caddy-data / caddy-config birimlerini yorumdan çıkarın, proje klasörüne bir
+  # Caddyfile koyun ve ub-finance'in environment bölümüne FLYBUDGET_TRUST_PROXY=1 ile
+  # FLYBUDGET_ALLOWED_HOSTS=<alan adınız> ekleyin. ub-finance'in portu 127.0.0.1'de kalsın.
+  # caddy:
+  #   image: caddy:2
+  #   container_name: ub-finance-caddy
+  #   ports:
+  #     - '80:80'
+  #     - '443:443'
+  #     - '443:443/udp'
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy-data:/data
+  #     - caddy-config:/config
+  #   depends_on:
+  #     - ub-finance
+  #   restart: unless-stopped
+
 secrets:
   flybudget_data_key:
     file: ./flybudget_data_key.txt
 
 volumes:
   ub-finance-data:
+  # caddy-data:
+  # caddy-config:

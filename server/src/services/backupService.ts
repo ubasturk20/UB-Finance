@@ -1,7 +1,7 @@
 import path from 'path';
 import { getTableColumns, isNotNull, sql } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
-import { databasePath, db, sqlite } from '../db/index.js';
+import { databasePath, db, restrictToOwner, sqlite } from '../db/index.js';
 import {
   accountDetails,
   accounts,
@@ -153,6 +153,8 @@ export async function saveSafetyCopy(): Promise<string | null> {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const file = path.join(path.dirname(databasePath), `budget-before-restore-${stamp}.db`);
   await sqlite.backup(file);
+  // A full copy of the budget: as private as the database itself
+  restrictToOwner(file);
   return path.basename(file);
 }
 

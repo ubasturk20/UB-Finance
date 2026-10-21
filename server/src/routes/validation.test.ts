@@ -48,21 +48,21 @@ describe('error responses never leak internals', () => {
   it('malformed JSON gets a generic 400 JSON error', async () => {
     const res = await post('/accounts', null, '{bad json');
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: 'Invalid JSON' });
+    expect(await res.json()).toEqual({ error: 'Geçersiz JSON' });
   });
 
   it('unexpected exceptions get a generic 500 without the message or stack', async () => {
     const res = await fetch(base + '/boom');
     const text = await res.text();
     expect(res.status).toBe(500);
-    expect(JSON.parse(text)).toEqual({ error: 'Internal server error' });
+    expect(JSON.parse(text)).toEqual({ error: 'Sunucu hatası' });
     expect(text).not.toMatch(/secret|Users|\.ts|at /);
   });
 
   it('unknown API routes get a JSON 404', async () => {
     const res = await fetch(base + '/does-not-exist');
     expect(res.status).toBe(404);
-    expect(await res.json()).toEqual({ error: 'Not found' });
+    expect(await res.json()).toEqual({ error: 'Bulunamadı' });
   });
 
   it('oversized requests get a 413 JSON error', async () => {
@@ -72,7 +72,7 @@ describe('error responses never leak internals', () => {
       JSON.stringify({ name: 'x'.repeat(11 * 1024 * 1024) }),
     );
     expect(res.status).toBe(413);
-    expect(await res.json()).toEqual({ error: 'Request too large' });
+    expect(await res.json()).toEqual({ error: 'İstek çok büyük' });
   });
 });
 

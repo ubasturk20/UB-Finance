@@ -13,5 +13,8 @@ const file = path.join(dir, `budget-${stamp}.db`);
 fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
 const db = new Database(dbPath, { readonly: true, fileMustExist: true });
 db.backup(file)
-  .then(() => console.log(`Backup saved to ${file}`))
+  .then(() => {
+    fs.chmodSync(file, 0o600); // a full copy of the budget: only the owner may read it
+    console.log(`Backup saved to ${file}`);
+  })
   .finally(() => db.close());
