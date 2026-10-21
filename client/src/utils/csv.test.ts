@@ -406,9 +406,27 @@ describe('detectSkipRows (property-based)', () => {
 describe('decodeCsvBytes', () => {
   const bytes = (...b: number[]) => new Uint8Array(b).buffer;
 
-  it('reads UTF-8, and falls back to Windows-1252 for files that are not', () => {
+  it('reads UTF-8, and falls back to Windows-1254 (Turkish) for files that are not', () => {
     expect(decodeCsvBytes(new TextEncoder().encode('Müller;Café').buffer)).toBe('Müller;Café');
     expect(decodeCsvBytes(bytes(0x4d, 0xfc, 0x6c, 0x6c, 0x65, 0x72))).toBe('Müller');
+    // "Işık Ödeme Şğ" as Turkish banks export it
+    const turkish = bytes(
+      0x49,
+      0xfe,
+      0xfd,
+      0x6b,
+      0x20,
+      0xd6,
+      0x64,
+      0x65,
+      0x6d,
+      0x65,
+      0x20,
+      0xde,
+      0xf0,
+    );
+    expect(decodeCsvBytes(turkish)).toBe('Işık Ödeme Şğ');
+    expect(decodeCsvBytes(turkish, 'windows-1254')).toBe('Işık Ödeme Şğ');
   });
 
   it('follows a UTF-16 byte order mark', () => {

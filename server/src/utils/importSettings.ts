@@ -8,6 +8,7 @@ export const CSV_ENCODINGS = [
   'utf-8',
   'utf-16le',
   'utf-16be',
+  'windows-1254',
   'windows-1252',
   'windows-1250',
   'iso-8859-2',

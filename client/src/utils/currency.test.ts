@@ -5,6 +5,7 @@ import {
   amountStyle,
   currencyConvention,
   amountToInput,
+  currencyAmountStyle,
   formatAmount,
   formatAxisAmount,
   localeAmountStyle,
@@ -311,5 +312,12 @@ describe('amounts in other currencies', () => {
     expect(currencyConvention('USD')).toEqual({ position: 'before', space: false });
     expect(currencyConvention('BRL')).toEqual({ position: 'before', space: true });
     expect(currencyConvention('SEK').position).toBe('after');
+  });
+
+  it('writes Turkish lira after the amount with a space, in the Turkish format', () => {
+    expect(currencyConvention('TRY')).toEqual({ position: 'after', space: true });
+    const auto = { amountFormat: 'auto', symbolPosition: 'auto', currencySymbol: '₺' } as const;
+    expect(formatAmount(-123_456, currencyAmountStyle('TRY', auto, 'TRY'))).toBe('-1.234,56 ₺');
+    expect(formatAmount(-123_456, currencyAmountStyle(null, auto, null))).toBe('-1.234,56 ₺');
   });
 });

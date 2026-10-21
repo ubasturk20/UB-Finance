@@ -16,12 +16,13 @@ import type { HeatmapRow } from '../../utils/calendarLayout';
 import { ChartSkeleton, TOOLTIP_CLASS } from './ChartHelpers';
 import type { DailyFlowPoint } from '../../types';
 import { formatWeekday } from '../../utils/dates';
+import { WEEKDAYS_NARROW } from '../../utils/locale';
 
 // Money in and out on each day. Up to CALENDAR_MONTHS_MAX months show as month grids, each
 // day with a green bar (money in, from the left) and a red one (money out, from the right).
 // Longer ranges show as a heatmap, a square per day colored by that day's net.
 
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAYS = WEEKDAYS_NARROW;
 // Heatmap intensity per level (1-4), as a share of the positive/negative color
 const LEVEL_MIX = [0, 28, 48, 72, 100];
 const mix = (color: 'positive' | 'negative', pct: number) =>

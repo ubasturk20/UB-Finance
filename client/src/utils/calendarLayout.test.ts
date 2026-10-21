@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { eachDayOfInterval, endOfMonth, format, getDay, parseISO } from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, parseISO } from 'date-fns';
+import { weekdayIndex } from './locale';
 import { barShare, heatmapRows, monthWeeks, quantileLevels } from './calendarLayout';
 import { monthsBetween } from './dateRange';
 
@@ -14,7 +15,8 @@ const daysOf = (from: string, to: string) =>
     end: endOfMonth(parseISO(`${to}-01`)),
   }).map((d) => format(d, 'yyyy-MM-dd'));
 
-const weekday = (day: string) => getDay(parseISO(day));
+// Weeks start on Monday: Monday is column 0, Sunday column 6
+const weekday = (day: string) => weekdayIndex(parseISO(day));
 
 describe('monthWeeks (property-based)', () => {
   it('lists every day of the month once, in order, under its weekday', () => {

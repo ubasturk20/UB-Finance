@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { format, parse } from 'date-fns';
+import { format, parse, setDefaultOptions } from 'date-fns';
+import { applyDateLocale } from './locale';
 import { formatDay, formatShortDay, formatWeekday, shortDayPattern } from './dates';
 import type { DateFormatOption } from '../store/preferencesStore';
 
@@ -41,9 +42,23 @@ describe('dates shown in the Date Format preference (property-based)', () => {
     expect(formatShortDay('2026-01-05', {}, 'MM/dd/yyyy')).toBe('Jan 5');
     expect(formatShortDay('2026-01-05', {}, 'yyyy-MM-dd')).toBe('Jan 5');
     expect(formatShortDay('2026-01-05', {}, 'dd/MM/yyyy')).toBe('5 Jan');
-    expect(formatShortDay('2026-01-05', { long: true }, 'dd.MM.yyyy')).toBe('5. January');
+    expect(formatShortDay('2026-01-05', { long: true }, 'dd.MM.yyyy')).toBe('5 January');
     expect(format(new Date(2026, 0, 5), shortDayPattern({ year: true }, 'dd.MM.yyyy'))).toBe(
-      "5. Jan '26",
+      "5 Jan '26",
     );
+  });
+
+  it('writes Turkish month and day names once the app locale is applied', () => {
+    applyDateLocale();
+    try {
+      expect(formatShortDay('2026-01-05', { long: true }, 'dd.MM.yyyy')).toBe('5 Ocak');
+      expect(formatWeekday('2026-02-02', { long: true }, 'dd.MM.yyyy')).toBe(
+        'Pazartesi, 02.02.2026',
+      );
+      // Keys stay digits only
+      expect(format(new Date(2026, 7, 31), 'yyyy-MM-dd')).toBe('2026-08-31');
+    } finally {
+      setDefaultOptions({ locale: undefined, weekStartsOn: undefined });
+    }
   });
 });
