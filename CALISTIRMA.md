@@ -10,7 +10,6 @@
 ```bash
 git clone https://github.com/ubasturk20/UB-Finance.git
 cd UB-Finance
-git checkout tr/f0-hazirlik   # ya da üzerinde çalışılan dal
 ```
 
 ## 3. Şifreleme anahtarı (bir kez)
