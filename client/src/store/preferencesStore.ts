@@ -84,11 +84,11 @@ export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
       theme: 'light',
-      currencySymbol: '$',
+      currencySymbol: '₺',
       amountFormat: 'auto',
       symbolPosition: 'auto',
       currencyStyles: {},
-      dateFormat: 'MMM d, yyyy',
+      dateFormat: 'dd.MM.yyyy',
       savingsGoal: 20,
       sidebarMode: 'persistent',
       showMerchantIcons: true,

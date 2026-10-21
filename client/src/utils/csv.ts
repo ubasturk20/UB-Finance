@@ -132,6 +132,7 @@ export const CSV_ENCODINGS = [
   { value: 'utf-8', label: 'UTF-8' },
   { value: 'utf-16le', label: 'UTF-16 LE' },
   { value: 'utf-16be', label: 'UTF-16 BE' },
+  { value: 'windows-1254', label: 'Türkçe (Windows-1254)' },
   { value: 'windows-1252', label: 'Western European (Windows-1252)' },
   { value: 'windows-1250', label: 'Central European (Windows-1250)' },
   { value: 'iso-8859-2', label: 'Central European (ISO-8859-2)' },
@@ -141,9 +142,9 @@ export type CsvEncoding = (typeof CSV_ENCODINGS)[number]['value'];
 
 /**
  * The text of a file. `auto` follows a byte order mark (UTF-16 from Excel's "Unicode text"),
- * then reads UTF-8 if the file is valid UTF-8, else Windows-1252, which many banks still
- * export. Polish or Czech files in Windows-1250 need it chosen: they are valid 1252 too, just
- * with the wrong letters.
+ * then reads UTF-8 if the file is valid UTF-8, else Windows-1254 (Turkish), which Turkish banks
+ * and Excel still export. It is Windows-1252 except for ğ, ı, ş and their capitals, so Western
+ * European files read the same. Polish or Czech files in Windows-1250 need it chosen.
  */
 export function decodeCsvBytes(bytes: ArrayBuffer, encoding: CsvEncoding = 'auto'): string {
   if (encoding !== 'auto') return new TextDecoder(encoding).decode(bytes);
@@ -153,7 +154,7 @@ export function decodeCsvBytes(bytes: ArrayBuffer, encoding: CsvEncoding = 'auto
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
-    return new TextDecoder('windows-1252').decode(bytes);
+    return new TextDecoder('windows-1254').decode(bytes);
   }
 }
 

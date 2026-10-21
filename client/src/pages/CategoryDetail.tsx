@@ -16,7 +16,7 @@ import { useBudget, useCategoryHistory } from '../hooks/useBudget';
 import { useTransactions } from '../hooks/useTransactions';
 import { useAppStore } from '../store/appStore';
 import { usePreferencesStore } from '../store/preferencesStore';
-import { formatCurrency } from '../utils/currency';
+import { formatCentsAxis, formatCurrency } from '../utils/currency';
 import { chartColors } from '../utils/chartColors';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import type { Transaction } from '../types';
@@ -89,7 +89,7 @@ function HistoryChart({
                 tickLine={false}
                 width={50}
                 domain={[0, 'auto']}
-                tickFormatter={(v: number) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`)}
+                tickFormatter={(v: number) => formatCentsAxis(Math.round(v * 100))}
               />
               <Tooltip content={<ChartTooltip />} cursor={false} />
               <Bar
@@ -115,7 +115,7 @@ function HistoryChart({
                 <LabelList
                   dataKey="amount"
                   position="top"
-                  formatter={(v: any) => `$${Math.round(Number(v))}`}
+                  formatter={(v: any) => formatCentsAxis(Math.round(Number(v) * 100))}
                   style={{ fontSize: 10, fontWeight: 600, fill: chartColors.label }}
                 />
               </Bar>

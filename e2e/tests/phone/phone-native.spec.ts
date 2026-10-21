@@ -61,7 +61,7 @@ test.describe('register', () => {
     const card = page.getByTestId('transaction-card').filter({ hasText: 'Streamflix' });
     await expect(card).toContainText('Uncategorized');
     await expect(card).toContainText('family plan');
-    await expect(card).toContainText('$19.99');
+    await expect(card).toContainText('19,99 ₺');
     // No desktop hover controls on a phone
     await expect(page.getByTestId('transaction-row')).toHaveCount(0);
     await expectTouchSize(card);
@@ -127,7 +127,7 @@ test.describe('register', () => {
     await expect(
       page.getByTestId('transaction-card').filter({ hasText: 'Big Box Store' }),
     ).toContainText('Split (2)');
-    // $1,000 − $42.50 − $19.99 − $100: the split counts once
+    // 1.000 ₺ − 42,50 ₺ − 19,99 ₺ − 100 ₺: the split counts once
     await expect.poll(() => api.balance(checking.id)).toBe(100_000 - 4_250 - 1_999 - 10_000);
   });
 });
@@ -139,13 +139,13 @@ test.describe('budget', () => {
     await open(page, '/budget');
 
     const card = page.getByTestId('budget-card').filter({ hasText: 'Groceries' });
-    await expect(card).toContainText('$457.50 remaining');
-    await expect(card).toContainText('$42.50');
+    await expect(card).toContainText('457,50 ₺ remaining');
+    await expect(card).toContainText('42,50 ₺');
     await expect(page.getByRole('table')).toHaveCount(0);
     await expectTouchSize(page.getByRole('button', { name: 'Previous month' }));
     await expectTouchSize(page.getByRole('button', { name: 'Next month' }));
 
-    const planned = card.getByRole('button', { name: 'Planned for Groceries: $500' });
+    const planned = card.getByRole('button', { name: 'Planned for Groceries: 500 ₺' });
     await expectTouchSize(planned);
     await planned.click();
     const sheet = page.getByRole('dialog', { name: 'Plan Groceries' });
@@ -153,7 +153,7 @@ test.describe('budget', () => {
     await sheet.getByRole('textbox', { name: 'Planned for Groceries' }).fill('425');
     await sheet.getByRole('button', { name: 'Save' }).click();
     await expect(sheet).toBeHidden();
-    await expect(card).toContainText('$382.50 remaining');
+    await expect(card).toContainText('382,50 ₺ remaining');
 
     // Enter saves too, and the amount can be used for the next 12 months
     await card.getByRole('button', { name: /^Planned for Groceries/ }).click();
@@ -335,7 +335,7 @@ test('the month picker fits the screen and is easy to tap', async ({ page, api }
   expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
   const from = picker.getByRole('group', { name: 'From' });
   await expectTouchSize(from.getByRole('button', { name: 'Previous year' }));
-  await expectTouchSize(from.getByRole('button', { name: /^January / }));
+  await expectTouchSize(from.getByRole('button', { name: /^Ocak / }));
   await expectTouchSize(picker.getByRole('button', { name: 'Done' }));
   await expectTouchSize(picker.getByRole('button', { name: 'Cancel' }));
 });
@@ -346,7 +346,7 @@ test('report summary figures fit their card', async ({ page, api }) => {
   await expect(page.getByText('Total Expenses')).toBeVisible();
   const clipped = await page.evaluate(() =>
     [...document.querySelectorAll('main p')]
-      .filter((p) => /^-?\$[\d,.]+$/.test(p.textContent ?? ''))
+      .filter((p) => /^-?[\d.,]+\s₺$/.test(p.textContent ?? ''))
       .filter((p) => p.scrollWidth > p.clientWidth + 1)
       .map((p) => p.textContent),
   );

@@ -54,9 +54,9 @@ describe('expenseFigure (property-based)', () => {
     );
   });
 
-  it('a $250 balance correction left as money back reads "+$250", not "$250" spent', () => {
-    expect(expenseFigure(25_000)).toEqual({ value: '+$250', tone: 'positive' });
-    expect(expenseFigure(-5_250)).toEqual({ value: '$52.50', tone: 'negative' });
+  it('a 250 ₺ balance correction left as money back reads "+250 ₺", not "250 ₺" spent', () => {
+    expect(expenseFigure(25_000)).toEqual({ value: '+250\u00a0₺', tone: 'positive' });
+    expect(expenseFigure(-5_250)).toEqual({ value: '52,50\u00a0₺', tone: 'negative' });
   });
 });
 

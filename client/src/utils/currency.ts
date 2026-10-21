@@ -1,6 +1,7 @@
 // all money is integer minor units (cents; yen and dinars have 0 and 3 decimals) — convert
 // at the UI edges only
 import { useShallow } from 'zustand/react/shallow';
+import { APP_LOCALE } from './locale';
 import {
   usePreferencesStore,
   type AmountFormat,
@@ -64,8 +65,9 @@ export function localeAmountStyle(
   }
 }
 
-// The device's language doesn't change while the app runs
-const deviceLocale = () => (typeof navigator === 'undefined' ? undefined : navigator.language);
+// UB-Finance writes amounts the Turkish way on every device (utils/locale.ts), not in the
+// browser's language: "Automatic" means Turkish.
+const deviceLocale = (): string | undefined => APP_LOCALE;
 let deviceStyle: Pick<AmountStyle, 'format' | 'position'> | undefined;
 const device = () => (deviceStyle ??= localeAmountStyle(deviceLocale()));
 
@@ -112,12 +114,20 @@ function homeLocale(currency: string): string | undefined {
 const conventions = new Map<string, Pick<AmountStyle, 'position' | 'space'>>();
 
 /**
+ * Conventions chosen for this app rather than read from the browser: Turkish lira after the
+ * amount with a space (1.234,56 ₺), as Turkish banks write it (Intl's tr-TR puts ₺ first).
+ */
+const FIXED_CONVENTIONS: Record<string, Pick<AmountStyle, 'position' | 'space'>> = {
+  TRY: { position: 'after', space: true },
+};
+
+/**
  * Which side of the number a currency's symbol goes, and whether a space separates them, as
  * that currency's own country writes it (zł after: 12,50 zł; $ before: $12.50; CHF before
  * with a space). Only the side and space are used: separators follow the Amount format.
  */
 export function currencyConvention(currency: string): Pick<AmountStyle, 'position' | 'space'> {
-  let found = conventions.get(currency);
+  let found = conventions.get(currency) ?? FIXED_CONVENTIONS[currency];
   if (found) return found;
   try {
     const parts = new Intl.NumberFormat(homeLocale(currency), {
@@ -218,10 +228,14 @@ export function currencyAmountStyle(
   const format = prefs.amountFormat === 'auto' ? device().format : prefs.amountFormat;
   const code = currency ?? budgetCurrency;
   if (!code) {
+    const symbol = prefs.currencySymbol || '₺';
+    // Automatic: where the symbol's own currency puts it (12,50 ₺), else the device's way
+    const known = SYMBOL_CURRENCIES[symbol.trim()];
+    const auto = known ? currencyConvention(known).position : device().position;
     return {
       format,
-      position: prefs.symbolPosition === 'auto' ? device().position : prefs.symbolPosition,
-      symbol: prefs.currencySymbol || '$',
+      position: prefs.symbolPosition === 'auto' ? auto : prefs.symbolPosition,
+      symbol,
     };
   }
   const own = prefs.currencyStyles?.[code];
@@ -405,6 +419,7 @@ const SYMBOL_CURRENCIES: Record<string, string> = {
 };
 /** Where a $ or kr means which currency */
 const REGION_CURRENCIES: Record<string, string> = {
+  TR: 'TRY',
   US: 'USD',
   CA: 'CAD',
   AU: 'AUD',

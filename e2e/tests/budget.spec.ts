@@ -18,7 +18,7 @@ async function plan(page: Page, category: string, amount: string) {
   await input.fill(amount);
   await input.press('Enter');
   await expect(
-    page.getByRole('button', { name: new RegExp(`^Planned for ${category}: \\$`) }),
+    page.getByRole('button', { name: new RegExp(`^Planned for ${category}: -?[\\d.,]+\\s₺$`) }),
   ).toBeVisible();
 }
 
@@ -35,20 +35,20 @@ test.describe('budget', () => {
     });
 
     await open(page, '/budget');
-    await expect(toBeBudgeted(page)).toContainText('$3,000');
+    await expect(toBeBudgeted(page)).toContainText('3.000 ₺');
     await expect(toBeBudgeted(page)).toContainText('Left to budget');
 
     await plan(page, 'Groceries', '400');
-    await expect(toBeBudgeted(page)).toContainText('$2,600');
+    await expect(toBeBudgeted(page)).toContainText('2.600 ₺');
     await plan(page, 'Rent / Mortgage', '2600');
-    await expect(toBeBudgeted(page)).toContainText('$0');
+    await expect(toBeBudgeted(page)).toContainText('0 ₺');
     await expect(toBeBudgeted(page)).toContainText('Fully budgeted');
 
     const summary = await api.call('GET', `/budget/${thisMonth()}/summary`);
     expect(summary).toMatchObject({ income: 300_000, totalBudgeted: 300_000, toBeBudgeted: 0 });
 
     await plan(page, 'Restaurants', '50');
-    await expect(toBeBudgeted(page)).toContainText('-$50');
+    await expect(toBeBudgeted(page)).toContainText('-50 ₺');
     await expect(toBeBudgeted(page)).toContainText('Over budget');
   });
 
@@ -71,11 +71,11 @@ test.describe('budget', () => {
 
     await open(page, '/budget');
     const groceriesRow = page.getByRole('row').filter({ hasText: 'Groceries' });
-    await expect(groceriesRow).toContainText('$90');
-    await expect(groceriesRow).toContainText('$410');
+    await expect(groceriesRow).toContainText('90 ₺');
+    await expect(groceriesRow).toContainText('410 ₺');
     const restaurantsRow = page.getByRole('row').filter({ hasText: 'Restaurants' });
-    await expect(restaurantsRow).toContainText('$30');
-    await expect(restaurantsRow).toContainText('$70');
+    await expect(restaurantsRow).toContainText('30 ₺');
+    await expect(restaurantsRow).toContainText('70 ₺');
   });
 
   test('income in an off-budget account is not money to budget', async ({ page, api }) => {
@@ -96,7 +96,7 @@ test.describe('budget', () => {
       categoryId: dividends.id,
     });
     await open(page, '/budget');
-    await expect(toBeBudgeted(page)).toContainText('$1,000');
+    await expect(toBeBudgeted(page)).toContainText('1.000 ₺');
   });
 
   test('unspent money carries over to the next month', async ({ page, api }) => {
@@ -112,15 +112,15 @@ test.describe('budget', () => {
     await api.call('PUT', `/budget/${thisMonth()}/${groceries.id}`, { budgeted: 40_000 });
 
     await open(page, '/budget');
-    await expect(toBeBudgeted(page)).toContainText('$600');
+    await expect(toBeBudgeted(page)).toContainText('600 ₺');
     await page.getByRole('button', { name: 'Next month' }).click();
-    // Last month's unbudgeted $600 is still there to budget
-    await expect(toBeBudgeted(page)).toContainText('$600');
+    // Last month's unbudgeted 600 ₺ is still there to budget
+    await expect(toBeBudgeted(page)).toContainText('600 ₺');
     await page.getByRole('button', { name: 'Previous month' }).click();
     await page.getByRole('button', { name: 'Previous month' }).click();
-    await expect(toBeBudgeted(page)).toContainText('$0');
+    await expect(toBeBudgeted(page)).toContainText('0 ₺');
     await page.getByRole('button', { name: 'Today' }).click();
-    await expect(toBeBudgeted(page)).toContainText('$600');
+    await expect(toBeBudgeted(page)).toContainText('600 ₺');
   });
 
   test('a category links to its detail page with its transactions', async ({ page, api }) => {
@@ -169,7 +169,7 @@ test.describe('budget', () => {
     // Then next month's figures replace it
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
     await expect(
-      page.getByRole('button', { name: /^Planned for Groceries: \$0(\.00)?$/ }),
+      page.getByRole('button', { name: /^Planned for Groceries: 0(,00)?\s₺$/ }),
     ).toBeVisible();
   });
 });

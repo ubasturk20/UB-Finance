@@ -3,13 +3,13 @@ import {
   eachDayOfInterval,
   endOfMonth,
   format,
-  getDay,
   parseISO,
   startOfWeek,
 } from 'date-fns';
 import { monthsBetween } from './dateRange';
+import { WEEK_STARTS_ON, weekdayIndex } from './locale';
 
-// Layout for the transaction calendar. Weeks start on Sunday; days are yyyy-MM-dd strings.
+// Layout for the transaction calendar. Weeks start on Monday; days are yyyy-MM-dd strings.
 
 /** Ranges up to this many months show as month grids; longer ones as a heatmap. */
 export const CALENDAR_MONTHS_MAX = 3;
@@ -22,7 +22,7 @@ const ymd = (d: Date) => format(d, 'yyyy-MM-dd');
 export function monthWeeks(month: string): (string | null)[][] {
   const first = parseISO(`${month}-01`);
   const weeks: (string | null)[][] = [];
-  let week: (string | null)[] = Array(getDay(first)).fill(null);
+  let week: (string | null)[] = Array(weekdayIndex(first)).fill(null);
   for (const d of eachDayOfInterval({ start: first, end: endOfMonth(first) })) {
     week.push(ymd(d));
     if (week.length === 7) {
@@ -35,7 +35,7 @@ export function monthWeeks(month: string): (string | null)[][] {
 }
 
 export interface HeatmapRow {
-  /** Columns, one per week: 7 slots (Sunday first), the date or null outside this row */
+  /** Columns, one per week: 7 slots (Monday first), the date or null outside this row */
   weeks: (string | null)[][];
   /** Each month (yyyy-MM) and the column its first day falls in */
   months: { month: string; column: number }[];
@@ -49,11 +49,11 @@ export function heatmapRows(from: string, to: string, perRow = HEATMAP_ROW_MONTH
     const months = all.slice(i, i + perRow);
     const start = parseISO(`${months[0]}-01`);
     const end = endOfMonth(parseISO(`${months[months.length - 1]}-01`));
-    const gridStart = startOfWeek(start);
+    const gridStart = startOfWeek(start, { weekStartsOn: WEEK_STARTS_ON });
     const columns = Math.floor(differenceInCalendarDays(end, gridStart) / 7) + 1;
     const weeks: (string | null)[][] = Array.from({ length: columns }, () => Array(7).fill(null));
     const columnOf = (d: Date) => Math.floor(differenceInCalendarDays(d, gridStart) / 7);
-    for (const d of eachDayOfInterval({ start, end })) weeks[columnOf(d)][getDay(d)] = ymd(d);
+    for (const d of eachDayOfInterval({ start, end })) weeks[columnOf(d)][weekdayIndex(d)] = ymd(d);
     rows.push({
       weeks,
       months: months.map((month) => ({ month, column: columnOf(parseISO(`${month}-01`)) })),

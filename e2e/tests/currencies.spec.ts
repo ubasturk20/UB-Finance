@@ -52,9 +52,9 @@ test('choosing the budget currency, then adding accounts in others', async ({ pa
   // Each balance in its own currency; its euro value appears once there's a rate
   await addRate(api, 'EUR', 'JPY', '160');
   await page.reload();
-  await expect(page.getByRole('main').getByText('¥15,000')).toBeVisible();
-  // The euro written as at home in the euro area (this device is American)
-  await expect(page.getByRole('main').getByText(/≈ 93\.75\s€/)).toBeVisible();
+  await expect(page.getByRole('main').getByText('¥15.000')).toBeVisible();
+  // The euro written after the amount, as at home in the euro area, in the Turkish number format
+  await expect(page.getByRole('main').getByText(/≈ 93,75\s€/)).toBeVisible();
 });
 
 test('the złoty is written after the amount, the dollar before', async ({ page, api }) => {
@@ -63,8 +63,8 @@ test('the złoty is written after the amount, the dollar before', async ({ page,
   await api.createAccount('Konto', 123_456, 'checking', { currency: 'PLN' });
   await open(page, '/accounts');
   const main = page.getByRole('main');
-  await expect(main.getByText('$1,234.56').first()).toBeVisible();
-  await expect(main.getByText(/^1,234\.56\szł$/)).toBeVisible();
+  await expect(main.getByText('$1.234,56').first()).toBeVisible();
+  await expect(main.getByText(/^1\.234,56\szł$/)).toBeVisible();
 });
 
 test('money moved between currencies keeps both amounts and the budget unchanged', async ({

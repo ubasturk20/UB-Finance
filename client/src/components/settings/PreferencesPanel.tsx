@@ -87,10 +87,10 @@ export function PreferencesPanel() {
   function handleReset() {
     setTheme('light');
     setSidebarMode('persistent');
-    setCurrencySymbol('$');
+    setCurrencySymbol('₺');
     setAmountFormat('auto');
     setSymbolPosition('auto');
-    setDateFormat('MMM d, yyyy');
+    setDateFormat('dd.MM.yyyy');
     setShowMerchantIcons(true);
     setShowCategoryIcons(true);
     setShowAccountIcons(true);

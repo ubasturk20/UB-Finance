@@ -22,7 +22,7 @@ async function seed(api: Api) {
     payeeName: 'Market',
     categoryId: groceries.id,
   });
-  // A split: $6 groceries + $4 uncategorized
+  // A split: 6 ₺ groceries + 4 ₺ uncategorized
   await api.createTransaction({
     accountId: checking.id,
     date: isoDay(),
@@ -51,8 +51,8 @@ test.describe('reports', () => {
     // A new budget's reports start on this month
     await expect(main.getByRole('button', { name: '1M', pressed: true })).toBeVisible();
     // Every dollar spent, uncategorized included; no transfer, no double-counted split
-    await expect(main).toContainText(/\$2,000\s*Total Income/);
-    await expect(main).toContainText(/\$52\.50\s*Total Expenses/);
+    await expect(main).toContainText(/2\.000\s₺\s*Total Income/);
+    await expect(main).toContainText(/52,50\s₺\s*Total Expenses/);
     for (const widget of [
       'Net Worth',
       'Income & Expenses',
@@ -73,13 +73,13 @@ test.describe('reports', () => {
     await page.getByRole('button', { name: 'Table' }).click();
     await page.getByRole('combobox', { name: 'Group by' }).selectOption('category');
     const table = page.getByRole('table');
-    await expect(table.getByRole('row', { name: 'Groceries $48.50' })).toBeVisible();
-    await expect(table.getByRole('row', { name: 'Uncategorized $4' })).toBeVisible();
-    await expect(table.getByRole('row', { name: 'Total $52.50' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Groceries 48,50 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Uncategorized 4 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Total 52,50 ₺' })).toBeVisible();
 
     await page.getByRole('combobox', { name: 'Group by' }).selectOption('payee');
-    await expect(table.getByRole('row', { name: 'Market $42.50' })).toBeVisible();
-    await expect(table.getByRole('row', { name: 'Corner Shop $10' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Market 42,50 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Corner Shop 10 ₺' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Save' }).click();
     const dialog = page.getByRole('dialog', { name: 'Save Report' });
@@ -97,7 +97,9 @@ test.describe('reports', () => {
     await open(page, '/reports');
     await expect(page.getByRole('main').getByText('Spending by payee')).toBeVisible();
     await open(page, `/reports/custom/${saved.id}`);
-    await expect(page.getByRole('table').getByRole('row', { name: 'Market $42.50' })).toBeVisible();
+    await expect(
+      page.getByRole('table').getByRole('row', { name: 'Market 42,50 ₺' }),
+    ).toBeVisible();
   });
 
   test('switching the report to income shows income', async ({ page, api }) => {
@@ -106,7 +108,7 @@ test.describe('reports', () => {
     await page.getByRole('button', { name: 'Table' }).click();
     await page.getByRole('button', { name: 'Income', exact: true }).click();
     await expect(
-      page.getByRole('table').getByRole('row', { name: 'Paychecks $2,000' }),
+      page.getByRole('table').getByRole('row', { name: 'Paychecks 2.000 ₺' }),
     ).toBeVisible();
   });
 
@@ -126,19 +128,20 @@ test.describe('reports', () => {
 
 // Frozen months are picked from a month grid, not typed: typing a half month like "2026-1"
 // in Firefox/Safari crashed the page (#102)
+// Month names as the app writes them (Turkish)
 const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'Ocak',
+  'Şubat',
+  'Mart',
+  'Nisan',
+  'Mayıs',
+  'Haziran',
+  'Temmuz',
+  'Ağustos',
+  'Eylül',
+  'Ekim',
+  'Kasım',
+  'Aralık',
 ];
 const year = () => Number(thisMonth().slice(0, 4));
 const monthLabel = (ym: string) =>
@@ -152,7 +155,7 @@ async function pickFromJanuaryLastYear(page: Page) {
   // Keyboard focus starts on the selected From month
   await expect(from.getByRole('button', { pressed: true })).toBeFocused();
   await from.getByRole('button', { name: 'Previous year' }).click();
-  await from.getByRole('button', { name: `January ${year() - 1}` }).click();
+  await from.getByRole('button', { name: `Ocak ${year() - 1}` }).click();
   await picker.getByRole('button', { name: 'Done' }).click();
   await expect(picker).toBeHidden();
 }
@@ -168,19 +171,19 @@ test.describe('frozen months', () => {
     await main.getByRole('button', { name: 'Frozen' }).click();
     await pickFromJanuaryLastYear(page);
 
-    const range = `Jan ${year() - 1} – ${monthLabel(thisMonth())}`;
+    const range = `Oca ${year() - 1} – ${monthLabel(thisMonth())}`;
     await expect(main.getByRole('button', { name: range })).toBeVisible();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/dashboards'))[0].dateRange)
       .toEqual({ preset: 'custom', from: `${year() - 1}-01`, to: thisMonth() });
-    await expect(main).toContainText(/\$52\.50\s*Total Expenses/);
+    await expect(main).toContainText(/52,50\s₺\s*Total Expenses/);
 
     // Cancel keeps the months
     await main.getByRole('button', { name: range }).click();
     const picker = page.getByRole('dialog', { name: 'Choose months' });
     await picker
       .getByRole('group', { name: 'To' })
-      .getByRole('button', { name: `January ${year()}` })
+      .getByRole('button', { name: `Ocak ${year()}` })
       .click();
     await picker.getByRole('button', { name: 'Cancel' }).click();
     await expect(main.getByRole('button', { name: range })).toBeVisible();
@@ -232,8 +235,8 @@ test.describe('frozen months', () => {
     await page.getByRole('button', { name: 'Custom', exact: true }).click();
     await pickFromJanuaryLastYear(page);
     await expect(
-      page.getByRole('button', { name: `Jan ${year() - 1} – ${monthLabel(thisMonth())}` }),
+      page.getByRole('button', { name: `Oca ${year() - 1} – ${monthLabel(thisMonth())}` }),
     ).toBeVisible();
-    await expect(page.getByRole('table').getByRole('row', { name: 'Total $52.50' })).toBeVisible();
+    await expect(page.getByRole('table').getByRole('row', { name: 'Total 52,50 ₺' })).toBeVisible();
   });
 });

@@ -57,9 +57,9 @@ test('the sidebar lists accounts with their balances and opens them', async ({ p
   await api.createAccount('Rainy Day Savings', 1_000_000, 'savings');
   await open(page, '/dashboard');
   const nav = page.getByRole('complementary');
-  await expect(nav.getByRole('link', { name: 'All accounts $11,500' })).toBeVisible();
-  await nav.getByRole('button', { name: 'For budget $11,500' }).click();
-  await expect(nav.getByRole('link', { name: /Everyday Checking.*\$1,500/ })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'All accounts 11.500 ₺' })).toBeVisible();
+  await nav.getByRole('button', { name: 'For budget 11.500 ₺' }).click();
+  await expect(nav.getByRole('link', { name: /Everyday Checking.*1\.500\s₺/ })).toBeVisible();
   await nav.getByRole('link', { name: /Rainy Day Savings/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Rainy Day Savings' })).toBeVisible();
 });

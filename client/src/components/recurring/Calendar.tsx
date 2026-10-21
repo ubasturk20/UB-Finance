@@ -11,8 +11,9 @@ import {
   parseISO,
 } from 'date-fns';
 import type { ScheduleOccurrence, OccurrenceDisplayStatus } from '../../types';
+import { WEEK_STARTS_ON, WEEKDAYS_SHORT } from '../../utils/locale';
 
-const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_HEADERS = WEEKDAYS_SHORT;
 const MAX_CHIPS = 3;
 
 const CHIP_COLORS: Record<OccurrenceDisplayStatus, string> = {
@@ -45,8 +46,8 @@ export default function Calendar({ month, occurrences, onDateClick }: Props) {
   const monthDate = parseISO(`${month}-01`);
 
   const days = useMemo(() => {
-    const start = startOfWeek(startOfMonth(monthDate));
-    const end = endOfWeek(endOfMonth(monthDate));
+    const start = startOfWeek(startOfMonth(monthDate), { weekStartsOn: WEEK_STARTS_ON });
+    const end = endOfWeek(endOfMonth(monthDate), { weekStartsOn: WEEK_STARTS_ON });
     return eachDayOfInterval({ start, end });
   }, [month]);
 

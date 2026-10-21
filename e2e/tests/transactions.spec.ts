@@ -47,7 +47,7 @@ test.describe('account register', () => {
 
     await expect(page.getByRole('button', { name: 'Corner Grocery', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: '🛒 Groceries' })).toBeVisible();
-    await expect(header(page)).toContainText('$957.50');
+    await expect(header(page)).toContainText('957,50 ₺');
     expect(await api.balance(checking.id)).toBe(95_750);
 
     const [tx] = await api.transactions(`?account_id=${checking.id}`);
@@ -89,7 +89,7 @@ test.describe('account register', () => {
       inflow: '2500',
     });
     await newForm(page).getByRole('button', { name: 'Save' }).click();
-    await expect(header(page)).toContainText('$3,500');
+    await expect(header(page)).toContainText('3.500 ₺');
     expect(await api.balance(checking.id)).toBe(350_000);
   });
 
@@ -107,7 +107,7 @@ test.describe('account register', () => {
     await form.getByRole('textbox', { name: 'Outflow' }).fill('12.34');
     await expect(form.getByRole('textbox', { name: 'Inflow' })).toHaveValue('');
     await form.getByRole('button', { name: 'Save' }).click();
-    await expect(header(page)).toContainText('$987.66');
+    await expect(header(page)).toContainText('987,66 ₺');
   });
 
   test('a split transaction counts once toward the balance', async ({ page, api }) => {
@@ -120,7 +120,7 @@ test.describe('account register', () => {
       .getByRole('combobox', { name: 'Split 1 category' })
       .selectOption({ label: '🛒 Groceries' });
     await form.getByRole('textbox', { name: 'Split 1 amount' }).fill('60');
-    await expect(form.getByText('$40 remaining')).toBeVisible();
+    await expect(form.getByText('40 ₺ remaining')).toBeVisible();
     await form
       .getByRole('combobox', { name: 'Split 2 category' })
       .selectOption({ label: '🏠 Rent / Mortgage' });
@@ -129,8 +129,8 @@ test.describe('account register', () => {
     await newForm(page).getByRole('button', { name: 'Save' }).click();
 
     await expect(page.getByRole('button', { name: 'Split (2)' })).toBeVisible();
-    // $1,000 − $100, not − $200
-    await expect(header(page)).toContainText('$900');
+    // 1.000 ₺ − 100 ₺, not − 200 ₺
+    await expect(header(page)).toContainText('900 ₺');
     expect(await api.balance(checking.id)).toBe(90_000);
 
     const [parent] = await api.transactions(`?account_id=${checking.id}`);
@@ -380,7 +380,7 @@ test.describe('transfers between existing transactions (#89)', () => {
     const dialog = page.getByRole('dialog', { name: 'Possible transfers' });
     // The grocery run and the interest only look alike: say so, and it's not suggested again
     await dialog
-      .getByRole('button', { name: /Not a transfer: \$40 from Everyday Checking/ })
+      .getByRole('button', { name: /Not a transfer: 40\s₺ from Everyday Checking/ })
       .click();
     await expect(dialog.getByRole('listitem')).toHaveCount(1);
     await dialog.getByRole('button', { name: 'Link 1 transfer' }).click();
@@ -456,7 +456,7 @@ test('sending a new transaction twice (offline retry) saves it once', async ({ a
   expect(accounts.find((a) => a.id === savings.id)!.balance).toBe(10_000);
 });
 
-/** Seeds `count` transactions of -$1.00, one a day going back from today ("Shop 0" is today) */
+/** Seeds `count` transactions of -1,00 ₺, one a day going back from today ("Shop 0" is today) */
 async function seedDaily(api: Api, accountId: string, count: number) {
   const rows = Array.from({ length: count }, (_, i) => ({
     date: isoDay(-i),
@@ -505,7 +505,7 @@ test.describe('long histories', () => {
     await open(page, `/accounts/${checking.id}/reconcile`);
     // Nothing reconciled yet, so the reconciled part is just the starting balance
     await expect(page.getByText('Current selected balance in app').locator('..')).toContainText(
-      '$1,000',
+      '1.000 ₺',
     );
     await page.getByRole('button', { name: 'Start Reconciliation' }).click();
     await expect(page.getByText('Shop 249')).toBeVisible();

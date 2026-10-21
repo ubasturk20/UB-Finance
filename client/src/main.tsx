@@ -10,10 +10,12 @@ import '@fontsource/inter/700.css';
 import 'react-grid-layout/css/styles.css';
 import './index.css';
 import { initTheme } from './utils/applyTheme';
+import { applyDateLocale } from './utils/locale';
 import { restoreOfflineCopy, startOfflineCopy } from './offline/snapshot';
 import { loadOutbox } from './offline/outbox';
 import { IS_DEMO, startDemoApi } from './demo/demoApi';
 
+applyDateLocale();
 initTheme();
 
 const queryClient = new QueryClient({
