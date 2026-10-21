@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search } from 'lucide-react';
+import { t } from '../../i18n';
 
 export interface PickerOption {
   id: string;
@@ -21,7 +22,7 @@ const buttonClass =
 
 /** Searchable dropdown for picking one or several payees, accounts or categories */
 export function OptionPicker(props: Props) {
-  const { options, placeholder = 'Select…' } = props;
+  const { options, placeholder = t('rules.picker.select') } = props;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -64,7 +65,7 @@ export function OptionPicker(props: Props) {
   }
 
   const summary = selected.length
-    ? selected.map((id) => byId.get(id)?.label ?? '(deleted)').join(', ')
+    ? selected.map((id) => byId.get(id)?.label ?? t('rules.summary.deleted')).join(', ')
     : null;
 
   return (
@@ -94,7 +95,7 @@ export function OptionPicker(props: Props) {
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search…"
+                placeholder={t('rules.picker.search')}
                 className="w-full pl-7 pr-2 py-1 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-400"
               />
             </div>
@@ -127,7 +128,9 @@ export function OptionPicker(props: Props) {
               );
             })}
             {filtered.length === 0 && (
-              <p className="px-3 py-3 text-sm text-text-tertiary text-center">No matches</p>
+              <p className="px-3 py-3 text-sm text-text-tertiary text-center">
+                {t('rules.picker.noMatches')}
+              </p>
             )}
           </div>
         </div>

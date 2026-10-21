@@ -40,10 +40,10 @@ test('the demo opens on a finished budget, and every page works', async ({ page 
     ['/accounts', 'Northstar Auto Loan'],
     ['/recurring', "Riley's paycheck"],
     ['/reports', 'Where the money goes'],
-    ['/cash-flow', 'Total income'],
+    ['/cash-flow', 'Toplam gelir'],
     ['/goals', 'Emergency fund'],
     ['/payees', 'Daily Grind Coffee'],
-    ['/rules', 'Rename payee to Daily Grind Coffee'],
+    ['/rules', 'Alıcıyı ayarla: Daily Grind Coffee'],
     ['/settings', 'Paychecks'],
   ] as const) {
     await page.evaluate((r) => (location.hash = `#${r}`), route);
@@ -58,8 +58,11 @@ test('the banner leads back to the website: its homepage and the download page',
 }) => {
   await openDemo(page);
   const banner = page.getByRole('region', { name: 'Demo' });
-  await expect(banner.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/');
-  await expect(banner.getByRole('link', { name: /Download/ })).toHaveAttribute('href', '/download');
+  await expect(banner.getByRole('link', { name: 'Ana sayfaya dön' })).toHaveAttribute('href', '/');
+  await expect(banner.getByRole('link', { name: /İndir|indir/ })).toHaveAttribute(
+    'href',
+    '/download',
+  );
 });
 
 test('every payee shows its logo', async ({ page }) => {
@@ -89,14 +92,11 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
   await expect(page.getByText('My test account')).toHaveCount(0);
 
   await page.getByRole('link', { name: 'Alıcılar' }).click();
-  await page.getByRole('button', { name: 'Delete Corner Grocer' }).click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /Delete/ })
-    .click();
+  await page.getByRole('button', { name: 'Sil: Corner Grocer' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /Sil/ }).click();
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Start over' }).click();
+  await page.getByRole('button', { name: 'Baştan başla' }).click();
   await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Alıcılar' }).click();
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toBeVisible();
@@ -104,13 +104,13 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
 
 test("bank connections can't be set up in the demo", async ({ page }) => {
   await openDemo(page, '/settings?tab=connections');
-  await expect(page.getByText('Not available in the demo')).toBeVisible();
+  await expect(page.getByText('Demoda kullanılamaz')).toBeVisible();
   await expect(page.getByRole('textbox')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Hesap ekle' }).click();
   await page.getByRole('button', { name: 'SimpleFIN ile bağlan' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Connect a bank' });
-  await expect(dialog).toContainText('need the FlyBudget app');
+  const dialog = page.getByRole('dialog', { name: 'Banka bağla' });
+  await expect(dialog).toContainText('UB-Finance uygulaması gerekir');
   await expect(dialog.getByRole('textbox')).toHaveCount(0);
 
   // The demo's API refuses them too
@@ -129,9 +129,7 @@ test("bank connections can't be set up in the demo", async ({ page }) => {
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Hesap ekle' }).click();
   await page.getByRole('button', { name: 'Enable Banking ile bağlan' }).click();
-  await expect(page.getByRole('dialog', { name: 'Connect a bank' })).toContainText(
-    'Enable Banking',
-  );
+  await expect(page.getByRole('dialog', { name: 'Banka bağla' })).toContainText('Enable Banking');
   const ebStatus = await page.evaluate(
     async () =>
       (
@@ -244,7 +242,7 @@ test("the demo's preferences stay in the tab, and Start over resets them", async
   expect(stored.local).toBeNull();
   expect(stored.session).toContain('dark');
 
-  await page.getByRole('button', { name: 'Start over' }).click();
+  await page.getByRole('button', { name: 'Baştan başla' }).click();
   await expect(page.getByText('Kalan', { exact: true })).toBeVisible();
   await expect(page.locator('html')).not.toHaveClass(/dark/);
 });

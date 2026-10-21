@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { t } from '../../i18n';
 import {
   TOP_TREND_CATEGORIES,
   useIncomeVsExpenses,
@@ -17,18 +18,18 @@ import type { StatCard } from './ChartHelpers';
 import type { BuiltinWidgetType } from '../../types';
 
 export const BUILTIN_REPORTS: Record<BuiltinWidgetType, { label: string; description: string }> = {
-  summary: { label: 'Summary', description: 'Income, expenses and monthly averages' },
-  'net-worth': { label: 'Net Worth', description: 'Assets, liabilities and net worth over time' },
+  summary: { label: t('rep.builtin.summary'), description: t('rep.builtin.summary.desc') },
+  'net-worth': { label: t('rep.builtin.netWorth'), description: t('rep.builtin.netWorth.desc') },
   'income-expenses': {
-    label: 'Income & Expenses',
-    description: 'Money in vs. money out each month',
+    label: t('rep.builtin.incomeExpenses'),
+    description: t('rep.builtin.incomeExpenses.desc'),
   },
-  spending: { label: 'Spending by Category', description: 'Where your money went, by category' },
+  spending: { label: t('rep.builtin.spending'), description: t('rep.builtin.spending.desc') },
   'spending-trends': {
-    label: 'Spending Trends',
-    description: 'How spending in your biggest categories changes over time',
+    label: t('rep.builtin.spendingTrends'),
+    description: t('rep.builtin.spendingTrends.desc'),
   },
-  calendar: { label: 'Transaction Calendar', description: 'Money in and out on each day' },
+  calendar: { label: t('rep.builtin.calendar'), description: t('rep.builtin.calendar.desc') },
 };
 
 export const BUILTIN_TYPES = Object.keys(BUILTIN_REPORTS) as BuiltinWidgetType[];
@@ -45,10 +46,16 @@ export function useSummaryCards(from: string, to: string): StatCard[] {
     const expNet = ieData.reduce((s, d) => s + d.expenseNet, 0);
     const txCount = ieData.reduce((s, d) => s + d.expenseCount, 0);
     return [
-      { label: 'Total Income', ...incomeFigure(totalInc) },
-      { label: 'Total Expenses', ...expenseFigure(expNet) },
-      { label: 'Avg Monthly Expenses', ...expenseFigure(expNet / monthsToAverage(ieData)) },
-      { label: 'Avg Per Transaction', ...expenseFigure(txCount > 0 ? expNet / txCount : 0) },
+      { label: t('rep.stat.totalIncome'), ...incomeFigure(totalInc) },
+      { label: t('rep.stat.totalExpenses'), ...expenseFigure(expNet) },
+      {
+        label: t('rep.stat.avgMonthlyExpenses'),
+        ...expenseFigure(expNet / monthsToAverage(ieData)),
+      },
+      {
+        label: t('rep.stat.avgPerTransaction'),
+        ...expenseFigure(txCount > 0 ? expNet / txCount : 0),
+      },
     ];
   }, [ieData]);
 }
@@ -101,8 +108,8 @@ function DashboardSpendingTrends({
   const caption = categoryIds
     ? undefined
     : ids.length === 1
-      ? 'Biggest spending category'
-      : `${ids.length} biggest spending categories`;
+      ? t('rep.trends.biggestOne')
+      : t('rep.trends.biggestMany', { count: ids.length });
   return <SpendingTrendsChart from={from} to={to} categoryIds={ids} caption={caption} />;
 }
 

@@ -181,8 +181,8 @@ test.describe('accounts', () => {
     // A change in value isn't money earned or spent: reports leave it out
     await open(page, '/reports');
     const main = page.getByRole('main');
-    await expect(main).toContainText(/0\s₺\s*Total Income/);
-    await expect(main).toContainText(/0\s₺\s*Total Expenses/);
+    await expect(main).toContainText(/0\s₺\s*Toplam Gelir/);
+    await expect(main).toContainText(/0\s₺\s*Toplam Gider/);
   });
 
   test('the accounts page totals assets and liabilities', async ({ page, api }) => {

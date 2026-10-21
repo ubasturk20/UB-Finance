@@ -3,6 +3,7 @@ import { RuleEditorModal } from './RuleEditorModal';
 import { ApplyRulesModal } from './ApplyRulesModal';
 import { useCreateRule, useRules, useUpdateRule } from '../../hooks/useRules';
 import type { Rule, RuleInput } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -38,7 +39,7 @@ export function RuleEditorFlow({ isOpen, onClose, rule, initial, title }: Props)
       <RuleEditorModal
         isOpen={isOpen && !applyRuleId}
         onClose={onClose}
-        title={title ?? (rule ? 'Edit rule' : 'New rule')}
+        title={title ?? (rule ? t('rules.editor.editRule') : t('rules.editor.newRule'))}
         initial={rule ?? initial ?? emptyRule()}
         saving={createRule.isPending || updateRule.isPending}
         onSave={handleSave}
@@ -49,7 +50,7 @@ export function RuleEditorFlow({ isOpen, onClose, rule, initial, title }: Props)
           onClose={onClose}
           ruleIds={[applyRuleId]}
           initialScope="all"
-          title="Apply rule to existing transactions"
+          title={t('rules.applyRuleTitle')}
         />
       )}
     </>

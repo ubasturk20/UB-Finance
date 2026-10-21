@@ -207,11 +207,11 @@ test.describe('payees', () => {
     await expect(cards).toHaveCount(2);
 
     // Rename from the menu
-    const menu = page.getByRole('button', { name: 'Actions for Streamflix' });
+    const menu = page.getByRole('button', { name: 'Streamflix için seçenekler' });
     await expectTouchSize(menu);
     await menu.click();
-    await page.getByRole('menuitem', { name: 'Rename' }).click();
-    const input = page.getByRole('textbox', { name: 'Rename Streamflix' });
+    await page.getByRole('menuitem', { name: 'Yeniden adlandır' }).click();
+    const input = page.getByRole('textbox', { name: 'Yeniden adlandır: Streamflix' });
     await input.fill('Streamflix Premium');
     await input.press('Enter');
     await expect(cards.filter({ hasText: 'Streamflix Premium' })).toBeVisible();
@@ -219,7 +219,7 @@ test.describe('payees', () => {
     // Default category
     const groceries = await api.category('Groceries');
     await page
-      .getByRole('combobox', { name: 'Default category for Corner Grocery' })
+      .getByRole('combobox', { name: 'Corner Grocery için varsayılan kategori' })
       .selectOption(groceries.id);
     await expect
       .poll(async () =>
@@ -228,22 +228,22 @@ test.describe('payees', () => {
       .toMatchObject({ defaultCategoryId: groceries.id });
 
     // Merge two
-    await page.getByRole('checkbox', { name: 'Select Corner Grocery' }).check();
-    await page.getByRole('checkbox', { name: 'Select Streamflix Premium' }).check();
-    await page.getByRole('button', { name: 'Merge 2 payees' }).click();
-    const merge = page.getByRole('dialog', { name: 'Merge Payees' });
+    await page.getByRole('checkbox', { name: 'Seç: Corner Grocery' }).check();
+    await page.getByRole('checkbox', { name: 'Seç: Streamflix Premium' }).check();
+    await page.getByRole('button', { name: '2 alıcıyı birleştir' }).click();
+    const merge = page.getByRole('dialog', { name: 'Alıcıları birleştir' });
     await expectBottomSheet(page, merge);
     await merge.getByRole('radio', { name: /Corner Grocery/ }).check();
-    await merge.getByRole('button', { name: 'Merge' }).click();
+    await merge.getByRole('button', { name: 'Birleştir' }).click();
     await expect(cards).toHaveCount(1);
-    await expect(cards).toContainText('2 transactions');
+    await expect(cards).toContainText('2 işlem');
 
     // Delete from the menu
-    await page.getByRole('button', { name: 'Actions for Corner Grocery' }).click();
-    await page.getByRole('menuitem', { name: 'Delete' }).click();
+    await page.getByRole('button', { name: 'Corner Grocery için seçenekler' }).click();
+    await page.getByRole('menuitem', { name: 'Sil' }).click();
     await page
-      .getByRole('dialog', { name: 'Delete Payee' })
-      .getByRole('button', { name: 'Delete' })
+      .getByRole('dialog', { name: 'Alıcıyı sil' })
+      .getByRole('button', { name: 'Sil' })
       .click();
     await expect(cards).toHaveCount(0);
   });
@@ -266,26 +266,26 @@ test.describe('rules', () => {
     await open(page, '/rules');
 
     // No drag handles on a phone; the switch has a full-size tap area
-    await expect(page.getByRole('button', { name: 'Drag to reorder' })).toHaveCount(0);
-    const toggle = page.getByRole('switch', { name: 'Disable rule' }).first();
+    await expect(page.getByRole('button', { name: 'Sıralamak için sürükleyin' })).toHaveCount(0);
+    const toggle = page.getByRole('switch', { name: 'Kuralı kapat' }).first();
     await expectTouchSize(toggle);
     await toggle.click();
     await expect.poll(async () => (await api.call<any[]>('GET', '/rules'))[0].enabled).toBe(false);
 
     // The first rule can only move down, the last only up
-    const menus = page.getByRole('button', { name: 'Rule actions' });
+    const menus = page.getByRole('button', { name: 'Kural seçenekleri' });
     await menus.first().click();
-    await expect(page.getByRole('menuitem', { name: 'Move up' })).toHaveCount(0);
-    await page.getByRole('menuitem', { name: 'Move down' }).click();
+    await expect(page.getByRole('menuitem', { name: 'Yukarı taşı' })).toHaveCount(0);
+    await page.getByRole('menuitem', { name: 'Aşağı taşı' }).click();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/rules')).map((r) => r.id))
       .toEqual([second.id, first.id]);
 
     await menus.first().click();
-    await page.getByRole('menuitem', { name: 'Delete' }).click();
+    await page.getByRole('menuitem', { name: 'Sil' }).click();
     await page
-      .getByRole('dialog', { name: 'Delete rule' })
-      .getByRole('button', { name: 'Delete' })
+      .getByRole('dialog', { name: 'Kuralı sil' })
+      .getByRole('button', { name: 'Sil' })
       .click();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/rules')).map((r) => r.id))
@@ -326,7 +326,7 @@ test.describe('dialogs and touch targets', () => {
 test('the month picker fits the screen and is easy to tap', async ({ page, api }) => {
   await seedAccount(api);
   await open(page, '/reports');
-  await page.getByRole('main').getByRole('button', { name: 'Frozen' }).click();
+  await page.getByRole('main').getByRole('button', { name: 'Sabitlenmiş' }).click();
   const picker = page.getByRole('dialog', { name: 'Ayları seçin' });
   await expect(picker).toBeVisible();
   await picker.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
@@ -345,7 +345,7 @@ test('the month picker fits the screen and is easy to tap', async ({ page, api }
 test('report summary figures fit their card', async ({ page, api }) => {
   await seedAccount(api);
   await open(page, '/reports');
-  await expect(page.getByText('Total Expenses')).toBeVisible();
+  await expect(page.getByText('Toplam Gider')).toBeVisible();
   const clipped = await page.evaluate(() =>
     [...document.querySelectorAll('main p')]
       .filter((p) => /^-?[\d.,]+\s₺$/.test(p.textContent ?? ''))
@@ -394,16 +394,16 @@ test.describe('cash flow', () => {
     await seedAccount(api);
     await open(page, '/cash-flow');
 
-    await expect(page.getByText('Where it went')).toBeVisible();
-    const list = page.locator('section', { hasText: 'Where it went' });
+    await expect(page.getByText('Paranın gittiği yer')).toBeVisible();
+    const list = page.locator('section', { hasText: 'Paranın gittiği yer' });
     const group = list.getByRole('button', { expanded: false }).first();
     await expectTouchSize(group);
     await group.click();
     await list.getByRole('button', { name: /Groceries/ }).click();
-    await expect(page.getByText(/Transactions: .*Groceries/)).toBeVisible();
+    await expect(page.getByText(/İşlemler: .*Groceries/)).toBeVisible();
     await expect(page.getByText('Corner Grocery').first()).toBeVisible();
 
-    await page.getByRole('button', { name: 'Diagram' }).click();
+    await page.getByRole('button', { name: 'Diyagram' }).click();
     const svg = page.locator('main svg.select-none');
     await expect(svg).toBeVisible();
     // Drawn wider than the phone, in a box that scrolls on its own

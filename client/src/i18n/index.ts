@@ -8,6 +8,10 @@ import { common } from './messages/common';
 import { dashboard } from './messages/dashboard';
 import { importing } from './messages/importing';
 import { recurring } from './messages/recurring';
+import { cashFlow } from './messages/cashFlow';
+import { reportBuilder } from './messages/reportBuilder';
+import { reports } from './messages/reports';
+import { rulesPayees } from './messages/rulesPayees';
 import { settings } from './messages/settings';
 import { shell } from './messages/shell';
 import { transactionDetail } from './messages/transactionDetail';
@@ -24,6 +28,10 @@ const MESSAGES = {
   ...importing,
   ...budget,
   ...recurring,
+  ...reports,
+  ...reportBuilder,
+  ...cashFlow,
+  ...rulesPayees,
 } as const;
 
 export type MessageKey = keyof typeof MESSAGES;

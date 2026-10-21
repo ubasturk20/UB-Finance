@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Snowflake } from 'lucide-react';
 import { MonthRangePicker } from '../ui/MonthRangePicker';
+import { t } from '../../i18n';
 import { DATE_PRESETS, computeDateRange, resolveDateRange } from '../../utils/dateRange';
 import type { ReportDateRange } from '../../types';
 
@@ -21,12 +22,13 @@ export function DateRangeControl({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex gap-0">
+      <div className="flex flex-wrap gap-0">
         {DATE_PRESETS.filter((p) => p.id !== 'custom').map((p) => (
           <button
             type="button"
             key={p.id}
             title={p.long}
+            aria-label={p.long}
             aria-pressed={value.preset === p.id}
             onClick={() => {
               setJustFroze(false);
@@ -44,7 +46,7 @@ export function DateRangeControl({
         <button
           type="button"
           aria-pressed={frozen}
-          title="Keep these dates fixed instead of moving with the current month"
+          title={t('rep.range.frozenTitle')}
           onClick={() => {
             if (frozen) return;
             setJustFroze(true);
@@ -56,7 +58,7 @@ export function DateRangeControl({
               : 'border-transparent text-text-tertiary hover:text-text-secondary'
           }`}
         >
-          <Snowflake size={11} /> Frozen
+          <Snowflake size={11} /> {t('rep.range.frozen')}
         </button>
       </div>
       {frozen && (

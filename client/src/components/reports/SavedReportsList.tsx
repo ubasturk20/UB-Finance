@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { useSavedReports, useDeleteSavedReport } from '../../hooks/useCustomReports';
+import { t } from '../../i18n';
 
 interface Props {
   activeId?: string;
@@ -32,7 +33,7 @@ export default function SavedReportsList({ activeId }: Props) {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-text-secondary bg-surface border border-border rounded-md hover:bg-surface-alt transition-colors"
       >
-        {activeReport ? activeReport.name : 'Saved Reports'}
+        {activeReport ? activeReport.name : t('rb.saved.title')}
         <ChevronDown className="w-3.5 h-3.5 text-text-tertiary" />
       </button>
 
@@ -58,6 +59,8 @@ export default function SavedReportsList({ activeId }: Props) {
                   deleteMutation.mutate(r.id);
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1 text-text-tertiary hover:text-negative transition-all"
+                aria-label={t('rb.saved.delete', { name: r.name })}
+                title={t('rb.saved.delete', { name: r.name })}
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

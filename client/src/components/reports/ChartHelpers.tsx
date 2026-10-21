@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { ChartNoAxesColumn } from 'lucide-react';
+import { formatPercent, t } from '../../i18n';
 import { formatCurrency } from '../../utils/currency';
 import { CATEGORY_COLORS } from '../../utils/chartColors';
 
@@ -15,7 +16,10 @@ export interface TooltipSummary {
 /** `summary` for CurrencyTooltip: the sum of every series at the hovered point. */
 export const sumSeries = (payload: any[]): TooltipSummary | null =>
   payload.length > 1
-    ? { label: 'Total', value: payload.reduce((s, p) => s + (Number(p.value) || 0), 0) }
+    ? {
+        label: t('rep.chart.total'),
+        value: payload.reduce((s, p) => s + (Number(p.value) || 0), 0),
+      }
     : null;
 
 export const TOOLTIP_CLASS = 'bg-surface border border-border rounded-md shadow-hover px-3 py-2';
@@ -42,12 +46,12 @@ export function CurrencyTooltip({
       </p>
       {rows.map((p: any) => (
         <p key={p.name} className="text-xs font-medium" style={{ color: p.color }}>
-          {p.name}: {formatCurrency(p.value)}
+          {t('rep.chart.tooltipLine', { name: p.name, amount: formatCurrency(p.value) })}
         </p>
       ))}
       {extra && (
         <p className="text-xs font-semibold text-text mt-1 pt-1 border-t border-border-light">
-          {extra.label}: {formatCurrency(extra.value)}
+          {t('rep.chart.tooltipLine', { name: extra.label, amount: formatCurrency(extra.value) })}
         </p>
       )}
     </div>
@@ -75,7 +79,10 @@ export function ShareTooltip({ active, payload, label, total, noSwatch }: any) {
       <p className="text-sm font-semibold text-text tabular-nums">{formatCurrency(value)}</p>
       {total > 0 && (
         <p className="text-xs text-text-tertiary tabular-nums">
-          {((value / total) * 100).toFixed(1)}% of {formatCurrency(total)}
+          {t('rep.chart.share', {
+            percent: formatPercent(value / total),
+            total: formatCurrency(total),
+          })}
         </p>
       )}
     </div>
@@ -94,8 +101,8 @@ export function ChartSkeleton() {
 
 /** A chart with nothing to draw: says so, and what would fill it */
 export function EmptyState({
-  message = 'No data for this period',
-  hint = 'Add transactions, or pick a longer date range.',
+  message = t('rep.chart.empty'),
+  hint = t('rep.chart.emptyHint'),
 }: {
   message?: string;
   hint?: string;

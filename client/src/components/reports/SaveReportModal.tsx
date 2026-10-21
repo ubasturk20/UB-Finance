@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -29,25 +30,27 @@ export default function SaveReportModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isUpdating ? 'Update Report' : 'Save Report'}
+      title={isUpdating ? t('rb.update.title') : t('rb.save.title')}
       size="sm"
     >
       <form onSubmit={handleSubmit}>
-        <label className="block text-sm font-medium text-text-secondary mb-1">Report Name</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">
+          {t('rb.save.name')}
+        </label>
         <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Monthly Spending by Payee"
-          aria-label="Report name"
+          placeholder={t('rb.save.placeholder')}
+          aria-label={t('rb.save.name')}
           autoFocus
         />
         <div className="flex justify-end gap-2 mt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={!name.trim()}>
-            {isUpdating ? 'Update' : 'Save'}
+            {isUpdating ? t('rb.update') : t('common.save')}
           </Button>
         </div>
       </form>

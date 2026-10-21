@@ -9,11 +9,11 @@ const PAGES: { link: string; route: string; heading?: string }[] = [
   { link: 'İşlemler', route: '/transactions', heading: 'Tüm İşlemler' },
   { link: 'Bütçe', route: '/budget' },
   { link: 'Düzenli İşlemler', route: '/recurring', heading: 'Düzenli İşlemler' },
-  { link: 'Raporlar', route: '/reports', heading: 'Reports' },
-  { link: 'Nakit Akışı', route: '/cash-flow', heading: 'Cash Flow' },
+  { link: 'Raporlar', route: '/reports', heading: 'Raporlar' },
+  { link: 'Nakit Akışı', route: '/cash-flow', heading: 'Nakit Akışı' },
   { link: 'Hedefler', route: '/goals', heading: 'Hedefler' },
-  { link: 'Alıcılar', route: '/payees', heading: 'Payees' },
-  { link: 'Kurallar', route: '/rules', heading: 'Rules' },
+  { link: 'Alıcılar', route: '/payees', heading: 'Alıcılar' },
+  { link: 'Kurallar', route: '/rules', heading: 'Kurallar' },
   { link: 'Ayarlar', route: '/settings', heading: 'Ayarlar' },
 ];
 

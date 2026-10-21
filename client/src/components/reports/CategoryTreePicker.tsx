@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { t } from '../../i18n';
 
 interface Props {
   selectedCategoryIds: string[];
@@ -77,14 +78,19 @@ export default function CategoryTreePicker({
         onClick={selectAll}
         className={`text-xs px-1.5 py-0.5 rounded ${allSelected ? 'text-brand-600 font-medium' : 'text-text-tertiary hover:text-text-secondary'}`}
       >
-        {allSelected ? 'All selected' : 'Select all'}
+        {allSelected ? t('rb.picker.allSelected') : t('rb.picker.selectAll')}
       </button>
       {groups.map((g) => (
         <div key={g.id}>
           <div className="flex items-center gap-1 py-0.5">
             <button
+              type="button"
               onClick={() => toggleExpand(g.id)}
               className="text-text-tertiary hover:text-text-secondary p-0.5"
+              aria-expanded={expanded.has(g.id)}
+              aria-label={t(expanded.has(g.id) ? 'rb.picker.collapse' : 'rb.picker.expand', {
+                name: g.name,
+              })}
             >
               {expanded.has(g.id) ? (
                 <ChevronDown className="w-3 h-3" />

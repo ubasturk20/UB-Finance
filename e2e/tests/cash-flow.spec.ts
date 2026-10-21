@@ -21,9 +21,9 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   ])
     await api.createTransaction({ accountId: account.id, ...tx });
   await open(page, '/cash-flow');
-  await page.getByRole('button', { name: '1M', exact: true }).click();
-  await page.getByRole('button', { name: /Show transactions: .*Groceries$/ }).click();
-  const list = page.getByRole('region', { name: /Transactions:/ });
+  await page.getByRole('button', { name: '1 ay', exact: true }).click();
+  await page.getByRole('button', { name: /İşlemleri göster: .*Groceries$/ }).click();
+  const list = page.getByRole('region', { name: /İşlemler:/ });
   await expect(list).toContainText('Current groceries');
   await expect(list).not.toContainText('Previous groceries');
   await expect(list).not.toContainText('Current dining');
@@ -33,7 +33,7 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   // A stale search must not hide the next chart selection.
   await list.getByPlaceholder('Alıcı veya notlarda ara…').fill('no such payee');
   await page
-    .getByRole('button', { name: 'Show transactions: Uncategorized', exact: true })
+    .getByRole('button', { name: 'İşlemleri göster: Kategorisiz', exact: true })
     .first()
     .click();
   await expect(list).toContainText('Unknown merchant');
@@ -42,12 +42,12 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   const group = (await api.categoryGroups()).find((g) =>
     g.categories.some((c) => c.id === grocery.id),
   )!;
-  await page.getByRole('button', { name: `Show transactions: ${group.name}`, exact: true }).click();
+  await page.getByRole('button', { name: `İşlemleri göster: ${group.name}`, exact: true }).click();
   await expect(list).toContainText('Current groceries');
   await expect(list).not.toContainText('Unknown merchant');
   // Switching date ranges must issue the chart's month bounds, not the register's defaults.
-  await page.getByRole('button', { name: '6M', exact: true }).click();
-  await page.getByRole('button', { name: /Show transactions: .*Groceries$/ }).click();
+  await page.getByRole('button', { name: '6 ay', exact: true }).click();
+  await page.getByRole('button', { name: /İşlemleri göster: .*Groceries$/ }).click();
   await expect(list).toContainText('Previous groceries');
   await expect(list).toContainText('Current groceries');
 });

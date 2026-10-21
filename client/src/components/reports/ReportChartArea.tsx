@@ -30,6 +30,7 @@ import {
 } from './ChartHelpers';
 import ReportTable from './ReportTable';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
+import { t } from '../../i18n';
 
 // Plot insets for the charts below: left margin (16) + default y-axis width (60), right margin (16)
 const INSET = { left: 76, right: 16 };
@@ -201,7 +202,7 @@ function TotalChartView({
             <Area
               type="monotone"
               dataKey="value"
-              name="Amount"
+              name={t('rb.amount')}
               stroke={chartColors.brand}
               fill={chartColors.brand}
               fillOpacity={0.15}
@@ -210,13 +211,13 @@ function TotalChartView({
             <Line
               type="monotone"
               dataKey="value"
-              name="Amount"
+              name={t('rb.amount')}
               stroke={chartColors.brand}
               strokeWidth={2}
               dot={{ r: 3 }}
             />
           ) : (
-            <Bar dataKey="value" name="Amount" radius={[4, 4, 0, 0]} maxBarSize={48}>
+            <Bar dataKey="value" name={t('rb.amount')} radius={[4, 4, 0, 0]} maxBarSize={48}>
               {chartData.map((d, i) => (
                 <Cell key={i} fill={d.color} />
               ))}

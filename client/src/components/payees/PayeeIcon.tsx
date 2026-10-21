@@ -3,6 +3,7 @@ import { ArrowLeftRight, Pencil, X } from 'lucide-react';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { payeeColor } from '../../utils/transactionColors';
 import { fileToSquareDataUrl } from '../../utils/imageResize';
+import { t } from '../../i18n';
 
 const SIZES = {
   sm: { box: 'w-6 h-6', text: 'text-[10px]', icon: 12, edit: 10 },
@@ -57,6 +58,7 @@ export function PayeeIcon({
     );
 
   if (!onLogoChange || transfer) return face;
+  const editLabel = logo ? t('payees.icon.change', { name }) : t('payees.icon.upload', { name });
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -66,7 +68,7 @@ export function PayeeIcon({
       onLogoChange!(await fileToSquareDataUrl(file));
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not use that image.');
+      setError(err instanceof Error ? err.message : t('payees.icon.error'));
     }
   }
 
@@ -76,8 +78,8 @@ export function PayeeIcon({
         type="button"
         onClick={() => fileRef.current?.click()}
         onMouseLeave={() => setError(null)}
-        title={error ?? (logo ? `Change image for ${name}` : `Upload an image for ${name}`)}
-        aria-label={logo ? `Change image for ${name}` : `Upload an image for ${name}`}
+        title={error ?? editLabel}
+        aria-label={editLabel}
         className={`relative block rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 ${error ? 'ring-2 ring-negative' : ''}`}
       >
         {face}
@@ -89,8 +91,8 @@ export function PayeeIcon({
         <button
           type="button"
           onClick={() => onLogoChange(null)}
-          title="Use initial instead"
-          aria-label={`Remove image for ${name}`}
+          title={t('payees.icon.useInitial')}
+          aria-label={t('payees.icon.remove', { name })}
           className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center bg-surface border border-border text-text-tertiary hover:text-negative opacity-0 group-hover/logo:opacity-100 group-focus-within/logo:opacity-100 transition-opacity cursor-pointer"
         >
           <X size={10} />

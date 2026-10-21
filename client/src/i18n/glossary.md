@@ -82,3 +82,9 @@ eklenir. Ton: sade, kısa, "siz" dili (Kaydedin değil, düğmelerde mastar/emir
 | Due / Missed / Overdue    | Vadesi geldi / Kaçırıldı / Gecikti |
 | Paid / Skipped            | Ödendi / Atlandı                   |
 | Pause / Resume            | Duraklat / Sürdür                  |
+| Widget                    | Pencere öğesi                      |
+| Frozen / Live (aralık)    | Sabitlenmiş / Canlı                |
+| Custom report             | Özel rapor                         |
+| Group by / Chart type     | Gruplama / Grafik türü             |
+| Condition / Action        | Koşul / Eylem                      |
+| Merge                     | Birleştir                          |

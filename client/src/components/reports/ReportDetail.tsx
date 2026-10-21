@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { Check, ChevronDown, Download, X } from 'lucide-react';
+import { formatPercent, t } from '../../i18n';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { StatCard as StatTile } from '../ui/StatCard';
@@ -57,8 +58,7 @@ const toneOf = (cents: number): StatCard['tone'] =>
   cents > 0 ? 'positive' : cents < 0 ? 'negative' : 'neutral';
 
 const fullMonth = (month: string) => format(parseISO(`${month}-01`), 'MMM yyyy');
-const percent = (part: number, whole: number) =>
-  whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : '—';
+const percent = (part: number, whole: number) => (whole > 0 ? formatPercent(part / whole) : '—');
 
 interface Column<R> {
   label: string;
@@ -95,7 +95,7 @@ function BreakdownTable<R>({
   const shown = maxRows && !showAll ? rows.slice(0, maxRows) : rows;
   if (!rows.length) {
     return (
-      <p className="px-4 py-10 text-sm text-center text-text-tertiary">No data for this period.</p>
+      <p className="px-4 py-10 text-sm text-center text-text-tertiary">{t('rep.detail.noData')}</p>
     );
   }
   return (
@@ -158,7 +158,7 @@ function BreakdownTable<R>({
           onClick={() => setShowAll(true)}
           className="w-full px-4 py-2.5 text-xs font-medium text-brand-600 hover:bg-hover border-t border-border-light cursor-pointer"
         >
-          Show all {rows.length}
+          {t('rep.detail.showAll', { count: rows.length })}
         </button>
       )}
     </div>
@@ -254,7 +254,7 @@ function DetailLayout({
           <h3 className="text-sm font-semibold text-text">{tableTitle}</h3>
           {onExport && (
             <Button variant="secondary" size="sm" onClick={onExport}>
-              <Download size={13} /> Export CSV
+              <Download size={13} /> {t('rep.detail.exportCsv')}
             </Button>
           )}
         </div>
@@ -270,7 +270,7 @@ interface DetailProps {
 }
 
 const csvName = (type: BuiltinWidgetType, from: string, to: string) =>
-  `report-${type}-${from}-to-${to}.csv`;
+  t('rep.csv.filename', { type, from, to });
 
 function SummaryDetail({ from, to }: DetailProps) {
   const { data = [], isLoading } = useIncomeVsExpenses(from, to);
@@ -291,19 +291,19 @@ function SummaryDetail({ from, to }: DetailProps) {
     <DetailLayout
       loading={isLoading}
       stats={stats}
-      chartTitle="Expenses by month"
-      chartSubtitle="Spending net of refunds, against the monthly average"
+      chartTitle={t('rep.summary.chartTitle')}
+      chartSubtitle={t('rep.summary.chartSubtitle')}
       chart={<MonthlySpendingChart from={from} to={to} />}
-      tableTitle="Monthly breakdown"
+      tableTitle={t('rep.monthlyBreakdown')}
       onExport={() =>
         downloadCsv(
           csvName('summary', from, to),
           rows.map((r) => ({
-            month: r.month,
-            income_cents: r.income,
-            expenses_cents: r.expenses,
-            net_cents: r.net,
-            transactions: r.count,
+            [t('rep.csv.month')]: r.month,
+            [t('rep.csv.incomeMinor')]: r.income,
+            [t('rep.csv.expensesMinor')]: r.expenses,
+            [t('rep.csv.netMinor')]: r.net,
+            [t('rep.csv.transactions')]: r.count,
           })),
         )
       }
@@ -312,15 +312,19 @@ function SummaryDetail({ from, to }: DetailProps) {
           rows={rows}
           rowKey={(r) => r.month}
           columns={[
-            { label: 'Month', cell: (r) => fullMonth(r.month) },
-            { label: 'Income', align: 'right', cell: (r) => formatCurrency(r.income) },
-            { label: 'Expenses', align: 'right', cell: (r) => formatCurrency(r.expenses) },
-            { label: 'Net', align: 'right', cell: (r) => <Signed cents={r.net} /> },
-            { label: 'Transactions', align: 'right', cell: (r) => r.count },
+            { label: t('rep.col.month'), cell: (r) => fullMonth(r.month) },
+            { label: t('rep.col.income'), align: 'right', cell: (r) => formatCurrency(r.income) },
+            {
+              label: t('rep.col.expenses'),
+              align: 'right',
+              cell: (r) => formatCurrency(r.expenses),
+            },
+            { label: t('rep.col.net'), align: 'right', cell: (r) => <Signed cents={r.net} /> },
+            { label: t('rep.col.transactions'), align: 'right', cell: (r) => r.count },
           ]}
           footer={[
             {
-              label: 'Total',
+              label: t('rep.col.total'),
               cells: [
                 formatCurrency(sum('income')),
                 formatCurrency(sum('expenses')),
@@ -329,7 +333,7 @@ function SummaryDetail({ from, to }: DetailProps) {
               ],
             },
             {
-              label: 'Monthly average',
+              label: t('rep.col.monthlyAverage'),
               cells: [
                 formatCurrency(avg('income')),
                 formatCurrency(avg('expenses')),
@@ -351,14 +355,14 @@ function NetWorthDetail({ from, to }: DetailProps) {
   const change = netWorthChange(series);
   const last = series[series.length - 1];
   const stats: StatCard[] = [
-    { label: 'Net Worth', value: formatCurrency(change?.latest ?? 0) },
+    { label: t('rep.netWorth.stat'), value: formatCurrency(change?.latest ?? 0) },
     {
-      label: 'Change',
+      label: t('rep.netWorth.change'),
       value: change ? formatChange(change.change, change.percent) : formatCurrency(0),
       tone: toneOf(change?.change ?? 0),
     },
-    { label: 'Assets', value: formatCurrency(last?.assets ?? 0) },
-    { label: 'Liabilities', value: formatCurrency(last?.liabilities ?? 0) },
+    { label: t('rep.netWorth.assets'), value: formatCurrency(last?.assets ?? 0) },
+    { label: t('rep.netWorth.liabilities'), value: formatCurrency(last?.liabilities ?? 0) },
   ];
   const rows = monthly.map((d, i) => ({
     ...d,
@@ -369,20 +373,20 @@ function NetWorthDetail({ from, to }: DetailProps) {
     <DetailLayout
       loading={isLoading}
       stats={stats}
-      chartTitle="Net worth over time"
-      chartSubtitle="Assets minus liabilities"
+      chartTitle={t('rep.netWorth.chartTitle')}
+      chartSubtitle={t('rep.netWorth.chartSubtitle')}
       chartHeight="h-96"
       chart={<NetWorthChart from={from} to={to} />}
-      tableTitle="Month-end balances"
+      tableTitle={t('rep.netWorth.tableTitle')}
       onExport={() =>
         downloadCsv(
           csvName('net-worth', from, to),
           rows.map((r) => ({
-            month: r.month,
-            assets_cents: r.assets,
-            liabilities_cents: r.liabilities,
-            net_worth_cents: r.netWorth,
-            change_cents: r.change ?? '',
+            [t('rep.csv.month')]: r.month,
+            [t('rep.csv.assetsMinor')]: r.assets,
+            [t('rep.csv.liabilitiesMinor')]: r.liabilities,
+            [t('rep.csv.netWorthMinor')]: r.netWorth,
+            [t('rep.csv.changeMinor')]: r.change ?? '',
           })),
         )
       }
@@ -391,16 +395,20 @@ function NetWorthDetail({ from, to }: DetailProps) {
           rows={rows}
           rowKey={(r) => r.month}
           columns={[
-            { label: 'Month', cell: (r) => fullMonth(r.month) },
-            { label: 'Assets', align: 'right', cell: (r) => formatCurrency(r.assets) },
-            { label: 'Liabilities', align: 'right', cell: (r) => formatCurrency(r.liabilities) },
+            { label: t('rep.col.month'), cell: (r) => fullMonth(r.month) },
+            { label: t('rep.col.assets'), align: 'right', cell: (r) => formatCurrency(r.assets) },
             {
-              label: 'Net worth',
+              label: t('rep.col.liabilities'),
+              align: 'right',
+              cell: (r) => formatCurrency(r.liabilities),
+            },
+            {
+              label: t('rep.col.netWorth'),
               align: 'right',
               cell: (r) => <span className="text-text">{formatCurrency(r.netWorth)}</span>,
             },
             {
-              label: 'Change',
+              label: t('rep.col.change'),
               align: 'right',
               cell: (r) =>
                 r.change === null ? (
@@ -425,30 +433,34 @@ function IncomeExpensesDetail({ from, to }: DetailProps) {
   const expenses = data.reduce((s, d) => s + d.expenses, 0);
   const net = income - expenses;
   const months = Math.max(data.length, 1);
-  const rate = (i: number, n: number) => (i > 0 ? `${Math.round((n / i) * 100)}%` : '—');
+  const rate = (i: number, n: number) => (i > 0 ? formatPercent(n / i, 0) : '—');
   const stats: StatCard[] = [
-    { label: 'Income', value: formatCurrency(income), tone: 'positive' },
-    { label: 'Expenses', value: formatCurrency(expenses), tone: 'negative' },
-    { label: 'Net Savings', value: formatCurrency(net), tone: toneOf(net) },
-    { label: 'Savings Rate', value: rate(income, net), tone: income > 0 ? toneOf(net) : undefined },
+    { label: t('rep.ie.income'), value: formatCurrency(income), tone: 'positive' },
+    { label: t('rep.ie.expenses'), value: formatCurrency(expenses), tone: 'negative' },
+    { label: t('rep.ie.netSavings'), value: formatCurrency(net), tone: toneOf(net) },
+    {
+      label: t('rep.ie.savingsRate'),
+      value: rate(income, net),
+      tone: income > 0 ? toneOf(net) : undefined,
+    },
   ];
 
   return (
     <DetailLayout
       loading={isLoading}
       stats={stats}
-      chartTitle="Income vs. expenses"
-      chartSubtitle="Money in and out each month"
+      chartTitle={t('rep.ie.chartTitle')}
+      chartSubtitle={t('rep.ie.chartSubtitle')}
       chart={<IncomeExpensesChart from={from} to={to} />}
-      tableTitle="Monthly breakdown"
+      tableTitle={t('rep.monthlyBreakdown')}
       onExport={() =>
         downloadCsv(
           csvName('income-expenses', from, to),
           data.map((d) => ({
-            month: d.month,
-            income_cents: d.income,
-            expenses_cents: d.expenses,
-            net_cents: d.net,
+            [t('rep.csv.month')]: d.month,
+            [t('rep.csv.incomeMinor')]: d.income,
+            [t('rep.csv.expensesMinor')]: d.expenses,
+            [t('rep.csv.netMinor')]: d.net,
           })),
         )
       }
@@ -457,15 +469,23 @@ function IncomeExpensesDetail({ from, to }: DetailProps) {
           rows={data}
           rowKey={(r) => r.month}
           columns={[
-            { label: 'Month', cell: (r) => fullMonth(r.month) },
-            { label: 'Income', align: 'right', cell: (r) => formatCurrency(r.income) },
-            { label: 'Expenses', align: 'right', cell: (r) => formatCurrency(r.expenses) },
-            { label: 'Net', align: 'right', cell: (r) => <Signed cents={r.net} /> },
-            { label: 'Savings rate', align: 'right', cell: (r) => rate(r.income, r.net) },
+            { label: t('rep.col.month'), cell: (r) => fullMonth(r.month) },
+            { label: t('rep.col.income'), align: 'right', cell: (r) => formatCurrency(r.income) },
+            {
+              label: t('rep.col.expenses'),
+              align: 'right',
+              cell: (r) => formatCurrency(r.expenses),
+            },
+            { label: t('rep.col.net'), align: 'right', cell: (r) => <Signed cents={r.net} /> },
+            {
+              label: t('rep.col.savingsRate'),
+              align: 'right',
+              cell: (r) => rate(r.income, r.net),
+            },
           ]}
           footer={[
             {
-              label: 'Total',
+              label: t('rep.col.total'),
               cells: [
                 formatCurrency(income),
                 formatCurrency(expenses),
@@ -474,7 +494,7 @@ function IncomeExpensesDetail({ from, to }: DetailProps) {
               ],
             },
             {
-              label: 'Monthly average',
+              label: t('rep.col.monthlyAverage'),
               cells: [
                 formatCurrency(Math.round(income / months)),
                 formatCurrency(Math.round(expenses / months)),
@@ -507,33 +527,33 @@ function SpendingDetail({ from, to }: DetailProps) {
   const months = monthCount(from, to);
   const top = rows[0];
   const stats: StatCard[] = [
-    { label: 'Total Spent', value: formatCurrency(total) },
-    { label: 'Monthly Average', value: formatCurrency(Math.round(total / months)) },
+    { label: t('rep.spending.totalSpent'), value: formatCurrency(total) },
+    { label: t('rep.spending.monthlyAverage'), value: formatCurrency(Math.round(total / months)) },
     {
-      label: 'Biggest Category',
+      label: t('rep.spending.biggestCategory'),
       value: top ? formatCurrency(top.totalSpent) : '—',
       sub: top?.label,
     },
-    { label: 'Categories', value: String(rows.length) },
+    { label: t('rep.spending.categories'), value: String(rows.length) },
   ];
 
   return (
     <DetailLayout
       loading={isLoading}
       stats={stats}
-      chartTitle={rows.length > 10 ? 'Top 10 categories' : 'Spending by category'}
-      chartSubtitle={rows.length > 10 ? 'Every category is listed in the table below' : undefined}
+      chartTitle={rows.length > 10 ? t('rep.spending.top10') : t('rep.spending.byCategory')}
+      chartSubtitle={rows.length > 10 ? t('rep.spending.allListed') : undefined}
       chartHeight="h-96"
       chart={<SpendingChart from={from} to={to} />}
-      tableTitle="All categories"
+      tableTitle={t('rep.spending.allCategories')}
       onExport={() =>
         downloadCsv(
           csvName('spending', from, to),
           rows.map((r) => ({
-            category: r.label,
-            group: r.groupName ?? '',
-            spent_cents: r.totalSpent,
-            monthly_average_cents: Math.round(r.totalSpent / months),
+            [t('rep.csv.category')]: r.label,
+            [t('rep.csv.group')]: r.groupName ?? '',
+            [t('rep.csv.spentMinor')]: r.totalSpent,
+            [t('rep.csv.monthlyAverageMinor')]: Math.round(r.totalSpent / months),
           })),
         )
       }
@@ -543,7 +563,7 @@ function SpendingDetail({ from, to }: DetailProps) {
           rowKey={(r) => r.id}
           columns={[
             {
-              label: 'Category',
+              label: t('rep.col.category'),
               // The chart colors its ten bars in this same order
               cell: (r, i) => (
                 <span className="inline-flex items-center">
@@ -555,29 +575,33 @@ function SpendingDetail({ from, to }: DetailProps) {
               ),
             },
             {
-              label: 'Group',
+              label: t('rep.col.group'),
               cell: (r) => <span className="text-text-secondary">{r.groupName ?? '—'}</span>,
             },
-            { label: 'Spent', align: 'right', cell: (r) => formatCurrency(r.totalSpent) },
             {
-              label: 'Monthly average',
+              label: t('rep.col.spent'),
+              align: 'right',
+              cell: (r) => formatCurrency(r.totalSpent),
+            },
+            {
+              label: t('rep.col.monthlyAverage'),
               align: 'right',
               cell: (r) => formatCurrency(Math.round(r.totalSpent / months)),
             },
             {
-              label: 'Share',
+              label: t('rep.col.share'),
               align: 'right',
               cell: (r) => <ShareBar part={r.totalSpent} whole={total} />,
             },
           ]}
           footer={[
             {
-              label: 'Total',
+              label: t('rep.col.total'),
               cells: [
                 '',
                 formatCurrency(total),
                 formatCurrency(Math.round(total / months)),
-                '100%',
+                formatPercent(1),
               ],
             },
           ]}
@@ -625,7 +649,7 @@ function TrendCategoryPicker({
   return (
     <div className="relative shrink-0" ref={ref}>
       <Button variant="secondary" size="sm" onClick={() => setOpen(!open)}>
-        Categories ({value.length}) <ChevronDown size={12} />
+        {t('rep.trends.picker', { count: value.length })} <ChevronDown size={12} />
       </Button>
       {open && (
         <div className="absolute right-0 top-full mt-1 w-72 max-h-[60vh] overflow-y-auto bg-surface rounded-md border border-border shadow-hover z-30 py-1">
@@ -634,16 +658,16 @@ function TrendCategoryPicker({
             className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left hover:bg-hover transition-colors cursor-pointer"
           >
             <span>
-              <span className="block text-sm text-text">Biggest categories</span>
+              <span className="block text-sm text-text">{t('rep.trends.biggest')}</span>
               <span className="block text-xs text-text-tertiary">
-                The {TOP_TREND_CATEGORIES} with the most spending in the date range
+                {t('rep.trends.biggestHint', { count: TOP_TREND_CATEGORIES })}
               </span>
             </span>
             {auto && <Check size={14} className="text-brand-600 shrink-0" />}
           </button>
           <div className="border-t border-border-light my-1" />
           <p className="px-3 pt-1 pb-1 text-[11px] text-text-tertiary">
-            Or choose up to {MAX_TREND_CATEGORIES}
+            {t('rep.trends.chooseUpTo', { count: MAX_TREND_CATEGORIES })}
           </p>
           {expenseGroups.map((g) => (
             <div key={g.id}>
@@ -710,7 +734,7 @@ function SpendingTrendsDetail({
       return {
         id,
         color: EXPENSE_COLORS[i % EXPENSE_COLORS.length],
-        label: categoryLabel(byId.get(id), showIcons, 'Deleted category'),
+        label: categoryLabel(byId.get(id), showIcons, t('rep.deletedCategory')),
         total,
         peak,
       };
@@ -723,11 +747,14 @@ function SpendingTrendsDetail({
     null,
   );
   const stats: StatCard[] = [
-    { label: 'Total Spent', value: formatCurrency(selected) },
-    { label: 'Monthly Average', value: formatCurrency(Math.round(selected / months)) },
-    { label: 'Share of All Spending', value: percent(selected, allSpending) },
+    { label: t('rep.spending.totalSpent'), value: formatCurrency(selected) },
     {
-      label: 'Biggest Category',
+      label: t('rep.spending.monthlyAverage'),
+      value: formatCurrency(Math.round(selected / months)),
+    },
+    { label: t('rep.trends.shareOfAll'), value: percent(selected, allSpending) },
+    {
+      label: t('rep.spending.biggestCategory'),
       value: biggest && biggest.total > 0 ? formatCurrency(biggest.total) : '—',
       sub: biggest && biggest.total > 0 ? biggest.label : undefined,
     },
@@ -738,24 +765,26 @@ function SpendingTrendsDetail({
     <DetailLayout
       loading={top.isLoading || (ids.length > 0 && isLoading)}
       stats={stats}
-      chartTitle="Spending over time"
+      chartTitle={t('rep.trends.chartTitle')}
       chartSubtitle={
         auto
-          ? `Your ${ids.length === 1 ? 'biggest spending category' : `${ids.length} biggest spending categories`} in this period`
-          : `${ids.length} chosen ${ids.length === 1 ? 'category' : 'categories'}`
+          ? ids.length === 1
+            ? t('rep.trends.autoOne')
+            : t('rep.trends.autoMany', { count: ids.length })
+          : t('rep.trends.chosen', { count: ids.length })
       }
       chartActions={<TrendCategoryPicker value={ids} auto={auto} onChange={onCategoryIdsChange} />}
       chart={<SpendingTrendsChart from={from} to={to} categoryIds={ids} />}
-      tableTitle="By category"
+      tableTitle={t('rep.trends.tableTitle')}
       onExport={() =>
         downloadCsv(
           csvName('spending-trends', from, to),
           [...trend]
             .sort((a, b) => a.month.localeCompare(b.month))
             .map((p) => ({
-              month: p.month,
-              category: rows.find((r) => r.id === p.categoryId)?.label ?? '',
-              spent_cents: p.total,
+              [t('rep.csv.month')]: p.month,
+              [t('rep.csv.category')]: rows.find((r) => r.id === p.categoryId)?.label ?? '',
+              [t('rep.csv.spentMinor')]: p.total,
             })),
         )
       }
@@ -765,7 +794,7 @@ function SpendingTrendsDetail({
           rowKey={(r) => r.id}
           columns={[
             {
-              label: 'Category',
+              label: t('rep.col.category'),
               cell: (r) => (
                 <span className="inline-flex items-center">
                   <Swatch color={r.color} />
@@ -773,27 +802,27 @@ function SpendingTrendsDetail({
                 </span>
               ),
             },
-            { label: 'Spent', align: 'right', cell: (r) => formatCurrency(r.total) },
+            { label: t('rep.col.spent'), align: 'right', cell: (r) => formatCurrency(r.total) },
             {
-              label: 'Monthly average',
+              label: t('rep.col.monthlyAverage'),
               align: 'right',
               cell: (r) => formatCurrency(Math.round(r.total / months)),
             },
             {
-              label: 'Highest month',
+              label: t('rep.col.highestMonth'),
               align: 'right',
               cell: (r) =>
                 r.peak ? `${formatCurrency(r.peak.total)} (${fullMonth(r.peak.month)})` : '—',
             },
             {
-              label: 'Share of all spending',
+              label: t('rep.col.shareOfAll'),
               align: 'right',
               cell: (r) => <ShareBar part={r.total} whole={allSpending} />,
             },
           ]}
           footer={[
             {
-              label: 'Total',
+              label: t('rep.col.total'),
               cells: [
                 formatCurrency(selected),
                 formatCurrency(Math.round(selected / months)),
@@ -822,10 +851,10 @@ function DayTransactions({ day, onClose }: { day: string; onClose: () => void })
   );
   const logos = useMemo(() => new Map(payees.map((p) => [p.id, p.logo])), [payees]);
   const rows = data.filter(
-    (t) => !t.transferTransactionId && accountsById.get(t.accountId)?.isOffBudget === 0,
+    (tx) => !tx.transferTransactionId && accountsById.get(tx.accountId)?.isOffBudget === 0,
   );
-  const moneyIn = rows.reduce((s, t) => s + Math.max(t.amount, 0), 0);
-  const moneyOut = rows.reduce((s, t) => s - Math.min(t.amount, 0), 0);
+  const moneyIn = rows.reduce((s, tx) => s + Math.max(tx.amount, 0), 0);
+  const moneyOut = rows.reduce((s, tx) => s - Math.min(tx.amount, 0), 0);
 
   return (
     <Card padding="none" className="overflow-hidden">
@@ -833,16 +862,22 @@ function DayTransactions({ day, onClose }: { day: string; onClose: () => void })
         <div>
           <h3 className="text-sm font-semibold text-text">{formatWeekday(day, { long: true })}</h3>
           <p className="text-xs text-text-tertiary mt-0.5 tabular-nums">
-            {rows.length} {rows.length === 1 ? 'transaction' : 'transactions'}
-            {moneyIn > 0 && <span className="text-positive"> · {formatCurrency(moneyIn)} in</span>}
+            {t('rep.calendar.dayCount', { count: rows.length })}
+            {moneyIn > 0 && (
+              <span className="text-positive">
+                {t('rep.calendar.dayIn', { amount: formatCurrency(moneyIn) })}
+              </span>
+            )}
             {moneyOut > 0 && (
-              <span className="text-negative"> · {formatCurrency(moneyOut)} out</span>
+              <span className="text-negative">
+                {t('rep.calendar.dayOut', { amount: formatCurrency(moneyOut) })}
+              </span>
             )}
           </p>
         </div>
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('common.close')}
           className="p-1.5 rounded text-text-tertiary hover:text-text-secondary hover:bg-hover transition-colors cursor-pointer"
         >
           <X size={15} />
@@ -855,52 +890,54 @@ function DayTransactions({ day, onClose }: { day: string; onClose: () => void })
       ) : (
         <BreakdownTable
           rows={rows}
-          rowKey={(t) => t.id}
+          rowKey={(tx) => tx.id}
           columns={[
             {
-              label: 'Payee',
-              cell: (t) => (
+              label: t('rep.col.payee'),
+              cell: (tx) => (
                 <span className="inline-flex items-center gap-2">
                   <PayeeIcon
-                    name={t.payeeName ?? ''}
-                    logo={t.payeeId ? logos.get(t.payeeId) : null}
+                    name={tx.payeeName ?? ''}
+                    logo={tx.payeeId ? logos.get(tx.payeeId) : null}
                     size="sm"
                   />
-                  {t.payeeName || <span className="text-text-tertiary">No payee</span>}
+                  {tx.payeeName || (
+                    <span className="text-text-tertiary">{t('rep.calendar.noPayee')}</span>
+                  )}
                 </span>
               ),
             },
             {
-              label: 'Category',
-              cell: (t) => (
+              label: t('rep.col.category'),
+              cell: (tx) => (
                 <span className="text-text-secondary">
-                  {t.isParent
-                    ? `Split (${t.children?.length ?? 0})`
-                    : t.categoryId
-                      ? categoryLabel(categoriesById.get(t.categoryId), showIcons)
-                      : 'Uncategorized'}
+                  {tx.isParent
+                    ? t('rep.calendar.split', { count: tx.children?.length ?? 0 })
+                    : tx.categoryId
+                      ? categoryLabel(categoriesById.get(tx.categoryId), showIcons)
+                      : t('rep.uncategorized')}
                 </span>
               ),
             },
             {
-              label: 'Account',
-              cell: (t) => (
+              label: t('rep.col.account'),
+              cell: (tx) => (
                 <Link
-                  to={`/accounts/${t.accountId}`}
+                  to={`/accounts/${tx.accountId}`}
                   className="text-text-secondary hover:text-brand-600 transition-colors"
                 >
-                  {accountsById.get(t.accountId)?.name ?? ''}
+                  {accountsById.get(tx.accountId)?.name ?? ''}
                 </Link>
               ),
             },
             {
-              label: 'Amount',
+              label: t('rep.col.amount'),
               align: 'right',
-              cell: (t) =>
-                t.amount > 0 ? (
-                  <span className="text-positive">+{formatCurrency(t.amount)}</span>
+              cell: (tx) =>
+                tx.amount > 0 ? (
+                  <span className="text-positive">+{formatCurrency(tx.amount)}</span>
                 ) : (
-                  <span className="text-text">{formatCurrency(t.amount)}</span>
+                  <span className="text-text">{formatCurrency(tx.amount)}</span>
                 ),
             },
           ]}
@@ -925,13 +962,13 @@ function CalendarDetail({ from, to }: DetailProps) {
     differenceInCalendarDays(parseISO(bounds.to), parseISO(bounds.from)) + 1,
   );
   const stats: StatCard[] = [
-    { label: 'Money In', value: formatCurrency(moneyIn), tone: 'positive' },
-    { label: 'Money Out', value: formatCurrency(moneyOut), tone: 'negative' },
-    { label: 'Net', value: formatCurrency(net), tone: toneOf(net) },
+    { label: t('rep.calendar.moneyIn'), value: formatCurrency(moneyIn), tone: 'positive' },
+    { label: t('rep.calendar.moneyOut'), value: formatCurrency(moneyOut), tone: 'negative' },
+    { label: t('rep.calendar.net'), value: formatCurrency(net), tone: toneOf(net) },
     {
-      label: 'Daily Average Out',
+      label: t('rep.calendar.dailyAverageOut'),
       value: formatCurrency(days ? Math.round(moneyOut / days) : 0),
-      sub: days ? `Over ${days} ${days === 1 ? 'day' : 'days'}` : undefined,
+      sub: days ? t('rep.calendar.overDays', { count: days }) : undefined,
     },
   ];
   const rows = [...data].reverse();
@@ -948,11 +985,11 @@ function CalendarDetail({ from, to }: DetailProps) {
     <DetailLayout
       loading={isLoading}
       stats={stats}
-      chartTitle="Transaction calendar"
+      chartTitle={t('rep.calendar.chartTitle')}
       chartSubtitle={
         monthCount(from, to) > CALENDAR_MONTHS_MAX
-          ? 'Each day is colored by its net: green when more came in, red when more went out. Click a day to see its transactions.'
-          : 'Green is money in, red is money out. Click a day to see its transactions.'
+          ? t('rep.calendar.heatmapHint')
+          : t('rep.calendar.barsHint')
       }
       chartHeight=""
       chart={<TransactionCalendar from={from} to={to} selected={selected} onSelect={select} />}
@@ -963,16 +1000,16 @@ function CalendarDetail({ from, to }: DetailProps) {
           </div>
         )
       }
-      tableTitle="Days with transactions"
+      tableTitle={t('rep.calendar.tableTitle')}
       onExport={() =>
         downloadCsv(
           csvName('calendar', from, to),
           data.map((d) => ({
-            date: d.date,
-            transactions: d.count,
-            money_in_cents: d.income,
-            money_out_cents: d.expenses,
-            net_cents: d.income - d.expenses,
+            [t('rep.csv.date')]: d.date,
+            [t('rep.csv.transactions')]: d.count,
+            [t('rep.csv.moneyInMinor')]: d.income,
+            [t('rep.csv.moneyOutMinor')]: d.expenses,
+            [t('rep.csv.netMinor')]: d.income - d.expenses,
           })),
         )
       }
@@ -984,15 +1021,23 @@ function CalendarDetail({ from, to }: DetailProps) {
           selectedKey={selected}
           onRowClick={(r) => select(r.date)}
           columns={[
-            { label: 'Date', cell: (r) => formatWeekday(r.date) },
-            { label: 'Transactions', align: 'right', cell: (r) => r.count },
-            { label: 'Money in', align: 'right', cell: (r) => formatCurrency(r.income) },
-            { label: 'Money out', align: 'right', cell: (r) => formatCurrency(r.expenses) },
-            { label: 'Net', align: 'right', cell: (r) => <Signed cents={r.income - r.expenses} /> },
+            { label: t('rep.col.date'), cell: (r) => formatWeekday(r.date) },
+            { label: t('rep.col.transactions'), align: 'right', cell: (r) => r.count },
+            { label: t('rep.col.moneyIn'), align: 'right', cell: (r) => formatCurrency(r.income) },
+            {
+              label: t('rep.col.moneyOut'),
+              align: 'right',
+              cell: (r) => formatCurrency(r.expenses),
+            },
+            {
+              label: t('rep.col.net'),
+              align: 'right',
+              cell: (r) => <Signed cents={r.income - r.expenses} />,
+            },
           ]}
           footer={[
             {
-              label: 'Total',
+              label: t('rep.col.total'),
               cells: [
                 data.reduce((s, d) => s + d.count, 0),
                 formatCurrency(moneyIn),
