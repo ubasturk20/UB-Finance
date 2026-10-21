@@ -526,3 +526,52 @@ export const exchangeRates = sqliteTable(
   },
   (table) => [index('exchange_rates_pair_date_idx').on(table.base, table.quote, table.date)],
 );
+
+/**
+ * A credit card's or line of credit's own details (one row per account, migration 0025).
+ * Amounts in the account's minor units; rates in basis points (2000 = 20%).
+ */
+export const accountDetails = sqliteTable('account_details', {
+  accountId: text('account_id')
+    .primaryKey()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  /** Kart limiti */
+  creditLimit: integer('credit_limit'),
+  /** Hesap kesim günü (1-31; shorter months use their last day) */
+  statementDay: integer('statement_day'),
+  /** Son ödeme günü (1-31): the first such day after the statement */
+  dueDay: integer('due_day'),
+  /** Asgari ödeme oranı, basis points */
+  minPaymentRate: integer('min_payment_rate'),
+  /** Aylık akdi faiz, basis points (shown only) */
+  interestRate: integer('interest_rate'),
+  updatedAt: text('updated_at')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+/**
+ * Installment purchases on a card (taksitli alışveriş): `total_amount` split into
+ * `installment_count` equal parts, one on each statement from `first_month` (yyyy-MM).
+ */
+export const installmentPlans = sqliteTable(
+  'installment_plans',
+  {
+    id: text('id').primaryKey(),
+    accountId: text('account_id')
+      .notNull()
+      .references(() => accounts.id, { onDelete: 'cascade' }),
+    /** The purchase on the card, when it was recorded as one transaction */
+    transactionId: text('transaction_id').references(() => transactions.id, {
+      onDelete: 'set null',
+    }),
+    description: text('description').notNull(),
+    totalAmount: integer('total_amount').notNull(),
+    installmentCount: integer('installment_count').notNull(),
+    firstMonth: text('first_month').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (table) => [index('installment_plans_account_idx').on(table.accountId)],
+);

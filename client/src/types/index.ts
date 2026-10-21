@@ -938,3 +938,63 @@ export interface EnableBankingSyncResult {
   skipped: { noDate: number; badAmount: number; otherCurrency: number };
   errors: string[];
 }
+
+// Credit cards (Turkish cards: statements, minimum payments, installments)
+
+/** A credit card's or line of credit's details. Rates in basis points (2000 = %20). */
+export interface AccountDetails {
+  accountId: string;
+  creditLimit: number | null;
+  statementDay: number | null;
+  dueDay: number | null;
+  minPaymentRate: number | null;
+  interestRate: number | null;
+  updatedAt: string;
+}
+
+export interface CardSummary {
+  accountId: string;
+  currency: string | null;
+  balance: number;
+  /** False while no card details were entered */
+  hasDetails: boolean;
+  limit: number | null;
+  statementDay: number | null;
+  dueDay: number | null;
+  minPaymentRate: number | null;
+  interestRate: number | null;
+  /** What's owed now */
+  used: number;
+  /** Limit minus what's owed; null without a limit */
+  available: number | null;
+  /** The last statement (purchases less refunds plus the installments billed on it) */
+  statementDebt: number | null;
+  minimumPayment: number | null;
+  remainingAfterPayments: number | null;
+  installmentDebtRemaining: number;
+  lastStatement: string | null;
+  nextStatement: string | null;
+  dueDate: string | null;
+  /** Negative once the due date has passed */
+  daysUntilDue: number | null;
+  /** The month the open statement bills (yyyy-MM) */
+  openMonth: string;
+  today: string;
+}
+
+export interface InstallmentPlan {
+  id: string;
+  accountId: string;
+  transactionId: string | null;
+  description: string;
+  totalAmount: number;
+  installmentCount: number;
+  /** The statement month the first installment is billed on (yyyy-MM) */
+  firstMonth: string;
+  createdAt: string;
+  perInstallment: number;
+  /** The installment the open statement bills: 0 before the first, the count after the last */
+  current: number;
+  remainingCount: number;
+  remainingAmount: number;
+}

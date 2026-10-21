@@ -14,3 +14,8 @@ export function isLiabilityType(type: string): boolean {
 export function accountTypeLabel(type: string): string {
   return BY_TYPE.get(type as AccountTypeInfo['value'])?.label ?? type;
 }
+
+/** Accounts with card details, statements and installments: credit cards and KMH */
+export function isCardType(type: string): boolean {
+  return type === 'credit' || type === 'line_of_credit';
+}

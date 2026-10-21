@@ -74,12 +74,28 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
     actions: [{ type: 'set_category', value: groceries.id }],
   });
   await api.call('POST', '/goals', { name: 'Vacation', targetAmount: 200_000 });
+  // A credit card with its details and an installment purchase: the card summary must fit too
+  const card = await api.createAccount('Bonus Platinum Kredi Kartı', -1_234_567, 'credit');
+  await api.call('PUT', `/accounts/${card.id}/details`, {
+    creditLimit: 25_000_000,
+    statementDay: 15,
+    dueDay: 25,
+    minPaymentRate: 2_000,
+    interestRate: 425,
+  });
+  await api.call('POST', `/accounts/${card.id}/installments`, {
+    description: 'Çamaşır makinesi ve bulaşık makinesi kampanyası',
+    totalAmount: 4_599_900,
+    installmentCount: 12,
+    firstMonth: thisMonth(),
+  });
 
   const routes: [string, string][] = [
     ['dashboard', '/dashboard'],
     ['accounts', '/accounts'],
     ['account', `/accounts/${checking.id}`],
     ['reconcile', `/accounts/${checking.id}/reconcile`],
+    ['credit-card', `/accounts/${card.id}`],
     ['transactions', '/transactions'],
     ['budget', '/budget'],
     ['budget-category', `/budget/category/${groceries.id}`],

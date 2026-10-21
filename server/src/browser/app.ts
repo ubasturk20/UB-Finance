@@ -20,6 +20,7 @@ import { customReportsRouter } from '../routes/customReports.js';
 import { dashboardsRouter } from '../routes/dashboards.js';
 import { schedulesRouter } from '../routes/schedules.js';
 import { goalsRouter } from '../routes/goals.js';
+import { creditCardsRouter } from '../routes/creditCards.js';
 import { currencyRouter } from '../routes/currency.js';
 
 /** Answer for anything that needs a real server: bank connections, sign-in. */
@@ -62,6 +63,7 @@ app.use('/custom-reports', customReportsRouter as unknown as ShimRouter);
 app.use('/dashboards', dashboardsRouter as unknown as ShimRouter);
 app.use('/schedules', schedulesRouter as unknown as ShimRouter);
 app.use('/goals', goalsRouter as unknown as ShimRouter);
+app.use(creditCardsRouter as unknown as ShimRouter);
 // Rates can be typed in, but not downloaded: the demo never talks to another server
 app.put('/currency/download', (req, res, next) => {
   const body = req.body as { enabled?: unknown; url?: unknown } | undefined;
