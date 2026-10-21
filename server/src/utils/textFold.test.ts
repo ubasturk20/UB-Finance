@@ -10,6 +10,13 @@ describe('foldText', () => {
   });
 
   it('is the plain lowercase for ASCII text (property-based)', () => {
-    fc.assert(fc.property(fc.string(), (s) => expect(foldText(s)).toBe(s.toLowerCase())));
+    const ascii = fc.string({
+      unit: fc.integer({ min: 32, max: 126 }).map((c) => String.fromCharCode(c)),
+    });
+    fc.assert(
+      fc.property(ascii, (s) => {
+        expect(foldText(s)).toBe(s.toLowerCase());
+      }),
+    );
   });
 });
