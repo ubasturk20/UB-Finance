@@ -228,15 +228,14 @@ export function EditAccountModal({ account, onClose }: Props) {
             <label className="block text-sm font-medium text-text-secondary mb-1">
               {t('acc.form.startingBalance')}
             </label>
-            <AmountFields report={report}>
-              <CurrencyInput
-                value={startingBalance}
-                onChange={setStartingBalance}
-                allowNegative
-                aria-label={t('acc.form.startingBalanceAria')}
-                currency={currency}
-              />
-            </AmountFields>
+            {/* Not gated: unreadable text keeps the balance it had (as before card details) */}
+            <CurrencyInput
+              value={startingBalance}
+              onChange={setStartingBalance}
+              allowNegative
+              aria-label={t('acc.form.startingBalanceAria')}
+              currency={currency}
+            />
           </div>
 
           {isCard && (
