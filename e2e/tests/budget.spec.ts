@@ -42,7 +42,7 @@ test.describe('budget', () => {
 
     await plan(page, 'Market alışverişi', '400');
     await expect(toBeBudgeted(page)).toContainText('2.600 ₺');
-    await plan(page, 'Rent / Mortgage', '2600');
+    await plan(page, 'Kira', '2600');
     await expect(toBeBudgeted(page)).toContainText('0 ₺');
     await expect(toBeBudgeted(page)).toContainText('Tamamen bütçelendi');
 

@@ -6,6 +6,8 @@
  * by a higher rule is never overwritten by a lower one. Prepend/append notes always stack.
  */
 
+import { foldText } from '../utils/textFold.js';
+
 export const TEXT_FIELDS = ['payee_name', 'imported_payee', 'notes'] as const;
 export const ID_FIELDS = ['payee', 'account', 'category'] as const;
 
@@ -96,7 +98,8 @@ export type RuleOutcome = {
 // ---------------------------------------------------------------------------
 // Conditions
 
-const lower = (s: string | null | undefined) => (s ?? '').toLowerCase();
+// Turkish-aware: "migros" matches "MİGROS" and "MIGROS" (bank files write both)
+const lower = (s: string | null | undefined) => foldText(s);
 
 function textSubject(field: TextField, tx: TxState): string | null {
   if (field === 'payee_name') return tx.payeeName;
@@ -118,7 +121,7 @@ function subjectOf(field: TextField | IdField, tx: TxState): string | null {
 
 /** Compare two values; text compares case-insensitively, ids exactly */
 function same(field: TextField | IdField, a: string | null, b: string): boolean {
-  return isTextField(field) ? lower(a) === b.toLowerCase() : a === b;
+  return isTextField(field) ? lower(a) === lower(b) : a === b;
 }
 
 export function evalCondition(c: Condition, tx: TxState): boolean {
@@ -178,7 +181,7 @@ export function evalCondition(c: Condition, tx: TxState): boolean {
   }
 
   const s = lower(subject);
-  const v = c.value.toLowerCase();
+  const v = lower(c.value);
   switch (c.op) {
     case 'contains':
       return s.includes(v);

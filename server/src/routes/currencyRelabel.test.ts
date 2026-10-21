@@ -62,7 +62,7 @@ describe('correcting the budget currency', () => {
     db.insert(goals).values({ id: 'g', name: 'Trip', targetAmount: 50_000 }).run();
     const res = await relabel('JPY');
     expect(res.status).toBe(409);
-    expect(res.body.error).toMatch(/different number of decimals/);
+    expect(res.body.error).toMatch(/farklı sayıda ondalık basamak/);
     // Same decimals: nothing changes meaning
     expect((await relabel('EUR')).status).toBe(200);
   });

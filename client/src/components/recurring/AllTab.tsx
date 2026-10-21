@@ -28,6 +28,7 @@ import { docsUrl } from '../../utils/project';
 import type { Schedule, ScheduleOccurrence } from '../../types';
 import { formatDay } from '../../utils/dates';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 const GRID =
   'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_110px_130px_120px_120px_32px] items-center gap-4';
@@ -124,7 +125,7 @@ export default function AllTab({
 
   // Same searchable fields as Actual: name, payee, account, amount, status, date
   const filtered = useMemo(() => {
-    const q = filter.trim().toLowerCase();
+    const q = foldText(filter.trim());
     if (!q) return rows;
     return rows.filter((r) =>
       [
@@ -135,7 +136,7 @@ export default function AllTab({
         statusLabel(r.status),
         r.nextDate ? formatDay(r.nextDate) : '',
         FREQ_LABEL.get(r.schedule.recurrenceType) ?? '',
-      ].some((f) => f.toLowerCase().includes(q)),
+      ].some((f) => foldText(f).includes(q)),
     );
   }, [rows, filter]);
 

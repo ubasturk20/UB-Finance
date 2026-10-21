@@ -123,7 +123,7 @@ test.describe('account register', () => {
     await expect(form.getByText('40 ₺ kalan')).toBeVisible();
     await form
       .getByRole('combobox', { name: 'Parça 2 kategorisi' })
-      .selectOption({ label: '🏠 Rent / Mortgage' });
+      .selectOption({ label: '🏠 Kira' });
     await form.getByRole('textbox', { name: 'Parça 2 tutarı' }).fill('40');
     await expect(form.getByText('Dengede')).toBeVisible();
     await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
@@ -172,7 +172,7 @@ test.describe('account register', () => {
 
     // Category via the searchable picker
     await panel.getByRole('button', { name: 'Kategorisiz' }).click();
-    await page.getByPlaceholder('Kategori ara…').fill('stream');
+    await page.getByPlaceholder('Kategori ara…').fill('dijital');
     await page.getByRole('button', { name: /Dijital abonelikler/ }).click();
 
     await panel.getByRole('textbox', { name: 'Notlar' }).fill('family plan');

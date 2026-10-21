@@ -38,7 +38,7 @@ async function buildCoffeeRule(page: Page, expectedMatches: number) {
     expectedMatches ? `${expectedMatches} işlemle eşleşiyor` : 'Henüz eşleşen işlem yok',
   );
   await dialog.getByRole('button', { name: 'Kategori seçin…' }).click();
-  await page.getByPlaceholder('Kategori ara…').fill('coffee');
+  await page.getByPlaceholder('Kategori ara…').fill('kafe');
   await page.getByRole('button', { name: /Kafe/ }).click();
   return dialog;
 }

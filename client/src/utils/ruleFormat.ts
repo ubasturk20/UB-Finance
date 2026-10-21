@@ -10,6 +10,7 @@ import type {
 } from '../types';
 import { formatDay } from './dates';
 import { formatPercent, t } from '../i18n';
+import { foldText } from './textFold';
 
 const TEXT_OPS: RuleConditionOp[] = [
   'is',
@@ -267,10 +268,10 @@ export function actionText(a: RuleAction, l: RuleLookups): string {
 
 /** Plain text of a whole rule, for search */
 export function ruleSearchText(r: Rule, l: RuleLookups): string {
-  return [
-    ...r.conditions.map((c) => conditionText(c, l)),
-    ...r.actions.map((a) => actionText(a, l)),
-  ]
-    .join(' ')
-    .toLowerCase();
+  return foldText(
+    [
+      ...r.conditions.map((c) => conditionText(c, l)),
+      ...r.actions.map((a) => actionText(a, l)),
+    ].join(' '),
+  );
 }

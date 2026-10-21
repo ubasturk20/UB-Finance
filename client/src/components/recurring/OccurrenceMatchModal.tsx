@@ -8,6 +8,7 @@ import { formatCurrency } from '../../utils/currency';
 import type { ScheduleOccurrence } from '../../types';
 import { formatDay } from '../../utils/dates';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 interface Props {
   isOpen: boolean;
@@ -38,11 +39,9 @@ export default function OccurrenceMatchModal({ isOpen, onClose, occurrence }: Pr
   const filtered = useMemo(() => {
     let list = transactions.filter((tx) => !tx.transferTransactionId && !tx.scheduleId);
     if (search) {
-      const q = search.toLowerCase();
+      const q = foldText(search);
       list = list.filter(
-        (tx) =>
-          (tx.payeeName ?? '').toLowerCase().includes(q) ||
-          (tx.notes ?? '').toLowerCase().includes(q),
+        (tx) => foldText(tx.payeeName).includes(q) || foldText(tx.notes).includes(q),
       );
     }
     return list;

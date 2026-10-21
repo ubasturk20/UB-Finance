@@ -74,7 +74,7 @@ test.describe('register', () => {
     await expectTouchSize(details.getByRole('button', { name: 'Ayrıntıları kapat' }));
 
     await details.getByRole('button', { name: 'Kategorisiz' }).click();
-    await page.getByPlaceholder('Kategori ara…').fill('stream');
+    await page.getByPlaceholder('Kategori ara…').fill('dijital');
     await page.getByRole('button', { name: /Dijital abonelikler/ }).click();
     const streaming = await api.category('Dijital abonelikler');
     await expect

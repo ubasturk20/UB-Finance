@@ -4,6 +4,7 @@ import { useCanSave } from '../../hooks/useConnection';
 import { usePayees, useCreatePayee } from '../../hooks/usePayees';
 import { PayeeIcon } from '../payees/PayeeIcon';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 export const selectorInputClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm text-text bg-surface placeholder-text-disabled focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600';
@@ -50,9 +51,9 @@ export function MerchantSelect({
     [payees],
   );
   const filtered = query
-    ? sortedPayees.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+    ? sortedPayees.filter((p) => foldText(p.name).includes(foldText(query))).slice(0, 8)
     : sortedPayees.slice(0, 8);
-  const exactMatch = payees.find((p) => p.name.toLowerCase() === query.trim().toLowerCase());
+  const exactMatch = payees.find((p) => foldText(p.name) === foldText(query.trim()));
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {

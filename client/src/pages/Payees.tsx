@@ -11,6 +11,7 @@ import RowMenu from '../components/ui/RowMenu';
 import { useIsPhone } from '../hooks/useIsPhone';
 import type { PayeeWithCount } from '../types';
 import { t } from '../i18n';
+import { foldText } from '../utils/textFold';
 
 function MergeModal({
   isOpen,
@@ -101,7 +102,7 @@ export default function PayeesPage() {
   );
 
   const filtered = useMemo(
-    () => payees.filter((p) => p.name.toLowerCase().includes(search.toLowerCase())),
+    () => payees.filter((p) => foldText(p.name).includes(foldText(search))),
     [payees, search],
   );
 
