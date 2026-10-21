@@ -22,6 +22,7 @@ import { ServerStatus } from './ServerStatus';
 import { DOCS_URL } from '../../utils/project';
 import { BrandName } from '../ui/BrandName';
 import logoUrl from '/logo.png';
+import { t } from '../../i18n';
 
 interface NavItemProps {
   to: string;
@@ -105,7 +106,7 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-sidebar-border">
         <img src={logoUrl} alt="" className="w-7 h-7 shrink-0" />
-        {/* The sidebar is dark in both themes, so "Budget" is always light here */}
+        {/* The sidebar is dark in both themes, so "Finance" is always light here */}
         <BrandName
           className={`text-sm font-semibold tracking-tight transition-opacity duration-200 ${
             isExpanded ? 'opacity-100' : 'opacity-0'
@@ -122,11 +123,11 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
             href={DOCS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Help & docs (opens in a new tab)"
+            aria-label={t('shell.sidebar.helpLabel')}
             className={`group ${headerButton}`}
           >
             <CircleHelp size={16} aria-hidden />
-            <HeaderTooltip>Help &amp; docs</HeaderTooltip>
+            <HeaderTooltip>{t('shell.sidebar.help')}</HeaderTooltip>
           </a>
           {/* The phone drawer closes; the desktop sidebar has a pin instead: pinned stays open,
               unpinned collapses and opens on hover (the Sidebar setting in Preferences) */}
@@ -134,7 +135,7 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close menu"
+              aria-label={t('shell.sidebar.closeMenu')}
               className={headerButton}
             >
               <X size={18} />
@@ -144,7 +145,7 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
               type="button"
               onClick={() => setSidebarMode(pinned ? 'auto-hide' : 'persistent')}
               aria-pressed={pinned}
-              aria-label="Pin sidebar"
+              aria-label={t('shell.sidebar.pin')}
               className={`group ${headerButton}`}
             >
               <Pin
@@ -153,7 +154,9 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
                 fill={pinned ? 'currentColor' : 'none'}
                 className={pinned ? 'text-sidebar-text-hi' : undefined}
               />
-              <HeaderTooltip>{pinned ? 'Unpin sidebar' : 'Pin sidebar'}</HeaderTooltip>
+              <HeaderTooltip>
+                {pinned ? t('shell.sidebar.unpin') : t('shell.sidebar.pin')}
+              </HeaderTooltip>
             </button>
           )}
         </div>
@@ -164,41 +167,51 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
         <NavItem
           to="/dashboard"
           icon={<LayoutDashboard size={18} />}
-          label="Dashboard"
+          label={t('shell.nav.dashboard')}
           collapsed={!isExpanded}
         />
         <NavItem
           to="/accounts"
           icon={<Landmark size={18} />}
-          label="Accounts"
+          label={t('shell.nav.accounts')}
           collapsed={!isExpanded}
         />
         <NavItem
           to="/transactions"
           icon={<ArrowLeftRight size={18} />}
-          label="Transactions"
+          label={t('shell.nav.transactions')}
           collapsed={!isExpanded}
         />
-        <NavItem to="/budget" icon={<Wallet size={18} />} label="Budget" collapsed={!isExpanded} />
+        <NavItem
+          to="/budget"
+          icon={<Wallet size={18} />}
+          label={t('shell.nav.budget')}
+          collapsed={!isExpanded}
+        />
         <NavItem
           to="/recurring"
           icon={<Repeat size={18} />}
-          label="Recurring"
+          label={t('shell.nav.recurring')}
           collapsed={!isExpanded}
         />
         <NavItem
           to="/reports"
           icon={<BarChart3 size={18} />}
-          label="Reports"
+          label={t('shell.nav.reports')}
           collapsed={!isExpanded}
         />
         <NavItem
           to="/cash-flow"
           icon={<Workflow size={18} />}
-          label="Cash Flow"
+          label={t('shell.nav.cashFlow')}
           collapsed={!isExpanded}
         />
-        <NavItem to="/goals" icon={<Target size={18} />} label="Goals" collapsed={!isExpanded} />
+        <NavItem
+          to="/goals"
+          icon={<Target size={18} />}
+          label={t('shell.nav.goals')}
+          collapsed={!isExpanded}
+        />
       </nav>
 
       {/* Account list */}
@@ -212,12 +225,22 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
 
       {/* Footer nav */}
       <nav className="py-2 px-3 border-t border-sidebar-border space-y-0.5">
-        <NavItem to="/payees" icon={<Users size={18} />} label="Payees" collapsed={!isExpanded} />
-        <NavItem to="/rules" icon={<Zap size={18} />} label="Rules" collapsed={!isExpanded} />
+        <NavItem
+          to="/payees"
+          icon={<Users size={18} />}
+          label={t('shell.nav.payees')}
+          collapsed={!isExpanded}
+        />
+        <NavItem
+          to="/rules"
+          icon={<Zap size={18} />}
+          label={t('shell.nav.rules')}
+          collapsed={!isExpanded}
+        />
         <NavItem
           to="/settings"
           icon={<Settings size={18} />}
-          label="Settings"
+          label={t('shell.nav.settings')}
           collapsed={!isExpanded}
         />
       </nav>

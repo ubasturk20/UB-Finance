@@ -298,23 +298,23 @@ test.describe('dialogs and touch targets', () => {
     await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
     const dialog = page.getByRole('dialog', { name: 'Add Account' });
     await expectBottomSheet(page, dialog);
-    await expectTouchSize(dialog.getByRole('button', { name: 'Close' }));
-    await dialog.getByRole('button', { name: 'Close' }).click();
+    await expectTouchSize(dialog.getByRole('button', { name: 'Kapat' }));
+    await dialog.getByRole('button', { name: 'Kapat' }).click();
     await expect(dialog).toBeHidden();
   });
 
   test('primary controls are at least 44px', async ({ page, api }) => {
     const { checking } = await seedAccount(api);
     await open(page, `/accounts/${checking.id}`);
-    const menu = page.getByRole('button', { name: 'Open menu' });
+    const menu = page.getByRole('button', { name: 'Menüyü aç' });
     await expectTouchSize(menu);
     for (const name of ['Add Transaction', 'Import CSV', 'This Month', 'All Time']) {
       await expectTouchSize(page.getByRole('button', { name, exact: true }));
     }
     await menu.click();
     const nav = page.getByRole('complementary');
-    await expectTouchSize(page.getByRole('button', { name: 'Close menu' }));
-    for (const name of ['Dashboard', 'Budget', 'Settings']) {
+    await expectTouchSize(page.getByRole('button', { name: 'Menüyü kapat' }));
+    for (const name of ['Genel Bakış', 'Bütçe', 'Ayarlar']) {
       const { height } = await size(nav.getByRole('link', { name, exact: true }));
       expect(height, name).toBeGreaterThanOrEqual(TOUCH);
     }
@@ -325,7 +325,7 @@ test('the month picker fits the screen and is easy to tap', async ({ page, api }
   await seedAccount(api);
   await open(page, '/reports');
   await page.getByRole('main').getByRole('button', { name: 'Frozen' }).click();
-  const picker = page.getByRole('dialog', { name: 'Choose months' });
+  const picker = page.getByRole('dialog', { name: 'Ayları seçin' });
   await expect(picker).toBeVisible();
   await picker.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const box = (await picker.boundingBox())!;
@@ -333,11 +333,11 @@ test('the month picker fits the screen and is easy to tap', async ({ page, api }
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
   expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
-  const from = picker.getByRole('group', { name: 'From' });
-  await expectTouchSize(from.getByRole('button', { name: 'Previous year' }));
+  const from = picker.getByRole('group', { name: 'Başlangıç' });
+  await expectTouchSize(from.getByRole('button', { name: 'Önceki yıl' }));
   await expectTouchSize(from.getByRole('button', { name: /^Ocak / }));
-  await expectTouchSize(picker.getByRole('button', { name: 'Done' }));
-  await expectTouchSize(picker.getByRole('button', { name: 'Cancel' }));
+  await expectTouchSize(picker.getByRole('button', { name: 'Bitti' }));
+  await expectTouchSize(picker.getByRole('button', { name: 'İptal' }));
 });
 
 test('report summary figures fit their card', async ({ page, api }) => {

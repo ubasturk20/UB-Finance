@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import EmojiPicker, { EmojiStyle, type EmojiClickData } from 'emoji-picker-react';
+import { t } from '../../i18n';
 
 const WIDTH = 320;
 const HEIGHT = 400;
@@ -85,7 +86,7 @@ export function EmojiPickerPopover({
         }}
         width={WIDTH}
         height={pos.height}
-        searchPlaceholder="Search emoji..."
+        searchPlaceholder={t('ui.emoji.search')}
         previewConfig={{ showPreview: false }}
         // The default style loads images from a CDN, which the CSP blocks
         emojiStyle={EmojiStyle.NATIVE}

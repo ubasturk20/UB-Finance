@@ -1,4 +1,5 @@
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react';
+import { t } from '../../i18n';
 
 interface Props {
   href: string;
@@ -21,7 +22,7 @@ export function ExternalLink({ href, children, className = '', icon = true }: Pr
     >
       {children}
       {icon && <ExternalLinkIcon size={12} aria-hidden className="shrink-0" />}
-      <span className="sr-only"> (opens in a new tab)</span>
+      <span className="sr-only">{t('ui.externalLink.newTab')}</span>
     </a>
   );
 }

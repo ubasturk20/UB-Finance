@@ -241,23 +241,23 @@ const SHOTS: Shot[] = [
     prepare: (page) => openDialog(page, 'Add Goal'),
     element: dialog,
   },
-  { name: 'settings-data', route: '/settings?tab=data', waitFor: 'Download Backup' },
-  { name: 'settings-preferences', route: '/settings?tab=preferences', waitFor: 'Theme' },
+  { name: 'settings-data', route: '/settings?tab=data', waitFor: 'Yedeği indir' },
+  { name: 'settings-preferences', route: '/settings?tab=preferences', waitFor: 'Tema' },
   {
     name: 'settings-amounts',
     route: '/settings?tab=preferences',
-    waitFor: 'Number format',
+    waitFor: 'Sayı biçimi',
     // Shown the European way, the reason the setting exists
     prepare: async (page) => {
-      const amounts = page.getByRole('region', { name: 'Amounts' });
+      const amounts = page.getByRole('region', { name: 'Tutarlar' });
       await amounts
-        .getByRole('group', { name: 'Number format' })
+        .getByRole('group', { name: 'Sayı biçimi' })
         .getByRole('button', { name: '1.234,56' })
         .click();
-      await amounts.getByRole('textbox', { name: 'Currency symbol' }).fill('€');
-      await amounts.getByRole('button', { name: 'After' }).click();
+      await amounts.getByRole('textbox', { name: 'Para birimi simgesi' }).fill('€');
+      await amounts.getByRole('button', { name: 'Sonda' }).click();
     },
-    element: (page) => page.getByRole('region', { name: 'Amounts' }),
+    element: (page) => page.getByRole('region', { name: 'Tutarlar' }),
   },
 
   // --- Phones ---
@@ -361,7 +361,7 @@ async function take(browser: Browser, shot: Shot) {
     await page.goto(`http://localhost:${PORT}/demo/#${shot.route}`);
     if (shot.waitFor) await page.getByText(shot.waitFor).first().waitFor({ timeout: 15_000 });
     // Show the on-budget accounts in the sidebar (they start collapsed)
-    if (!shot.phone) await page.getByRole('button', { name: /^For budget/ }).click();
+    if (!shot.phone) await page.getByRole('button', { name: /^Bütçedeki/ }).click();
     if (shot.prepare) await shot.prepare(page);
     // Let charts finish animating
     await page.waitForTimeout(1500);

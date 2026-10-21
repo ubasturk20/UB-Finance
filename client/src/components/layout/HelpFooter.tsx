@@ -1,6 +1,7 @@
 import { BookOpen, MessageCircleQuestion } from 'lucide-react';
 import { ExternalLink } from '../ui/ExternalLink';
 import { DOCS_URL, ISSUES_URL, SOURCE_CODE_URL } from '../../utils/project';
+import { t } from '../../i18n';
 
 /** "Learn more" links at the bottom of a page: the user guide, the source code and issues */
 export function HelpFooter({ className = '' }: { className?: string }) {
@@ -9,15 +10,15 @@ export function HelpFooter({ className = '' }: { className?: string }) {
     <footer
       className={`flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-6 text-xs text-text-tertiary ${className}`}
     >
-      <span>New to FlyBudget?</span>
+      <span>{t('shell.help.newTo')}</span>
       <ExternalLink href={DOCS_URL} className={link} icon={false}>
-        <BookOpen size={13} aria-hidden /> Read the guide
+        <BookOpen size={13} aria-hidden /> {t('shell.help.guide')}
       </ExternalLink>
       <ExternalLink href={SOURCE_CODE_URL} className={link} icon={false}>
-        <GithubMark /> Source on GitHub
+        <GithubMark /> {t('shell.help.source')}
       </ExternalLink>
       <ExternalLink href={ISSUES_URL} className={link} icon={false}>
-        <MessageCircleQuestion size={13} aria-hidden /> Report a problem or suggest an idea
+        <MessageCircleQuestion size={13} aria-hidden /> {t('shell.help.issues')}
       </ExternalLink>
     </footer>
   );

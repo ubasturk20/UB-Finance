@@ -107,7 +107,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
 
 test('the welcome screen fits a phone screen', async ({ page }, testInfo) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to FlyBudget' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
   await screenshot(page, testInfo, 'welcome');
   expect(await sidewaysOverflow(page)).toEqual([]);
 });
@@ -117,16 +117,16 @@ test('the sidebar is a drawer behind a menu button', async ({ page, api }) => {
   await open(page, '/dashboard');
 
   // The page gets the full width; the navigation is hidden until asked for
-  const menu = page.getByRole('button', { name: 'Open menu' });
+  const menu = page.getByRole('button', { name: 'Menüyü aç' });
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('link', { name: 'Budget', exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Bütçe', exact: true })).toBeHidden();
   const mainBox = await page.getByRole('main').boundingBox();
   expect(mainBox!.width).toBeGreaterThanOrEqual(389);
 
   await menu.click();
   await expect(menu).toHaveAttribute('aria-expanded', 'true');
   const nav = page.getByRole('complementary');
-  await expect(nav.getByRole('link', { name: 'Budget', exact: true })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Bütçe', exact: true })).toBeVisible();
   // Focus moves into the drawer
   await expect(nav.locator(':focus')).toHaveCount(1);
 
@@ -134,18 +134,18 @@ test('the sidebar is a drawer behind a menu button', async ({ page, api }) => {
   await page.keyboard.press('Escape');
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(menu).toBeFocused();
-  await expect(page.getByRole('link', { name: 'Budget', exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Bütçe', exact: true })).toBeHidden();
 
   // Following a link closes it
   await menu.click();
-  await nav.getByRole('link', { name: 'Budget', exact: true }).click();
+  await nav.getByRole('link', { name: 'Bütçe', exact: true }).click();
   await expect(page).toHaveURL(/#\/budget$/);
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(page.getByRole('status', { name: 'To be budgeted' })).toBeVisible();
 
   // So does the close button
   await menu.click();
-  await page.getByRole('button', { name: 'Close menu' }).click();
+  await page.getByRole('button', { name: 'Menüyü kapat' }).click();
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(menu).toBeFocused();
 });

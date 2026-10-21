@@ -19,16 +19,18 @@ test.describe('categories', () => {
 
   test('creates a group and a category in it', async ({ page, api }) => {
     // The second "Create group" is in the Expenses section
-    await page.getByRole('button', { name: 'Create group' }).nth(1).click();
-    await page.getByPlaceholder('Group name...').fill('Pets');
-    await page.getByRole('button', { name: 'Add group' }).click();
+    await page.getByRole('button', { name: 'Grup oluştur' }).nth(1).click();
+    await page.getByPlaceholder('Grup adı…').fill('Pets');
+    await page.getByRole('button', { name: 'Grup ekle' }).click();
     await expect(page.getByText('Pets', { exact: true })).toBeVisible();
 
     // New groups go last, so its "Create Category" is the last one
-    await page.getByRole('button', { name: 'Create Category' }).last().click();
-    await page.getByPlaceholder('Category name...').fill('Vet Bills');
-    await page.getByPlaceholder('Category name...').press('Enter');
-    await expect(page.getByRole('button', { name: 'Edit Vet Bills' })).toBeVisible();
+    await page.getByRole('button', { name: 'Kategori oluştur' }).last().click();
+    await page.getByPlaceholder('Kategori adı…').fill('Vet Bills');
+    await page.getByPlaceholder('Kategori adı…').press('Enter');
+    await expect(
+      page.getByRole('button', { name: 'Vet Bills kategorisini düzenle' }),
+    ).toBeVisible();
 
     const pets = (await api.categoryGroups()).find((g) => g.name === 'Pets')!;
     expect(pets).toMatchObject({ isIncome: 0 });
@@ -37,8 +39,8 @@ test.describe('categories', () => {
 
   test('the emoji picker shows its emojis and fits on screen', async ({ page }) => {
     // The last group's form is at the bottom of its card, which hides what overflows it
-    await page.getByRole('button', { name: 'Create Category' }).last().click();
-    await page.getByRole('button', { name: 'Pick icon' }).click();
+    await page.getByRole('button', { name: 'Kategori oluştur' }).last().click();
+    await page.getByRole('button', { name: 'Simge seç' }).click();
 
     const picker = page.locator('aside.EmojiPickerReact');
     await expect(picker.getByRole('button', { name: 'grinning face', exact: true })).toBeVisible();
@@ -47,36 +49,40 @@ test.describe('categories', () => {
   });
 
   test('picks an icon for a new category', async ({ page, api }) => {
-    await page.getByRole('button', { name: 'Create Category' }).last().click();
-    await page.getByPlaceholder('Category name...').fill('Dog Walker');
-    await page.getByRole('button', { name: 'Pick icon' }).click();
+    await page.getByRole('button', { name: 'Kategori oluştur' }).last().click();
+    await page.getByPlaceholder('Kategori adı…').fill('Dog Walker');
+    await page.getByRole('button', { name: 'Simge seç' }).click();
     await pickEmoji(page, 'dog face');
-    await expect(page.getByRole('button', { name: 'Pick icon' })).toHaveText('🐶');
+    await expect(page.getByRole('button', { name: 'Simge seç' })).toHaveText('🐶');
 
-    await page.getByRole('button', { name: 'Add category' }).click();
-    await expect(page.getByRole('button', { name: 'Edit Dog Walker' })).toBeVisible();
+    await page.getByRole('button', { name: 'Kategori ekle' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Dog Walker kategorisini düzenle' }),
+    ).toBeVisible();
     await expect.poll(async () => (await api.category('Dog Walker'))?.icon).toBe('🐶');
   });
 
   test('changes a category icon in the edit dialog', async ({ page, api }) => {
-    await page.getByRole('button', { name: 'Edit Parking' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Edit Category' });
-    await dialog.getByRole('button', { name: 'Change icon' }).click();
+    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Kategoriyi düzenle' });
+    await dialog.getByRole('button', { name: 'Simgeyi değiştir' }).click();
     await pickEmoji(page, 'dog face');
-    await expect(dialog.getByRole('button', { name: 'Change icon' })).toHaveText('🐶');
+    await expect(dialog.getByRole('button', { name: 'Simgeyi değiştir' })).toHaveText('🐶');
 
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect(dialog).toBeHidden();
     await expect.poll(async () => (await api.category('Parking'))?.icon).toBe('🐶');
   });
 
   test('renames a category from the keyboard', async ({ page, api }) => {
-    await page.getByRole('button', { name: 'Edit Parking' }).focus();
+    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).focus();
     await page.keyboard.press('Enter');
-    const dialog = page.getByRole('dialog', { name: 'Edit Category' });
-    await dialog.getByRole('textbox', { name: 'Category name' }).fill('Parking & Tolls');
-    await dialog.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByRole('button', { name: 'Edit Parking & Tolls' })).toBeVisible();
+    const dialog = page.getByRole('dialog', { name: 'Kategoriyi düzenle' });
+    await dialog.getByRole('textbox', { name: 'Kategori adı' }).fill('Parking & Tolls');
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Parking & Tolls kategorisini düzenle' }),
+    ).toBeVisible();
     await expect.poll(() => api.category('Parking & Tolls')).toBeTruthy();
   });
 
@@ -92,18 +98,20 @@ test.describe('categories', () => {
       categoryId: parking.id,
     });
 
-    await page.getByRole('button', { name: 'Edit Parking' }).click();
+    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).click();
     await page
-      .getByRole('dialog', { name: 'Edit Category' })
-      .getByRole('button', { name: 'Delete' })
+      .getByRole('dialog', { name: 'Kategoriyi düzenle' })
+      .getByRole('button', { name: 'Sil' })
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Delete Category' });
-    await expect(dialog).toContainText('Parking has 1 transaction');
-    await expect(dialog.getByRole('button', { name: 'Reassign & Delete' })).toBeDisabled();
-    await dialog.getByRole('combobox', { name: 'Move transactions to' }).selectOption(transit.id);
-    await dialog.getByRole('button', { name: 'Reassign & Delete' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Kategoriyi sil' });
+    await expect(dialog).toContainText('Parking kategorisinde 1 işlem var');
+    await expect(dialog.getByRole('button', { name: 'Taşı ve sil' })).toBeDisabled();
+    await dialog
+      .getByRole('combobox', { name: 'İşlemlerin taşınacağı kategori' })
+      .selectOption(transit.id);
+    await dialog.getByRole('button', { name: 'Taşı ve sil' }).click();
 
-    await expect(page.getByRole('button', { name: 'Edit Parking' })).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Parking kategorisini düzenle' })).toBeHidden();
     const [tx] = await api.transactions();
     expect(tx.categoryId).toBe(transit.id);
   });
@@ -113,9 +121,9 @@ test.describe('preferences', () => {
   test('persist across reloads', async ({ page, api }) => {
     await api.createAccount('Checking', 123_456);
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Preferences' }).click();
+    await page.getByRole('button', { name: 'Tercihler' }).click();
     // The dark theme is applied to the page and remembered
-    await page.getByRole('main').getByRole('button', { name: 'Dark', exact: true }).click();
+    await page.getByRole('main').getByRole('button', { name: 'Koyu', exact: true }).click();
     await expect(page.locator('html')).toHaveClass(/dark/);
     await page.reload();
     await expect(page.locator('html')).toHaveClass(/dark/);
@@ -130,22 +138,22 @@ test.describe('preferences', () => {
       payeeName: 'Miete',
     });
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Preferences' }).click();
+    await page.getByRole('button', { name: 'Tercihler' }).click();
     const main = page.getByRole('main');
     // Automatic is the Turkish way, whatever the browser's language (en-US in the tests)
-    await expect(main).toContainText('Example: -1.234,56 ₺');
+    await expect(main).toContainText('Örnek: -1.234,56 ₺');
 
     await main
-      .getByRole('group', { name: 'Number format' })
+      .getByRole('group', { name: 'Sayı biçimi' })
       .getByRole('button', { name: '1.234,56' })
       .click();
-    await main.getByRole('textbox', { name: 'Currency symbol' }).fill('€');
+    await main.getByRole('textbox', { name: 'Para birimi simgesi' }).fill('€');
     await main
-      .getByRole('group', { name: 'Currency symbol position' })
-      .getByRole('button', { name: 'After' })
+      .getByRole('group', { name: 'Para birimi simgesinin yeri' })
+      .getByRole('button', { name: 'Sonda' })
       .click();
     await main.getByRole('button', { name: /^dd\.MM\.yyyy/ }).click();
-    await expect(main).toContainText('Example: -1.234,56 €');
+    await expect(main).toContainText('Örnek: -1.234,56 €');
 
     await open(page, `/accounts/${girokonto.id}`);
     const register = page.getByRole('main');
@@ -188,19 +196,19 @@ test.describe('preferences', () => {
       payeeName: 'Bäckerei',
     });
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Preferences' }).click();
+    await page.getByRole('button', { name: 'Tercihler' }).click();
     await page
       .getByRole('main')
-      .getByRole('group', { name: 'Number format' })
+      .getByRole('group', { name: 'Sayı biçimi' })
       .getByRole('button', { name: '1.234,56' })
       .click();
-    await page.getByRole('button', { name: 'Data' }).click();
+    await page.getByRole('button', { name: 'Veriler' }).click();
     // The Data tab says how the file will be written
     await expect(page.getByRole('main')).toContainText(
-      'Amounts are written like -12,50, with semicolons between columns',
+      '-12,50 gibi ve sütunlar arasında noktalı virgülle yazılır',
     );
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Download CSV' }).click();
+    await page.getByRole('button', { name: 'CSV indir' }).click();
     const csv = fs.readFileSync(await (await download).path(), 'utf8');
     expect(csv.split('\n')[0]).toBe('Date;Account;Payee;Category;Notes;Amount;Reconciled');
     expect(csv).toContain(';Girokonto;Bäckerei;');
@@ -251,7 +259,7 @@ test('settings link to the license and the source code', async ({ page, api }) =
     'href',
     'https://www.gnu.org/licenses/agpl-3.0.html',
   );
-  const source = page.getByRole('link', { name: 'Source code' });
+  const source = page.getByRole('link', { name: 'Kaynak kodu' });
   await expect(source).toHaveAttribute('href', 'https://github.com/ubasturk20/UB-Finance');
   // Opens outside the app (the desktop app hands https links to the system browser)
   await expect(source).toHaveAttribute('target', '_blank');

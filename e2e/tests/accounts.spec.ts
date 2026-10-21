@@ -25,7 +25,7 @@ test.describe('accounts', () => {
     await page.getByRole('button', { name: 'Skip for now and look around' }).click();
     await expect(page).toHaveURL(/#\/dashboard$/);
     await expect(
-      page.getByRole('complementary').getByRole('link', { name: 'Budget' }),
+      page.getByRole('complementary').getByRole('link', { name: 'Bütçe' }),
     ).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
 

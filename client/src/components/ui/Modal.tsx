@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -28,8 +29,8 @@ export function useModalValue<T>(value: T | null | undefined | false) {
 
   useEffect(() => {
     if (isOpen) return;
-    const t = setTimeout(() => setLast(null), EXIT_MS);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setLast(null), EXIT_MS);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   return { value: isOpen ? value : last, isOpen };
@@ -49,8 +50,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: Props) 
 
   useEffect(() => {
     if (!closing) return;
-    const t = setTimeout(() => setMounted(false), EXIT_MS);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMounted(false), EXIT_MS);
+    return () => clearTimeout(timer);
   }, [closing]);
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: Props) 
             </h2>
             <button
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t('common.close')}
               className="p-1 max-md:-mr-2 max-md:min-w-11 max-md:min-h-11 flex items-center justify-center rounded-md text-text-tertiary hover:text-text-secondary hover:bg-surface-alt transition-colors"
             >
               <X size={18} />

@@ -21,6 +21,7 @@ import { useAccounts, useReorderAccounts } from '../../hooks/useAccounts';
 import { Badge } from '../ui/Badge';
 import { formatMoney } from '../../utils/currency';
 import type { Account, AccountType } from '../../types';
+import { t } from '../../i18n';
 
 function SortableAccountRow({ account }: { account: Account }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -44,7 +45,7 @@ function SortableAccountRow({ account }: { account: Account }) {
         {...attributes}
         {...listeners}
         className="text-text-disabled hover:text-text-tertiary cursor-grab active:cursor-grabbing touch-none shrink-0"
-        aria-label="Drag to reorder"
+        aria-label={t('settings.accounts.drag')}
       >
         <GripVertical size={16} />
       </button>
@@ -118,34 +119,30 @@ export function AccountReorder() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
-        Loading...
+        {t('common.loading')}
       </div>
     );
   }
 
   if (accounts.length === 0) {
     return (
-      <p className="text-sm text-text-tertiary text-center py-8">
-        No accounts yet. Add one from the Accounts page.
-      </p>
+      <p className="text-sm text-text-tertiary text-center py-8">{t('settings.accounts.empty')}</p>
     );
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-sm font-semibold text-text">Account Order</h2>
-        <p className="text-xs text-text-tertiary mt-0.5">
-          Drag to reorder accounts in the sidebar.
-        </p>
+        <h2 className="text-sm font-semibold text-text">{t('settings.accounts.title')}</h2>
+        <p className="text-xs text-text-tertiary mt-0.5">{t('settings.accounts.hint')}</p>
       </div>
       <AccountSection
-        title="On Budget"
+        title={t('settings.accounts.onBudget')}
         accounts={onBudget}
         onReorder={(ids) => reorderAccounts.mutate([...ids, ...offBudget.map((a) => a.id)])}
       />
       <AccountSection
-        title="Off Budget"
+        title={t('settings.accounts.offBudget')}
         accounts={offBudget}
         onReorder={(ids) => reorderAccounts.mutate([...onBudget.map((a) => a.id), ...ids])}
       />

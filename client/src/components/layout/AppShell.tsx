@@ -11,6 +11,7 @@ import { DemoBanner } from '../demo/DemoBanner';
 import { Sidebar, SidebarDrawer } from './Sidebar';
 import { BrandName } from '../ui/BrandName';
 import logoUrl from '/logo.png';
+import { t } from '../../i18n';
 
 export function AppShell() {
   useUndoKeyboard();
@@ -93,7 +94,7 @@ function PhoneShell() {
           <button
             ref={menuButton}
             onClick={() => setOpen(true)}
-            aria-label="Open menu"
+            aria-label={t('shell.sidebar.openMenu')}
             aria-expanded={open}
             aria-controls="app-sidebar"
             className="p-2 max-md:min-w-11 max-md:min-h-11 flex items-center justify-center rounded-md text-sidebar-text-hi hover:bg-sidebar-hover"

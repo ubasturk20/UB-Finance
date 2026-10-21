@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreVertical } from 'lucide-react';
 import { PHONE_MAX_WIDTH } from '../../hooks/useIsPhone';
+import { t } from '../../i18n';
 
 export interface RowMenuItem {
   label: string;
@@ -15,7 +16,7 @@ const MENU_W = 200;
 /** ⋮ button that opens a portal popover of actions. Closes on outside click, scroll, or ESC. */
 export default function RowMenu({
   items,
-  label = 'Actions',
+  label = t('common.moreActions'),
 }: {
   items: RowMenuItem[];
   /** The button's accessible name, e.g. "Actions for Rent" when a page has several */

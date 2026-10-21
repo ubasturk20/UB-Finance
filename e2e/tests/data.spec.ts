@@ -368,7 +368,7 @@ test.describe('CSV import', () => {
     // The same account written in groups of four is the same account
     dialog = await importStatement('DE89 3704 0044 0532 0130 00', 'B2');
     await expect(dialog.getByRole('alert')).toHaveCount(0);
-    await dialog.getByRole('button', { name: 'Close' }).click();
+    await dialog.getByRole('button', { name: 'Kapat' }).click();
 
     dialog = await importStatement('NL91ABNA0417164300', 'B3');
     await expect(dialog.getByRole('alert')).toContainText(
@@ -443,7 +443,7 @@ test.describe('CSV import', () => {
     });
 
     let dialog = await importCsv(page, BANK_CSV);
-    await dialog.getByRole('button', { name: 'Close' }).click();
+    await dialog.getByRole('button', { name: 'Kapat' }).click();
     await expect(dialog).toBeHidden();
     release();
 
@@ -468,7 +468,7 @@ test.describe('CSV import', () => {
     let dialog = await importCsv(page, BANK_CSV);
     await dialog.getByRole('button', { name: 'Preview' }).click();
     await dialog.getByRole('button', { name: 'Import 4 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Close' }).click();
+    await dialog.getByRole('button', { name: 'Kapat' }).click();
     await expect(dialog).toBeHidden();
     const confirmed = page.waitForResponse('**/import/confirm');
     release();
@@ -568,9 +568,9 @@ test.describe('export, backup and restore', () => {
       payeeName: '=HYPERLINK("http://evil.example")',
     });
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Data' }).click();
+    await page.getByRole('button', { name: 'Veriler' }).click();
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Download CSV' }).click();
+    await page.getByRole('button', { name: 'CSV indir' }).click();
     const csv = fs.readFileSync(await (await download).path(), 'utf8');
     // Turkish amounts have a decimal comma, so columns are separated by semicolons
     expect(csv.split('\n')[0]).toBe('Date;Account;Payee;Category;Notes;Amount;Reconciled');
@@ -589,9 +589,9 @@ test.describe('export, backup and restore', () => {
     await api.call('POST', '/goals', { name: 'Vacation', targetAmount: 200_000 });
 
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Data' }).click();
+    await page.getByRole('button', { name: 'Veriler' }).click();
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Download Backup' }).click();
+    await page.getByRole('button', { name: 'Yedeği indir' }).click();
     const backupFile = await (await download).path();
     const backup = JSON.parse(fs.readFileSync(backupFile, 'utf8'));
     expect(backup).toMatchObject({ format: 'flybudget-backup', version: 3 });
@@ -610,12 +610,12 @@ test.describe('export, backup and restore', () => {
     await api.createAccount('New Account', 1);
 
     // …and restoring brings it back
-    await page.getByLabel('Backup file').setInputFiles(backupFile);
-    const confirm = page.getByRole('dialog', { name: 'Restore this backup?' });
-    await expect(confirm).toContainText('All of your current data will be replaced');
-    await confirm.getByRole('button', { name: 'Replace my data' }).click();
-    await expect(page.getByRole('status')).toContainText('Restored');
-    await expect(page.getByRole('status')).toContainText('1 transactions');
+    await page.getByLabel('Yedek dosyası').setInputFiles(backupFile);
+    const confirm = page.getByRole('dialog', { name: 'Bu yedek geri yüklensin mi?' });
+    await expect(confirm).toContainText('Tüm mevcut verileriniz');
+    await confirm.getByRole('button', { name: 'Verilerimi değiştir' }).click();
+    await expect(page.getByRole('status')).toContainText('geri yüklendi');
+    await expect(page.getByRole('status')).toContainText('1 işlem');
 
     expect((await api.accounts()).map((a) => a.name)).toEqual(['Checking']);
     expect(await api.balance(checking.id)).toBe(47_500);
@@ -628,26 +628,26 @@ test.describe('export, backup and restore', () => {
   test('restoring a file that is not a backup changes nothing', async ({ page, api }) => {
     await api.createAccount('Checking', 50_000);
     await open(page, '/settings');
-    await page.getByRole('button', { name: 'Data' }).click();
-    await page.getByLabel('Backup file').setInputFiles({
+    await page.getByRole('button', { name: 'Veriler' }).click();
+    await page.getByLabel('Yedek dosyası').setInputFiles({
       name: 'notes.json',
       mimeType: 'application/json',
       buffer: Buffer.from('{"hello":"world"}'),
     });
     await page
-      .getByRole('dialog', { name: 'Restore this backup?' })
-      .getByRole('button', { name: 'Replace my data' })
+      .getByRole('dialog', { name: 'Bu yedek geri yüklensin mi?' })
+      .getByRole('button', { name: 'Verilerimi değiştir' })
       .click();
     await expect(page.getByRole('status')).toContainText('This is not a FlyBudget backup file');
     expect((await api.accounts()).map((a) => a.name)).toEqual(['Checking']);
 
-    await page.getByLabel('Backup file').setInputFiles({
+    await page.getByLabel('Yedek dosyası').setInputFiles({
       name: 'broken.json',
       mimeType: 'application/json',
       buffer: Buffer.from('{not json'),
     });
     await expect(page.getByRole('status')).toContainText(
-      'broken.json is not a FlyBudget backup file',
+      'broken.json bir UB-Finance yedek dosyası değil',
     );
   });
 });

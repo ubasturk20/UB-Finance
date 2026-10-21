@@ -1,6 +1,7 @@
 import type { AccountType } from '../../types';
 import { accountTypeLabel } from '../../utils/accountTypes';
 import { ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { t, type MessageKey } from '../../i18n';
 
 type Variant = AccountType | 'positive' | 'negative';
 
@@ -19,14 +20,15 @@ const styles: Partial<Record<Variant, string>> = {
   negative: 'bg-negative-subtle text-negative',
 };
 
-const labels: Partial<Record<Variant, string>> = {
-  credit: 'Credit',
-  positive: 'Positive',
-  negative: 'Negative',
+const labels: Partial<Record<Variant, MessageKey>> = {
+  credit: 'ui.badge.credit',
+  positive: 'ui.badge.positive',
+  negative: 'ui.badge.negative',
 };
 
 export function Badge({ variant, label }: Props) {
   const className = styles[variant];
+  const key = labels[variant];
   // Other account types get a tint of their icon color
   const color = ACCOUNT_TYPE_COLORS[variant] ?? '#6B7280';
   return (
@@ -38,7 +40,7 @@ export function Badge({ variant, label }: Props) {
           : { color, backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)` }
       }
     >
-      {label ?? labels[variant] ?? accountTypeLabel(variant)}
+      {label ?? (key ? t(key) : accountTypeLabel(variant))}
     </span>
   );
 }

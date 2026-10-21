@@ -149,14 +149,14 @@ const monthLabel = (ym: string) =>
 
 /** In the open month picker, sets From to January last year (To stays this month), then Done */
 async function pickFromJanuaryLastYear(page: Page) {
-  const picker = page.getByRole('dialog', { name: 'Choose months' });
+  const picker = page.getByRole('dialog', { name: 'Ayları seçin' });
   await expect(picker).toBeVisible();
-  const from = picker.getByRole('group', { name: 'From' });
+  const from = picker.getByRole('group', { name: 'Başlangıç' });
   // Keyboard focus starts on the selected From month
   await expect(from.getByRole('button', { pressed: true })).toBeFocused();
-  await from.getByRole('button', { name: 'Previous year' }).click();
+  await from.getByRole('button', { name: 'Önceki yıl' }).click();
   await from.getByRole('button', { name: `Ocak ${year() - 1}` }).click();
-  await picker.getByRole('button', { name: 'Done' }).click();
+  await picker.getByRole('button', { name: 'Bitti' }).click();
   await expect(picker).toBeHidden();
 }
 
@@ -180,12 +180,12 @@ test.describe('frozen months', () => {
 
     // Cancel keeps the months
     await main.getByRole('button', { name: range }).click();
-    const picker = page.getByRole('dialog', { name: 'Choose months' });
+    const picker = page.getByRole('dialog', { name: 'Ayları seçin' });
     await picker
-      .getByRole('group', { name: 'To' })
+      .getByRole('group', { name: 'Bitiş' })
       .getByRole('button', { name: `Ocak ${year()}` })
       .click();
-    await picker.getByRole('button', { name: 'Cancel' }).click();
+    await picker.getByRole('button', { name: 'İptal' }).click();
     await expect(main.getByRole('button', { name: range })).toBeVisible();
   });
 
@@ -199,19 +199,19 @@ test.describe('frozen months', () => {
       .getByRole('main')
       .locator('div')
       .filter({ has: page.getByText('Spending by Category', { exact: true }) })
-      .filter({ has: page.getByRole('button', { name: 'Actions' }) })
+      .filter({ has: page.getByRole('button', { name: 'Diğer işlemler' }) })
       .last();
     // Scroll first: the menu closes on scroll, and the scroll from clicking a widget below the
     // fold can land just after the menu opens
     await card.scrollIntoViewIfNeeded();
-    await card.getByRole('button', { name: 'Actions' }).click();
+    await card.getByRole('button', { name: 'Diğer işlemler' }).click();
     await page.getByRole('menuitem', { name: 'Date range…' }).click();
     const dialog = page.getByRole('dialog', { name: 'Date range' });
     await dialog.getByRole('button', { name: 'Own date range' }).click();
     await dialog.getByRole('button', { name: 'Frozen' }).click();
 
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog', { name: 'Choose months' })).toBeHidden();
+    await expect(page.getByRole('dialog', { name: 'Ayları seçin' })).toBeHidden();
     await expect(dialog).toBeVisible();
 
     await dialog.getByRole('button', { name: monthLabel(thisMonth()) }).click();

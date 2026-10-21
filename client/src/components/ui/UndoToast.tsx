@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Undo2, Redo2, X } from 'lucide-react';
 import { useUndoStore } from '../../store/undoStore';
+import { t } from '../../i18n';
 
 export function UndoToast() {
   const message = useUndoStore((s) => s.toastMessage);
@@ -11,8 +12,8 @@ export function UndoToast() {
 
   useEffect(() => {
     if (!message) return;
-    const t = setTimeout(clearToast, 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(clearToast, 4000);
+    return () => clearTimeout(timer);
   }, [message, clearToast]);
 
   if (!message) return null;
@@ -22,9 +23,7 @@ export function UndoToast() {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-text text-surface rounded-lg shadow-lg px-4 py-2.5 text-sm">
       {isUndo ? <Undo2 size={14} /> : <Redo2 size={14} />}
-      <span>
-        {isUndo ? 'Undid' : 'Redid'}: {message}
-      </span>
+      <span>{t(isUndo ? 'ui.undo.undid' : 'ui.undo.redid', { message })}</span>
       <button
         onClick={() => {
           clearToast();
@@ -32,10 +31,11 @@ export function UndoToast() {
         }}
         className="ml-1 font-medium text-brand-300 hover:text-brand-200 transition-colors"
       >
-        {isUndo ? 'Redo' : 'Undo'}
+        {isUndo ? t('ui.undo.redo') : t('common.undo')}
       </button>
       <button
         onClick={clearToast}
+        aria-label={t('common.close')}
         className="ml-1 text-surface/60 hover:text-surface transition-colors"
       >
         <X size={14} />
