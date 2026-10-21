@@ -1,4 +1,5 @@
 import { ExternalLink } from './ExternalLink';
+import { t } from '../../i18n';
 
 interface Props {
   icon?: React.ReactNode;
@@ -60,7 +61,7 @@ export function EmptyState({
           href={learnMoreHref}
           className={`text-xs font-medium text-brand-600 hover:text-brand-700 ${compact ? 'mt-2' : 'mt-4'}`}
         >
-          Learn more
+          {t('common.learnMore')}
         </ExternalLink>
       )}
     </div>

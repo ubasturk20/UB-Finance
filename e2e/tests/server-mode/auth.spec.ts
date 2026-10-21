@@ -19,34 +19,34 @@ test.beforeAll(async ({ browser }) => {
 test.afterAll(async () => owner.context().close());
 
 async function signIn(page: Page, password: string) {
-  await page.getByLabel('Password', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByLabel('Parola', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Giriş yap' }).click();
 }
 
 test('a new server asks for a password and the setup code', async ({ baseURL }) => {
   await owner.goto(`${baseURL}/`);
-  await expect(owner.getByText('Set up your FlyBudget server')).toBeVisible();
+  await expect(owner.getByText('UB-Finance sunucunuzu kurun')).toBeVisible();
   // Which server this is; on this computer (localhost) there's no insecure-connection warning
-  await expect(owner.getByLabel('Server address')).toHaveText(`localhost:${SERVER_PORT}`);
-  await expect(owner.getByText('Not a secure connection.')).toBeHidden();
+  await expect(owner.getByLabel('Sunucu adresi')).toHaveText(`localhost:${SERVER_PORT}`);
+  await expect(owner.getByText('Güvenli bir bağlantı değil.')).toBeHidden();
   // The data is not reachable yet
   const api = await owner.request.get('/api/accounts');
   expect(api.status()).toBe(401);
 
-  await owner.getByLabel('Setup code').fill('AAAA-BBBB-CCCC-DDDD');
-  await owner.getByLabel('New password').fill(PASSWORD);
-  await owner.getByLabel('Confirm password').fill(PASSWORD);
-  await owner.getByRole('button', { name: 'Create password' }).click();
+  await owner.getByLabel('Kurulum kodu').fill('AAAA-BBBB-CCCC-DDDD');
+  await owner.getByLabel('Yeni parola').fill(PASSWORD);
+  await owner.getByLabel('Parolayı onayla').fill(PASSWORD);
+  await owner.getByRole('button', { name: 'Parola oluştur' }).click();
   await expect(owner.getByText('Incorrect setup code')).toBeVisible();
 
-  await owner.getByLabel('Confirm password').fill('something else');
-  await owner.getByLabel('Setup code').fill(process.env.E2E_SETUP_CODE!.toLowerCase());
-  await owner.getByRole('button', { name: 'Create password' }).click();
-  await expect(owner.getByText("The passwords don't match.")).toBeVisible();
+  await owner.getByLabel('Parolayı onayla').fill('something else');
+  await owner.getByLabel('Kurulum kodu').fill(process.env.E2E_SETUP_CODE!.toLowerCase());
+  await owner.getByRole('button', { name: 'Parola oluştur' }).click();
+  await expect(owner.getByText('Parolalar eşleşmiyor.')).toBeVisible();
 
-  await owner.getByLabel('Confirm password').fill(PASSWORD);
-  await owner.getByRole('button', { name: 'Create password' }).click();
-  await expect(owner.getByRole('heading', { name: 'Welcome to FlyBudget' })).toBeVisible();
+  await owner.getByLabel('Parolayı onayla').fill(PASSWORD);
+  await owner.getByRole('button', { name: 'Parola oluştur' }).click();
+  await expect(owner.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
 
   // The session cookie can't be read by scripts
   const cookies = await owner.context().cookies();
@@ -71,7 +71,7 @@ test('the signed-in owner uses the app, with real page URLs', async ({ baseURL }
 
 test('another browser sees only the login screen', async ({ page, baseURL }) => {
   await page.goto(`${baseURL}/accounts`);
-  await expect(page.getByText('Sign in to FlyBudget')).toBeVisible();
+  await expect(page.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await expect(page.getByText('Credit Union')).toBeHidden();
   await signIn(page, 'not the password');
   await expect(page.getByText('Incorrect password')).toBeVisible();
@@ -87,17 +87,17 @@ test('changing the password signs out other browsers', async ({ browser, baseURL
   await expect(other.getByRole('complementary')).toBeVisible();
 
   await owner.goto(`${baseURL}/settings?tab=server`);
-  await owner.getByRole('textbox', { name: 'Current password' }).fill(PASSWORD);
-  await owner.getByRole('textbox', { name: 'New password', exact: true }).fill(NEW_PASSWORD);
-  await owner.getByRole('textbox', { name: 'Confirm new password' }).fill(NEW_PASSWORD);
-  await owner.getByRole('button', { name: 'Change password' }).click();
+  await owner.getByRole('textbox', { name: 'Mevcut parola' }).fill(PASSWORD);
+  await owner.getByRole('textbox', { name: 'Yeni parola', exact: true }).fill(NEW_PASSWORD);
+  await owner.getByRole('textbox', { name: 'Yeni parolayı onayla' }).fill(NEW_PASSWORD);
+  await owner.getByRole('button', { name: 'Parolayı değiştir' }).click();
   await expect(
-    owner.getByText('Password changed. Other devices have been signed out.'),
+    owner.getByText('Parola değiştirildi. Diğer cihazlarda oturum kapatıldı.'),
   ).toBeVisible();
 
   // The other browser's next request finds its session gone
   await other.reload();
-  await expect(other.getByText('Sign in to FlyBudget')).toBeVisible();
+  await expect(other.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await signIn(other, PASSWORD);
   await expect(other.getByText('Incorrect password')).toBeVisible();
   await signIn(other, NEW_PASSWORD);
@@ -137,41 +137,44 @@ test('Settings → Server shows the security check and signed-in devices', async
   await expect(phone.getByRole('complementary')).toBeVisible();
 
   await owner.goto(`${baseURL}/settings?tab=server`);
-  const checks = owner.getByRole('list', { name: 'Security check' });
+  const checks = owner.getByRole('list', { name: 'Güvenlik denetimi' });
   await expect(checks.getByRole('listitem')).toHaveCount(5);
-  await expect(checks).toContainText('Connected on the same computer as the server');
-  await expect(checks).toContainText('Bank credentials are encrypted at rest');
+  await expect(checks).toContainText('Sunucuyla aynı bilgisayardan bağlanıldı');
+  await expect(checks).toContainText('Banka kimlik bilgileri depoda şifreli');
   // FLYBUDGET_ALLOWED_HOSTS isn't set on the test server: a warning that names the fix
-  const hosts = checks.getByRole('listitem').filter({ hasText: 'Answers to any host name' });
-  await expect(hosts.getByLabel('Warning')).toBeVisible();
+  const hosts = checks
+    .getByRole('listitem')
+    .filter({ hasText: 'Her ana bilgisayar adına yanıt veriyor' });
+  await expect(hosts.getByLabel('Uyarı')).toBeVisible();
   await expect(hosts).toContainText('FLYBUDGET_ALLOWED_HOSTS');
 
-  const devices = owner.getByRole('list', { name: 'Signed-in devices' });
-  await expect(devices.getByRole('listitem').filter({ hasText: 'This device' })).toHaveCount(1);
+  const devices = owner.getByRole('list', { name: 'Giriş yapılmış cihazlar' });
+  await expect(devices.getByRole('listitem').filter({ hasText: 'Bu cihaz' })).toHaveCount(1);
   expect(await devices.getByRole('listitem').count()).toBeGreaterThanOrEqual(2);
 
-  await owner.getByRole('button', { name: 'Sign out all other devices' }).click();
+  const signOutOthers = owner.getByRole('button', { name: 'Diğer tüm cihazlardan çıkış yap' });
+  await signOutOthers.click();
   await expect(devices.getByRole('listitem')).toHaveCount(1);
-  await expect(owner.getByRole('button', { name: 'Sign out all other devices' })).toBeDisabled();
+  await expect(signOutOthers).toBeDisabled();
   await phone.reload();
-  await expect(phone.getByText('Sign in to FlyBudget')).toBeVisible();
+  await expect(phone.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await phone.context().close();
 });
 
 test('the sidebar shows the server and can sign out', async ({ baseURL }) => {
   await owner.goto(`${baseURL}/budget`);
   const status = owner.getByRole('button', {
-    name: `Server status: Online, localhost:${SERVER_PORT}`,
+    name: `Sunucu durumu: Çevrimiçi, localhost:${SERVER_PORT}`,
   });
   await status.click();
-  const menu = owner.getByRole('menu', { name: 'Server' });
+  const menu = owner.getByRole('menu', { name: 'Sunucu' });
   await expect(menu).toContainText(`localhost:${SERVER_PORT}`);
-  await menu.getByRole('menuitem', { name: 'Server settings' }).click();
-  await expect(owner.getByRole('list', { name: 'Security check' })).toBeVisible();
+  await menu.getByRole('menuitem', { name: 'Sunucu ayarları' }).click();
+  await expect(owner.getByRole('list', { name: 'Güvenlik denetimi' })).toBeVisible();
 
   await status.click();
-  await menu.getByRole('menuitem', { name: 'Sign out' }).click();
-  await expect(owner.getByText('Sign in to FlyBudget')).toBeVisible();
+  await menu.getByRole('menuitem', { name: 'Çıkış yap' }).click();
+  await expect(owner.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await signIn(owner, NEW_PASSWORD);
   await expect(owner.getByRole('complementary')).toBeVisible();
 });
@@ -219,11 +222,11 @@ test('with the server unreachable, the app opens with the offline copy and keeps
   await owner.context().setOffline(true);
   await owner.goto(accountUrl);
   await expect(owner.getByRole('heading', { level: 1, name: 'Credit Union' })).toBeVisible();
-  const banner = owner.getByRole('status', { name: 'Connection' });
-  await expect(banner).toContainText("Can't reach FlyBudget. Showing your data as of");
-  await expect(banner).toContainText('New transactions are saved on this device');
+  const banner = owner.getByRole('status', { name: 'Bağlantı' });
+  await expect(banner).toContainText("UB-Finance'a ulaşılamıyor. Verileriniz");
+  await expect(banner).toContainText('Yeni işlemler bu cihaza kaydedilir');
   // Other pages open from the copy too
-  await owner.getByRole('complementary').getByRole('link', { name: 'Budget', exact: true }).click();
+  await owner.getByRole('complementary').getByRole('link', { name: 'Bütçe', exact: true }).click();
   await expect(owner.getByRole('status', { name: 'To be budgeted' })).toBeVisible();
   await owner.goBack();
 
@@ -236,7 +239,7 @@ test('with the server unreachable, the app opens with the offline copy and keeps
   const waiting = owner.getByRole('region', { name: 'Saved on this device' });
   await expect(waiting.getByTestId('waiting-transaction')).toContainText('Coffee Cart');
   await expect(waiting).toContainText('Sent when FlyBudget reconnects');
-  await expect(banner).toContainText('1 transaction waiting to send');
+  await expect(banner).toContainText('1 işlem gönderilmeyi bekliyor');
   await owner.reload();
   await expect(waiting.getByTestId('waiting-transaction')).toContainText('Coffee Cart');
 
@@ -252,7 +255,7 @@ test('with the server unreachable, the app opens with the offline copy and keeps
 
 test('the offline copy can be turned off, and signing out deletes it', async ({ baseURL }) => {
   await owner.goto(`${baseURL}/settings?tab=server`);
-  const keep = owner.getByRole('checkbox', { name: /Keep a copy of my budget on this device/ });
+  const keep = owner.getByRole('checkbox', { name: /Bütçemin bir kopyasını bu cihazda tut/ });
   await expect(keep).toBeChecked();
   await expect.poll(() => offlineCopy(owner)).not.toBeNull();
   await keep.uncheck();
@@ -269,16 +272,16 @@ test('the offline copy can be turned off, and signing out deletes it', async ({ 
   await expect.poll(() => offlineCopy(owner)).not.toBeNull();
 
   await owner.goto(`${baseURL}/settings?tab=server`);
-  await owner.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(owner.getByText('Sign in to FlyBudget')).toBeVisible();
+  await owner.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
+  await expect(owner.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   expect(await offlineCopy(owner)).toBeNull();
   // So an unreachable server shows no data at all
   await unreachable(owner);
   await owner.reload();
-  await expect(owner.getByText('Try now')).toBeVisible();
+  await expect(owner.getByText('Şimdi dene')).toBeVisible();
   await expect(owner.getByText('Credit Union')).toBeHidden();
   await owner.unroute('**/api/**');
-  await owner.getByRole('button', { name: 'Try now' }).click();
+  await owner.getByRole('button', { name: 'Şimdi dene' }).click();
   await signIn(owner, NEW_PASSWORD);
   await expect(owner.getByRole('complementary')).toBeVisible();
 });
@@ -296,10 +299,10 @@ test('warns before sending the password over plain HTTP to another machine', asy
   try {
     const page = await browser.newPage();
     await page.goto(`http://flybudget.test:${SERVER_PORT}/`);
-    await expect(page.getByText('Sign in to FlyBudget')).toBeVisible();
-    await expect(page.getByLabel('Server address')).toHaveText(`flybudget.test:${SERVER_PORT}`);
+    await expect(page.getByText("UB-Finance'a giriş yapın")).toBeVisible();
+    await expect(page.getByLabel('Sunucu adresi')).toHaveText(`flybudget.test:${SERVER_PORT}`);
     await expect(page.getByRole('note')).toContainText(
-      'Not a secure connection. Your password would travel unencrypted. Only continue on a network you trust.',
+      'Güvenli bir bağlantı değil. Parolanız şifrelenmeden iletilir. Yalnızca güvendiğiniz bir ağda devam edin.',
     );
   } finally {
     await browser.close();
@@ -321,8 +324,8 @@ test("someone guessing passwords can't lock the owner out", async ({ playwright,
 
   // …but a browser that signed in before has its own limit and still gets in
   await owner.goto(`${baseURL}/settings?tab=server`);
-  await owner.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(owner.getByText('Sign in to FlyBudget')).toBeVisible();
+  await owner.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
+  await expect(owner.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await signIn(owner, NEW_PASSWORD);
   await expect(owner.getByRole('complementary')).toBeVisible();
 });

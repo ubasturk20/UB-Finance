@@ -20,6 +20,7 @@ import { Button } from '../ui/Button';
 import type { SimplefinSetupResult } from '../../types';
 import { IS_DEMO } from '../../demo/demoApi';
 import { NotInDemo } from '../demo/NotInDemo';
+import { t } from '../../i18n';
 
 type Provider = 'plaid' | 'simplefin' | 'enablebanking';
 
@@ -32,10 +33,8 @@ function ConnectedAccountsDemo() {
   return (
     <div className="space-y-5 max-w-xl">
       <div>
-        <h2 className="text-sm font-semibold text-text">Connected Banks</h2>
-        <p className="text-xs text-text-tertiary mt-0.5">
-          Automatically import transactions from your financial institutions.
-        </p>
+        <h2 className="text-sm font-semibold text-text">{t('settings.tab.connections')}</h2>
+        <p className="text-xs text-text-tertiary mt-0.5">{t('settings.banks.intro')}</p>
       </div>
       <NotInDemo />
     </div>
@@ -72,10 +71,8 @@ function ConnectedAccountsSettings() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-sm font-semibold text-text">Connected Banks</h2>
-        <p className="text-xs text-text-tertiary mt-0.5">
-          Automatically import transactions from your financial institutions.
-        </p>
+        <h2 className="text-sm font-semibold text-text">{t('settings.tab.connections')}</h2>
+        <p className="text-xs text-text-tertiary mt-0.5">{t('settings.banks.intro')}</p>
       </div>
 
       {/* Provider toggle */}
@@ -112,7 +109,7 @@ function ConnectedAccountsSettings() {
         </button>
         <button
           onClick={() => setProvider('enablebanking')}
-          title="European banks"
+          title={t('settings.banks.europeanBanks')}
           className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all duration-200 ease-in-out ${
             provider === 'enablebanking'
               ? 'bg-surface text-text shadow-sm ring-2 ring-brand-600'
@@ -134,8 +131,10 @@ function ConnectedAccountsSettings() {
           {syncAll.isSuccess && syncAll.data && (
             <div className="bg-positive-subtle border border-positive/10 rounded-md px-4 py-2">
               <p className="text-xs text-positive">
-                Plaid sync complete: {syncAll.data.results.reduce((s, r) => s + r.added, 0)} new
-                transactions imported.
+                {t('settings.banks.syncComplete', {
+                  provider: 'Plaid',
+                  count: syncAll.data.results.reduce((s, r) => s + r.added, 0),
+                })}
               </p>
             </div>
           )}
@@ -148,7 +147,7 @@ function ConnectedAccountsSettings() {
               <div className="flex items-center gap-2">
                 {plaidConfigured && (
                   <Button variant="secondary" size="sm" onClick={() => setShowConnect(true)}>
-                    <Plus size={14} /> Add Another Bank
+                    <Plus size={14} /> {t('settings.banks.addAnotherBank')}
                   </Button>
                 )}
                 <Button
@@ -159,11 +158,11 @@ function ConnectedAccountsSettings() {
                 >
                   {syncAll.isPending ? (
                     <>
-                      <Loader2 size={12} className="animate-spin" /> Syncing...
+                      <Loader2 size={12} className="animate-spin" /> {t('settings.banks.syncing')}
                     </>
                   ) : (
                     <>
-                      <RefreshCw size={12} /> Sync All
+                      <RefreshCw size={12} /> {t('settings.banks.syncAll')}
                     </>
                   )}
                 </Button>
@@ -171,19 +170,21 @@ function ConnectedAccountsSettings() {
             </div>
           ) : plaidConfigured ? (
             <div className="bg-surface-alt rounded-lg px-5 py-8 text-center">
-              <p className="text-xs text-text-tertiary mb-3">No banks connected via Plaid yet.</p>
+              <p className="text-xs text-text-tertiary mb-3">
+                {t('settings.banks.noneConnected', { provider: 'Plaid' })}
+              </p>
               <Button onClick={() => setShowConnect(true)}>
-                <Plus size={14} /> Connect Bank
+                <Plus size={14} /> {t('settings.banks.connectBank')}
               </Button>
             </div>
           ) : null}
 
           <div className="bg-surface-alt rounded-lg p-5 space-y-3">
-            <h3 className="text-sm font-medium text-text">Plaid Configuration</h3>
+            <h3 className="text-sm font-medium text-text">
+              {t('settings.banks.configuration', { provider: 'Plaid' })}
+            </h3>
             {!plaidConfigured && (
-              <p className="text-xs text-text-tertiary">
-                Enter your Plaid API credentials to enable bank connections.
-              </p>
+              <p className="text-xs text-text-tertiary">{t('settings.banks.plaidHint')}</p>
             )}
             <PlaidConfigForm />
           </div>
@@ -196,8 +197,10 @@ function ConnectedAccountsSettings() {
           {syncAllSf.isSuccess && syncAllSf.data && (
             <div className="bg-positive-subtle border border-positive/10 rounded-md px-4 py-2">
               <p className="text-xs text-positive">
-                SimpleFIN sync complete: {syncAllSf.data.results.reduce((s, r) => s + r.added, 0)}{' '}
-                new transactions imported.
+                {t('settings.banks.syncComplete', {
+                  provider: 'SimpleFIN',
+                  count: syncAllSf.data.results.reduce((s, r) => s + r.added, 0),
+                })}
               </p>
             </div>
           )}
@@ -209,7 +212,7 @@ function ConnectedAccountsSettings() {
               ))}
               <div className="flex items-center gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setShowSimplefin(true)}>
-                  <Plus size={14} /> Add Another Connection
+                  <Plus size={14} /> {t('settings.banks.addAnotherConnection')}
                 </Button>
                 <Button
                   variant="secondary"
@@ -219,11 +222,11 @@ function ConnectedAccountsSettings() {
                 >
                   {syncAllSf.isPending ? (
                     <>
-                      <Loader2 size={12} className="animate-spin" /> Syncing...
+                      <Loader2 size={12} className="animate-spin" /> {t('settings.banks.syncing')}
                     </>
                   ) : (
                     <>
-                      <RefreshCw size={12} /> Sync All
+                      <RefreshCw size={12} /> {t('settings.banks.syncAll')}
                     </>
                   )}
                 </Button>
@@ -232,11 +235,11 @@ function ConnectedAccountsSettings() {
           ) : null}
 
           <div className="bg-surface-alt rounded-lg p-5 space-y-3">
-            <h3 className="text-sm font-medium text-text">SimpleFIN Configuration</h3>
+            <h3 className="text-sm font-medium text-text">
+              {t('settings.banks.configuration', { provider: 'SimpleFIN' })}
+            </h3>
             {sfConnections.length === 0 && (
-              <p className="text-xs text-text-tertiary">
-                Enter your SimpleFIN setup token to enable bank connections.
-              </p>
+              <p className="text-xs text-text-tertiary">{t('settings.banks.simplefinHint')}</p>
             )}
             <SimplefinConfigForm
               onSetupComplete={(result) => {
@@ -251,15 +254,14 @@ function ConnectedAccountsSettings() {
       {/* Enable Banking content */}
       {provider === 'enablebanking' && (
         <div className="space-y-4">
-          <p className="text-xs text-text-secondary">
-            European banks (EEA), over PSD2. Free with your own Enable Banking application, for your
-            own accounts.
-          </p>
+          <p className="text-xs text-text-secondary">{t('settings.banks.enableBankingIntro')}</p>
           {syncAllEb.isSuccess && syncAllEb.data && (
             <div className="bg-positive-subtle border border-positive/10 rounded-md px-4 py-2">
               <p className="text-xs text-positive">
-                Enable Banking sync complete:{' '}
-                {syncAllEb.data.results.reduce((s, r) => s + r.added, 0)} new transactions imported.
+                {t('settings.banks.syncComplete', {
+                  provider: 'Enable Banking',
+                  count: syncAllEb.data.results.reduce((s, r) => s + r.added, 0),
+                })}
               </p>
             </div>
           )}
@@ -271,7 +273,7 @@ function ConnectedAccountsSettings() {
               ))}
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setShowEnableBanking(true)}>
-                  <Plus size={14} /> Add Another Bank
+                  <Plus size={14} /> {t('settings.banks.addAnotherBank')}
                 </Button>
                 <Button
                   variant="secondary"
@@ -281,11 +283,11 @@ function ConnectedAccountsSettings() {
                 >
                   {syncAllEb.isPending ? (
                     <>
-                      <Loader2 size={12} className="animate-spin" /> Syncing...
+                      <Loader2 size={12} className="animate-spin" /> {t('settings.banks.syncing')}
                     </>
                   ) : (
                     <>
-                      <RefreshCw size={12} /> Sync All
+                      <RefreshCw size={12} /> {t('settings.banks.syncAll')}
                     </>
                   )}
                 </Button>
@@ -294,16 +296,18 @@ function ConnectedAccountsSettings() {
           ) : ebConfigured ? (
             <div className="bg-surface-alt rounded-lg px-5 py-8 text-center">
               <p className="text-xs text-text-tertiary mb-3">
-                No banks connected via Enable Banking yet.
+                {t('settings.banks.noneConnected', { provider: 'Enable Banking' })}
               </p>
               <Button onClick={() => setShowEnableBanking(true)}>
-                <Plus size={14} /> Connect Bank
+                <Plus size={14} /> {t('settings.banks.connectBank')}
               </Button>
             </div>
           ) : null}
 
           <div className="bg-surface-alt rounded-lg p-5 space-y-3">
-            <h3 className="text-sm font-medium text-text">Enable Banking Application</h3>
+            <h3 className="text-sm font-medium text-text">
+              {t('settings.banks.enableBankingApp')}
+            </h3>
             <EnableBankingSetupForm
               onConfigured={() => {
                 // First setup: go straight on to connecting a bank

@@ -4,22 +4,22 @@ import { test, expect, open, isoDay } from './fixtures';
 // in fixtures.ts fails the test on any uncaught exception or console error).
 
 const PAGES: { link: string; route: string; heading?: string }[] = [
-  { link: 'Dashboard', route: '/dashboard' },
-  { link: 'Accounts', route: '/accounts', heading: 'Accounts' },
-  { link: 'Transactions', route: '/transactions', heading: 'All Transactions' },
-  { link: 'Budget', route: '/budget' },
-  { link: 'Recurring', route: '/recurring', heading: 'Recurring' },
-  { link: 'Reports', route: '/reports', heading: 'Reports' },
-  { link: 'Cash Flow', route: '/cash-flow', heading: 'Cash Flow' },
-  { link: 'Goals', route: '/goals', heading: 'Goals' },
-  { link: 'Payees', route: '/payees', heading: 'Payees' },
-  { link: 'Rules', route: '/rules', heading: 'Rules' },
-  { link: 'Settings', route: '/settings', heading: 'Settings' },
+  { link: 'Genel Bakış', route: '/dashboard' },
+  { link: 'Hesaplar', route: '/accounts', heading: 'Accounts' },
+  { link: 'İşlemler', route: '/transactions', heading: 'All Transactions' },
+  { link: 'Bütçe', route: '/budget' },
+  { link: 'Düzenli İşlemler', route: '/recurring', heading: 'Recurring' },
+  { link: 'Raporlar', route: '/reports', heading: 'Reports' },
+  { link: 'Nakit Akışı', route: '/cash-flow', heading: 'Cash Flow' },
+  { link: 'Hedefler', route: '/goals', heading: 'Goals' },
+  { link: 'Alıcılar', route: '/payees', heading: 'Payees' },
+  { link: 'Kurallar', route: '/rules', heading: 'Rules' },
+  { link: 'Ayarlar', route: '/settings', heading: 'Ayarlar' },
 ];
 
 test('a new budget starts on the welcome screen', async ({ page }) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to FlyBudget' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
   await expect(page).toHaveURL(/#\/welcome$/);
 });
 
@@ -57,8 +57,8 @@ test('the sidebar lists accounts with their balances and opens them', async ({ p
   await api.createAccount('Rainy Day Savings', 1_000_000, 'savings');
   await open(page, '/dashboard');
   const nav = page.getByRole('complementary');
-  await expect(nav.getByRole('link', { name: 'All accounts 11.500 ₺' })).toBeVisible();
-  await nav.getByRole('button', { name: 'For budget 11.500 ₺' }).click();
+  await expect(nav.getByRole('link', { name: 'Tüm hesaplar 11.500 ₺' })).toBeVisible();
+  await nav.getByRole('button', { name: 'Bütçedeki 11.500 ₺' }).click();
   await expect(nav.getByRole('link', { name: /Everyday Checking.*1\.500\s₺/ })).toBeVisible();
   await nav.getByRole('link', { name: /Rainy Day Savings/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Rainy Day Savings' })).toBeVisible();

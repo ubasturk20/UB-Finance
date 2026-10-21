@@ -27,13 +27,18 @@ import {
 import { parseRate } from '../../utils/money';
 import { formatDay } from '../../utils/dates';
 import { docsUrl } from '../../utils/project';
+import { t, type MessageKey } from '../../i18n';
 
 const section = 'bg-surface-alt rounded-lg p-5 space-y-4';
 const inputClass =
   'text-sm border border-border rounded-md px-3 py-1.5 max-md:min-h-11 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600';
 
+/** Where a rate came from: typed in, or the ECB */
+const rateSource = (source: string | null) =>
+  source === 'manual' ? t('settings.currency.sourceManual') : t('settings.currency.sourceEcb');
+
 const errorText = (err: unknown) =>
-  err instanceof Error ? err.message : 'Something went wrong. Try again.';
+  err instanceof Error ? err.message : t('settings.currency.error');
 
 /**
  * Settings → Currencies: the budget's currency, exchange rates (typed in, or downloaded from
@@ -45,11 +50,12 @@ export function CurrencySettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-sm font-semibold text-text">Currencies</h2>
+        <h2 className="text-sm font-semibold text-text">{t('settings.tab.currencies')}</h2>
         <p className="text-xs text-text-tertiary mt-0.5">
-          Your budget has one currency. Accounts can each have their own: their amounts stay in it,
-          and the budget and reports count them in yours at each day&apos;s exchange rate.{' '}
-          <ExternalLink href={docsUrl('currencies')}>How currencies work</ExternalLink>
+          {t('settings.currency.intro')}{' '}
+          <ExternalLink href={docsUrl('currencies')}>
+            {t('settings.currency.howItWorks')}
+          </ExternalLink>
         </p>
       </div>
       <BudgetCurrency current={settings.currency} />
@@ -76,12 +82,10 @@ function BudgetCurrency({ current }: { current: string | null }) {
     <section className={section} aria-labelledby="budget-currency-heading">
       <div>
         <h3 id="budget-currency-heading" className="text-sm font-medium text-text">
-          Budget currency
+          {t('settings.currency.budgetCurrency')}
         </h3>
         <p className="text-xs text-text-tertiary mt-0.5">
-          {current
-            ? 'What your budget, reports and net worth are counted in. It can be corrected while no account in another currency has transactions.'
-            : 'Choose the currency your amounts are in. Nothing is converted: it only names the currency, so accounts in other currencies can be added.'}
+          {current ? t('settings.currency.budgetCurrencyHint') : t('settings.currency.chooseHint')}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +93,7 @@ function BudgetCurrency({ current }: { current: string | null }) {
           value={choice}
           onChange={setChoice}
           first={current ? [current] : []}
-          aria-label="Budget currency"
+          aria-label={t('settings.currency.budgetCurrency')}
           className="max-w-xs"
         />
         <Button
@@ -97,7 +101,7 @@ function BudgetCurrency({ current }: { current: string | null }) {
           onClick={() => save.mutate(choice)}
           disabled={!changed || save.isPending || !canSave}
         >
-          {current ? 'Change' : 'Use this currency'}
+          {current ? t('settings.currency.change') : t('settings.currency.use')}
         </Button>
       </div>
       {save.isError && (
@@ -122,21 +126,19 @@ function MissingRates() {
     <section className={section} aria-labelledby="missing-heading">
       <div>
         <h3 id="missing-heading" className="text-sm font-medium text-text">
-          Values in {settings.currency}
+          {t('settings.currency.valuesIn', { currency: settings.currency ?? '' })}
         </h3>
         {missing && missing.count > 0 ? (
           <p className="mt-1 flex items-start gap-1.5 text-xs text-caution">
             <AlertTriangle size={13} className="mt-px shrink-0" aria-hidden />
-            {missing.count} transaction{missing.count === 1 ? '' : 's'} in{' '}
-            {missing.currencies.join(', ')} {missing.count === 1 ? 'has' : 'have'} no exchange rate
-            for {missing.count === 1 ? 'its' : 'their'} day yet, so the budget counts{' '}
-            {missing.count === 1 ? 'it' : 'them'} as nothing. Add a rate below, or turn on
-            downloading.
+            {t('settings.currency.missing', {
+              count: missing.count,
+              currencies: missing.currencies.join(', '),
+            })}
           </p>
         ) : (
           <p className="text-xs text-text-tertiary mt-0.5">
-            Every transaction in another currency has its value in {settings.currency}. Values stay
-            as they were when a rate changes; recalculate after correcting a rate.
+            {t('settings.currency.allValued', { currency: settings.currency ?? '' })}
           </p>
         )}
       </div>
@@ -147,14 +149,14 @@ function MissingRates() {
           onClick={() => recalculate.mutate({})}
           disabled={recalculate.isPending || !canSave}
         >
-          Recalculate from rates
+          {t('settings.currency.recalculate')}
         </Button>
         {recalculate.isSuccess && (
           <span role="status" className="text-xs text-text-secondary">
             {recalculate.data.changed
-              ? `${recalculate.data.changed} value${recalculate.data.changed === 1 ? '' : 's'} updated.`
-              : 'Nothing to update.'}{' '}
-            Values you typed in stay.
+              ? t('settings.currency.updated', { count: recalculate.data.changed })
+              : t('settings.currency.nothingToUpdate')}{' '}
+            {t('settings.currency.typedStay')}
           </span>
         )}
       </div>
@@ -194,12 +196,9 @@ function Rates() {
     <section className={section} aria-labelledby="rates-heading">
       <div>
         <h3 id="rates-heading" className="text-sm font-medium text-text">
-          Exchange rates
+          {t('settings.currency.exchangeRates')}
         </h3>
-        <p className="text-xs text-text-tertiary mt-0.5">
-          A day without a rate uses the closest earlier one, up to a month back. A rate you type in
-          wins over a downloaded one for its day.
-        </p>
+        <p className="text-xs text-text-tertiary mt-0.5">{t('settings.currency.ratesHint')}</p>
       </div>
 
       {settings!.latestRates.length > 0 && (
@@ -211,8 +210,8 @@ function Rates() {
               </span>
               <span className="text-xs text-text-tertiary">
                 {r.date
-                  ? `${formatDay(r.date)} · ${r.source === 'manual' ? 'typed in' : 'ECB'}`
-                  : 'No rate in the last month'}
+                  ? `${formatDay(r.date)} · ${rateSource(r.source)}`
+                  : t('settings.currency.noRecentRate')}
               </span>
             </li>
           ))}
@@ -225,19 +224,20 @@ function Rates() {
             htmlFor="rate-currency"
             className="block text-xs font-medium text-text-tertiary mb-1"
           >
-            Currency
+            {t('settings.currency.currency')}
           </label>
           <CurrencySelect
             id="rate-currency"
             value={currency}
             onChange={setCurrency}
             first={foreign}
+            aria-label={t('settings.currency.currency')}
             className="w-48"
           />
         </div>
         <div>
           <label htmlFor="rate-date" className="block text-xs font-medium text-text-tertiary mb-1">
-            Day
+            {t('settings.currency.day')}
           </label>
           <input
             id="rate-date"
@@ -249,7 +249,7 @@ function Rates() {
         </div>
         <div>
           <label htmlFor="rate-value" className="block text-xs font-medium text-text-tertiary mb-1">
-            1 {currency} in {budget}
+            {t('settings.currency.rateIn', { currency, budget })}
           </label>
           <input
             id="rate-value"
@@ -257,7 +257,7 @@ function Rates() {
             inputMode="decimal"
             value={rate}
             onChange={(e) => setRate(e.target.value)}
-            placeholder="1.0812"
+            placeholder="1,0812"
             aria-invalid={(rate !== '' && !rateValid) || undefined}
             className={`${inputClass} w-32`}
           />
@@ -267,12 +267,12 @@ function Rates() {
           size="sm"
           disabled={!rateValid || currency === budget || add.isPending || !canSave || !date}
         >
-          Add rate
+          {t('settings.currency.addRate')}
         </Button>
       </form>
       {rate !== '' && !rateValid && (
         <p role="alert" className="text-xs text-negative">
-          Type the rate as a positive number, like 1.0812.
+          {t('settings.currency.invalidRate')}
         </p>
       )}
       {add.isError && (
@@ -283,7 +283,9 @@ function Rates() {
 
       {typedIn.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-text-secondary mb-1.5">Rates you typed in</h4>
+          <h4 className="text-xs font-medium text-text-secondary mb-1.5">
+            {t('settings.currency.typedRates')}
+          </h4>
           <ul className="divide-y divide-border-light rounded-md border border-border bg-surface">
             {typedIn.map((r) => (
               <li key={r.id} className="flex items-center gap-3 px-3 py-1.5 text-sm">
@@ -294,7 +296,10 @@ function Rates() {
                   type="button"
                   onClick={() => remove.mutate(r.id)}
                   disabled={!canSave}
-                  aria-label={`Delete the rate for ${r.base} on ${formatDay(r.date)}`}
+                  aria-label={t('settings.currency.deleteRate', {
+                    currency: r.base,
+                    date: formatDay(r.date),
+                  })}
                   className="p-1.5 rounded text-text-tertiary hover:text-negative max-md:min-h-11 max-md:min-w-11 disabled:opacity-50"
                 >
                   <Trash2 size={14} />
@@ -316,7 +321,8 @@ function RateDownload() {
   const canSave = useCanSave();
   const [url, setUrl] = useState(settings?.ratesUrl ?? '');
   if (!settings) return null;
-  const server = settings.ratesUrl || settings.defaultRatesUrl || 'the rates server';
+  const server =
+    settings.ratesUrl || settings.defaultRatesUrl || t('settings.currency.ratesServer');
   const host = (() => {
     try {
       return new URL(server).host;
@@ -329,18 +335,14 @@ function RateDownload() {
     <section className={section} aria-labelledby="download-heading">
       <div>
         <h3 id="download-heading" className="text-sm font-medium text-text">
-          Download rates
+          {t('settings.currency.download')}
         </h3>
         <p className="text-xs text-text-tertiary mt-0.5">
-          The European Central Bank&apos;s daily reference rates, from {host} (Frankfurter, open
-          source). Only currency codes and dates are sent, never anything about your budget. Off
-          until you turn it on; then it checks every few hours.
+          {t('settings.currency.downloadHint', { host })}
         </p>
       </div>
       {!settings.canDownload ? (
-        <p className="text-xs text-text-secondary">
-          Not available in the demo: rates can be typed in above.
-        </p>
+        <p className="text-xs text-text-secondary">{t('settings.currency.notInDemo')}</p>
       ) : (
         <>
           <label className="flex items-center gap-3 cursor-pointer max-md:min-h-11">
@@ -351,7 +353,9 @@ function RateDownload() {
               disabled={!canSave || setDownload.isPending}
               className="h-4 w-4 rounded border-border text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-sm text-text-secondary">Download ECB reference rates</span>
+            <span className="text-sm text-text-secondary">
+              {t('settings.currency.downloadEcb')}
+            </span>
           </label>
           {settings.ratesEnabled && (
             <div className="space-y-3">
@@ -362,14 +366,21 @@ function RateDownload() {
                   onClick={() => download.mutate()}
                   disabled={download.isPending || !canSave}
                 >
-                  <Download size={13} /> {download.isPending ? 'Downloading…' : 'Download now'}
+                  <Download size={13} />{' '}
+                  {download.isPending
+                    ? t('settings.currency.downloading')
+                    : t('settings.currency.downloadNow')}
                 </Button>
                 <span className="text-xs text-text-tertiary" role="status">
                   {settings.lastFetchedAt
-                    ? `Last downloaded ${formatDay(settings.lastFetchedAt.slice(0, 10))}`
-                    : 'Not downloaded yet'}
+                    ? t('settings.currency.lastDownloaded', {
+                        date: formatDay(settings.lastFetchedAt.slice(0, 10)),
+                      })
+                    : t('settings.currency.notDownloaded')}
                   {download.data?.unsupported.length
-                    ? `. The ECB has no rates for ${download.data.unsupported.join(', ')}: type those in.`
+                    ? t('settings.currency.unsupported', {
+                        currencies: download.data.unsupported.join(', '),
+                      })
                     : ''}
                 </span>
               </div>
@@ -390,7 +401,7 @@ function RateDownload() {
                     htmlFor="rates-url"
                     className="block text-xs font-medium text-text-tertiary mb-1"
                   >
-                    Server (optional, for your own Frankfurter)
+                    {t('settings.currency.serverLabel')}
                   </label>
                   <input
                     id="rates-url"
@@ -407,7 +418,7 @@ function RateDownload() {
                   variant="secondary"
                   disabled={(url.trim() || null) === settings.ratesUrl || !canSave}
                 >
-                  Save server
+                  {t('settings.currency.saveServer')}
                 </Button>
               </form>
               {setDownload.isError && (
@@ -424,10 +435,10 @@ function RateDownload() {
   );
 }
 
-const POSITIONS: { value: SymbolPosition | 'auto'; label: string }[] = [
-  { value: 'auto', label: 'Automatic' },
-  { value: 'before', label: 'Before' },
-  { value: 'after', label: 'After' },
+const POSITIONS: { value: SymbolPosition | 'auto'; label: MessageKey }[] = [
+  { value: 'auto', label: 'common.automatic' },
+  { value: 'before', label: 'settings.prefs.position.before' },
+  { value: 'after', label: 'settings.prefs.position.after' },
 ];
 
 /** How each currency in use is written on this device: its symbol and which side it goes */
@@ -443,12 +454,10 @@ function Display() {
     <section className={section} aria-labelledby="display-heading">
       <div>
         <h3 id="display-heading" className="text-sm font-medium text-text">
-          How amounts are written
+          {t('settings.currency.display')}
         </h3>
         <p className="text-xs text-text-tertiary mt-0.5">
-          On this device. Automatic writes each currency as at home: 1 234,56 zł, $1,234.56, CHF
-          1&apos;234.56 (the number format is in Preferences). {budget}&apos;s position is the
-          Preferences one.
+          {t('settings.currency.displayHint', { budget })}
         </p>
       </div>
       <ul className="space-y-3">
@@ -462,14 +471,18 @@ function Display() {
               </span>
               <input
                 type="text"
-                aria-label={`${code} symbol`}
+                aria-label={t('settings.currency.symbol', { currency: code })}
                 value={own.symbol ?? ''}
                 placeholder={currencySymbol(code)}
                 maxLength={5}
                 onChange={(e) => setStyle(code, { ...own, symbol: e.target.value || undefined })}
                 className={`${inputClass} w-20 text-center`}
               />
-              <div role="group" aria-label={`${code} symbol position`} className="flex gap-1">
+              <div
+                role="group"
+                aria-label={t('settings.currency.symbolPosition', { currency: code })}
+                className="flex gap-1"
+              >
                 {POSITIONS.map((p) => (
                   <button
                     key={p.value}
@@ -488,8 +501,13 @@ function Display() {
                     }`}
                   >
                     {p.value === 'auto'
-                      ? `Automatic (${currencyConvention(code).position === 'after' ? 'after' : 'before'})`
-                      : p.label}
+                      ? t('settings.currency.automaticSide', {
+                          side:
+                            currencyConvention(code).position === 'after'
+                              ? t('settings.currency.side.after')
+                              : t('settings.currency.side.before'),
+                        })
+                      : t(p.label)}
                   </button>
                 ))}
               </div>

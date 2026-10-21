@@ -6,14 +6,15 @@ import { useConnection } from '../../hooks/useConnection';
 import { useAppMode, useServerInfo, useSignOut } from '../../hooks/useServer';
 import { connectionSecurity } from '../../utils/connection';
 import { IS_DEMO } from '../../demo/demoApi';
+import { t, type MessageKey } from '../../i18n';
 
 const MENU_W = 248;
 
 const SECURITY_LABEL = {
-  encrypted: 'Encrypted (HTTPS)',
-  local: 'Stays on this computer',
-  unencrypted: 'Not encrypted (HTTP)',
-} as const;
+  encrypted: 'shell.server.encrypted',
+  local: 'shell.server.local',
+  unencrypted: 'shell.server.unencrypted',
+} as const satisfies Record<string, MessageKey>;
 
 /**
  * Sidebar footer: where FlyBudget's server is and whether it's reachable, like Actual
@@ -33,17 +34,17 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
   const online = connection.status === 'connected';
   // The demo's data lives in this browser tab (its "server" runs in the page)
   const place = IS_DEMO
-    ? 'Demo in this browser'
+    ? t('shell.server.placeDemo')
     : mode === 'server'
       ? window.location.host
-      : 'On this computer';
+      : t('shell.server.placeLocal');
   const address = IS_DEMO
-    ? 'This browser'
+    ? t('shell.server.addressDemo')
     : mode === 'server'
       ? window.location.host
-      : 'This computer';
-  const stateText = online ? 'Online' : 'Reconnecting';
-  const label = `Server status: ${stateText}, ${place}`;
+      : t('shell.server.addressLocal');
+  const stateText = online ? t('shell.server.online') : t('shell.server.reconnecting');
+  const label = t('shell.server.statusLabel', { state: stateText, place });
   const security = connectionSecurity(window.location.protocol, window.location.hostname);
 
   const close = (refocus = true) => {
@@ -118,7 +119,7 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
         <span
           className={`truncate transition-opacity duration-200 ${collapsed ? 'opacity-0' : 'opacity-100'}`}
         >
-          {online ? place : 'Reconnecting…'}
+          {online ? place : t('shell.server.reconnectingShort')}
         </span>
       </button>
       {pos &&
@@ -126,7 +127,7 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
           <div
             ref={menuRef}
             role="menu"
-            aria-label="Server"
+            aria-label={t('shell.server.menu')}
             onKeyDown={onMenuKey}
             className="fixed z-50 bg-surface border border-border rounded-md shadow-hover py-1 animate-menu-in"
             style={{ bottom: pos.bottom, left: pos.left, width: MENU_W }}
@@ -134,14 +135,14 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
             <div role="presentation" className="px-3 pt-1.5 pb-2 space-y-1 text-xs">
               <p className="flex items-center gap-2 text-sm font-medium text-text">
                 {dot}
-                {online ? 'Server online' : 'Reconnecting to the server'}
+                {online ? t('shell.server.serverOnline') : t('shell.server.reconnectingToServer')}
               </p>
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-text-secondary">
-                <dt className="text-text-tertiary">Address</dt>
+                <dt className="text-text-tertiary">{t('shell.server.address')}</dt>
                 <dd className="truncate font-mono text-[11px] leading-5">{address}</dd>
-                <dt className="text-text-tertiary">Connection</dt>
-                <dd>{mode === 'server' ? SECURITY_LABEL[security] : SECURITY_LABEL.local}</dd>
-                <dt className="text-text-tertiary">Version</dt>
+                <dt className="text-text-tertiary">{t('shell.server.connection')}</dt>
+                <dd>{t(mode === 'server' ? SECURITY_LABEL[security] : SECURITY_LABEL.local)}</dd>
+                <dt className="text-text-tertiary">{t('shell.server.version')}</dt>
                 <dd>{info?.version ?? '…'}</dd>
               </dl>
             </div>
@@ -153,7 +154,7 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
                 className={itemClass}
                 onClick={() => void connection.retryNow()}
               >
-                <RefreshCw size={14} /> Retry now
+                <RefreshCw size={14} /> {t('shell.server.retryNow')}
               </button>
             )}
             <button
@@ -165,7 +166,7 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
                 navigate('/settings?tab=server');
               }}
             >
-              <Settings size={14} /> Server settings
+              <Settings size={14} /> {t('shell.server.settings')}
             </button>
             {mode === 'server' && (
               <button
@@ -177,7 +178,7 @@ export function ServerStatus({ collapsed }: { collapsed: boolean }) {
                   void signOut();
                 }}
               >
-                <LogOut size={14} /> Sign out
+                <LogOut size={14} /> {t('shell.server.signOut')}
               </button>
             )}
           </div>,

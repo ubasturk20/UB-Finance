@@ -15,28 +15,32 @@ test('the reconnect screen retries on its own and the app loads without a reload
   await page.route('**/api/**', (route) => route.abort('connectionrefused'));
   await open(page, '/dashboard');
 
-  await expect(page.getByRole('heading', { name: 'FlyBudget is starting up again' })).toBeVisible();
-  await expect(page.getByText(/Trying again in \d+s|Checking…/)).toBeVisible();
-  await expect(page.getByRole('progressbar', { name: 'Time until the next try' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Try now' })).toBeVisible();
-  await expect(page.getByText('Your data is safe on this computer.')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'UB-Finance yeniden başlatılıyor' }),
+  ).toBeVisible();
+  await expect(page.getByText(/\d+ sn sonra tekrar denenecek|Kontrol ediliyor…/)).toBeVisible();
+  await expect(
+    page.getByRole('progressbar', { name: 'Bir sonraki denemeye kalan süre' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Şimdi dene' })).toBeVisible();
+  await expect(page.getByText('Verileriniz bu bilgisayarda güvende.')).toBeVisible();
 
   // The server answers again: no clicks, no reload
   await page.unroute('**/api/**');
-  await expect(page.getByRole('link', { name: 'All accounts 1.500 ₺' })).toBeVisible({
+  await expect(page.getByRole('link', { name: 'Tüm hesaplar 1.500 ₺' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole('heading', { name: 'FlyBudget is starting up again' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'UB-Finance yeniden başlatılıyor' })).toBeHidden();
 });
 
 test('"Try now" reconnects straight away', async ({ page, api }) => {
   await api.createAccount('Everyday Checking', 150_000);
   await page.route('**/api/**', (route) => route.abort('connectionrefused'));
   await open(page, '/dashboard');
-  await expect(page.getByRole('button', { name: 'Try now' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Şimdi dene' })).toBeVisible();
   await page.unroute('**/api/**');
-  await page.getByRole('button', { name: 'Try now' }).click();
-  await expect(page.getByRole('link', { name: 'All accounts 1.500 ₺' })).toBeVisible();
+  await page.getByRole('button', { name: 'Şimdi dene' }).click();
+  await expect(page.getByRole('link', { name: 'Tüm hesaplar 1.500 ₺' })).toBeVisible();
 });
 
 test('mid-session the app keeps what it loaded, keeps new transactions, and recovers', async ({
@@ -63,18 +67,20 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
   try {
     // The next request finds the server gone (a page that hasn't loaded its data yet)
     const nav = page.getByRole('complementary');
-    await nav.getByRole('link', { name: 'Transactions', exact: true }).click();
-    const banner = page.getByRole('status', { name: 'Connection' });
-    await expect(banner).toContainText("Can't reach FlyBudget. Showing your data as of");
+    await nav.getByRole('link', { name: 'İşlemler', exact: true }).click();
+    const banner = page.getByRole('status', { name: 'Bağlantı' });
+    await expect(banner).toContainText("UB-Finance'a ulaşılamıyor. Verileriniz");
     await expect(banner).toContainText(
-      'New transactions are saved on this device; other changes wait until it reconnects.',
+      'Yeni işlemler bu cihaza kaydedilir; diğer değişiklikler bağlantı geri gelene kadar bekler.',
     );
-    await expect(banner).toContainText(/Retrying in \d+s|Checking…/);
+    await expect(banner).toContainText(/\d+ sn sonra tekrar denenecek|Kontrol ediliyor…/);
     // What was loaded stays on screen, but can't be changed
-    await nav.getByRole('link', { name: 'Budget', exact: true }).click();
+    await nav.getByRole('link', { name: 'Bütçe', exact: true }).click();
     await expect(planned).toBeVisible();
     await expect(planned).toBeDisabled();
-    await expect(page.getByRole('button', { name: /^Server status: Reconnecting/ })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /^Sunucu durumu: Yeniden bağlanıyor/ }),
+    ).toBeVisible();
 
     // In-app navigation (no reload) back to the account
     await page.evaluate((id) => (window.location.hash = `#/accounts/${id}`), account.id);
@@ -89,21 +95,21 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
     await expect(
       page.getByRole('region', { name: 'Saved on this device' }).getByTestId('waiting-transaction'),
     ).toContainText('Coffee Cart');
-    await expect(banner).toContainText('1 transaction waiting to send');
+    await expect(banner).toContainText('1 işlem gönderilmeyi bekliyor');
   } finally {
     await startDesktopServer();
   }
 
   // Back: "Retry now" checks straight away (unless an automatic retry got there first)
   await page
-    .getByRole('status', { name: 'Connection' })
-    .getByRole('button', { name: 'Retry now' })
+    .getByRole('status', { name: 'Bağlantı' })
+    .getByRole('button', { name: 'Şimdi tekrar dene' })
     .click({ timeout: 2_000 })
     .catch(() => {});
-  await expect(page.getByRole('status', { name: 'Connection' })).toContainText(
-    'Reconnected. Everything is up to date.',
+  await expect(page.getByRole('status', { name: 'Bağlantı' })).toContainText(
+    'Yeniden bağlanıldı. Her şey güncel.',
   );
-  await expect(page.getByRole('button', { name: /^Server status: Online/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Sunucu durumu: Çevrimiçi/ })).toBeVisible();
   // The waiting transaction was sent, once
   await expect(page.getByRole('region', { name: 'Saved on this device' })).toBeHidden();
   await expect(
@@ -122,29 +128,29 @@ test('the sidebar shows where the data lives and links to Settings → Server', 
 }) => {
   await api.createAccount('Everyday Checking');
   await open(page, '/dashboard');
-  const status = page.getByRole('button', { name: 'Server status: Online, on this computer' });
+  const status = page.getByRole('button', { name: 'Sunucu durumu: Çevrimiçi, Bu bilgisayarda' });
   await expect(status).toHaveAttribute('aria-expanded', 'false');
   await status.click();
-  const menu = page.getByRole('menu', { name: 'Server' });
-  await expect(menu).toContainText('Server online');
-  await expect(menu).toContainText('Stays on this computer');
-  await expect(menu).toContainText(/Version\s*\d+\.\d+\.\d+/);
+  const menu = page.getByRole('menu', { name: 'Sunucu' });
+  await expect(menu).toContainText('Sunucu çevrimiçi');
+  await expect(menu).toContainText('Bu bilgisayarda kalır');
+  await expect(menu).toContainText(/Sürüm\s*\d+\.\d+\.\d+/);
   // No login in the desktop app, so nothing to sign out of
-  await expect(menu.getByRole('menuitem', { name: 'Sign out' })).toHaveCount(0);
+  await expect(menu.getByRole('menuitem', { name: 'Çıkış yap' })).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
   await expect(status).toBeFocused();
 
   await status.click();
-  await page.getByRole('menuitem', { name: 'Server settings' }).click();
-  await expect(page.getByRole('heading', { name: 'Where your data lives' })).toBeVisible();
-  await expect(page.getByRole('main').getByText('On this computer', { exact: true })).toBeVisible();
-  const guide = page.getByRole('link', { name: 'Read the self-hosting guide' });
+  await page.getByRole('menuitem', { name: 'Sunucu ayarları' }).click();
+  await expect(page.getByRole('heading', { name: 'Verileriniz nerede' })).toBeVisible();
+  await expect(page.getByRole('main').getByText('Bu bilgisayarda', { exact: true })).toBeVisible();
+  const guide = page.getByRole('link', { name: 'Sunucu kurulum kılavuzunu oku' });
   await expect(guide).toHaveAttribute('href', 'https://flybudget.org/community/self-hosting');
   await expect(guide).toHaveAttribute('target', '_blank');
   await expect(guide).toHaveAttribute('rel', 'noopener noreferrer');
-  await page.getByRole('button', { name: 'Make a backup first' }).click();
-  await expect(page.getByRole('button', { name: 'Download Backup' })).toBeVisible();
+  await page.getByRole('button', { name: 'Önce yedek al' }).click();
+  await expect(page.getByRole('button', { name: 'Yedeği indir' })).toBeVisible();
 });
 
 test('server details are only for the app itself', async ({ playwright, baseURL, api }) => {

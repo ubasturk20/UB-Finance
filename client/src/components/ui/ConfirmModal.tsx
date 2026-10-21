@@ -1,5 +1,6 @@
 import { Modal } from './Modal';
 import { Button } from './Button';
+import { t } from '../../i18n';
 
 interface Props {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm',
+  confirmLabel = t('common.confirm'),
   danger = false,
 }: Props) {
   return (
@@ -25,7 +26,7 @@ export function ConfirmModal({
       <p className="text-sm text-text-secondary">{message}</p>
       <div className="flex justify-end gap-3 mt-6">
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           variant={danger ? 'danger' : 'primary'}

@@ -12,16 +12,25 @@ import { Link } from 'react-router-dom';
 import { useCurrencySettings } from '../../hooks/useCurrency';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { IS_DEMO } from '../../demo/isDemo';
+import { t, type MessageKey } from '../../i18n';
 
-const themeOptions: { value: Theme; label: string }[] = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' },
+const themeOptions: { value: Theme; label: MessageKey }[] = [
+  { value: 'light', label: 'settings.prefs.theme.light' },
+  { value: 'dark', label: 'settings.prefs.theme.dark' },
+  { value: 'system', label: 'settings.prefs.theme.system' },
 ];
 
-const sidebarModes: { value: SidebarMode; label: string; description: string }[] = [
-  { value: 'persistent', label: 'Pinned', description: 'Always open' },
-  { value: 'auto-hide', label: 'Auto-hide', description: 'Collapsed, opens on hover' },
+const sidebarModes: { value: SidebarMode; label: MessageKey; description: MessageKey }[] = [
+  {
+    value: 'persistent',
+    label: 'settings.prefs.sidebar.pinned',
+    description: 'settings.prefs.sidebar.pinnedHint',
+  },
+  {
+    value: 'auto-hide',
+    label: 'settings.prefs.sidebar.autoHide',
+    description: 'settings.prefs.sidebar.autoHideHint',
+  },
 ];
 
 const dateFormats: { value: DateFormatOption; label: string; example: string }[] = [
@@ -34,10 +43,10 @@ const dateFormats: { value: DateFormatOption; label: string; example: string }[]
 
 const amountFormats: (AmountFormat | 'auto')[] = ['auto', 'dot', 'comma', 'space', 'apostrophe'];
 
-const symbolPositions: { value: SymbolPosition | 'auto'; label: string }[] = [
-  { value: 'auto', label: 'Automatic' },
-  { value: 'before', label: 'Before' },
-  { value: 'after', label: 'After' },
+const symbolPositions: { value: SymbolPosition | 'auto'; label: MessageKey }[] = [
+  { value: 'auto', label: 'common.automatic' },
+  { value: 'before', label: 'settings.prefs.position.before' },
+  { value: 'after', label: 'settings.prefs.position.after' },
 ];
 
 /** 1,234.56 in a format, without a symbol */
@@ -101,18 +110,16 @@ export function PreferencesPanel() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-text">Preferences</h2>
+          <h2 className="text-sm font-semibold text-text">{t('settings.tab.preferences')}</h2>
           <p className="text-xs text-text-tertiary mt-0.5">
-            {IS_DEMO
-              ? 'Settings are kept in this tab while you try the demo.'
-              : 'Settings are saved automatically to your browser.'}
+            {IS_DEMO ? t('settings.prefs.savedDemo') : t('settings.prefs.savedBrowser')}
           </p>
         </div>
         <button
           onClick={() => setResetOpen(true)}
           className="text-xs text-text-tertiary hover:text-text-secondary transition-colors"
         >
-          Reset to defaults
+          {t('settings.prefs.reset')}
         </button>
       </div>
 
@@ -120,14 +127,14 @@ export function PreferencesPanel() {
         isOpen={resetOpen}
         onClose={() => setResetOpen(false)}
         onConfirm={handleReset}
-        title="Reset preferences"
-        message="Are you sure you want to reset all preferences to their default values?"
-        confirmLabel="Reset"
+        title={t('settings.prefs.resetTitle')}
+        message={t('settings.prefs.resetMessage')}
+        confirmLabel={t('settings.prefs.resetConfirm')}
         danger
       />
 
       <div className="bg-surface-alt rounded-lg p-5 space-y-4">
-        <h3 className="text-sm font-medium text-text">Theme</h3>
+        <h3 className="text-sm font-medium text-text">{t('settings.prefs.theme')}</h3>
         <div className="flex gap-3">
           {themeOptions.map((opt) => (
             <button
@@ -139,14 +146,14 @@ export function PreferencesPanel() {
                   : 'border-border bg-surface text-text-secondary hover:border-border'
               }`}
             >
-              {opt.label}
+              {t(opt.label)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="bg-surface-alt rounded-lg p-5 space-y-4">
-        <h3 className="text-sm font-medium text-text">Sidebar</h3>
+        <h3 className="text-sm font-medium text-text">{t('settings.prefs.sidebar')}</h3>
         <div className="flex gap-3">
           {sidebarModes.map((opt) => (
             <button
@@ -158,9 +165,9 @@ export function PreferencesPanel() {
                   : 'border-border bg-surface text-text-secondary hover:border-border'
               }`}
             >
-              <span>{opt.label}</span>
+              <span>{t(opt.label)}</span>
               <span className="text-xs text-text-tertiary font-normal mt-0.5">
-                {opt.description}
+                {t(opt.description)}
               </span>
             </button>
           ))}
@@ -168,24 +175,24 @@ export function PreferencesPanel() {
       </div>
 
       <div className="bg-surface-alt rounded-lg p-5 space-y-5">
-        <h3 className="text-sm font-medium text-text">Icons</h3>
+        <h3 className="text-sm font-medium text-text">{t('settings.prefs.icons')}</h3>
         {(
           [
             {
-              label: 'Merchant',
-              description: 'Merchant logos (or colored initials) next to merchant names',
+              label: t('settings.prefs.icons.payee'),
+              description: t('settings.prefs.icons.payeeHint'),
               value: showMerchantIcons,
               setter: setShowMerchantIcons,
             },
             {
-              label: 'Category',
-              description: 'Emoji icons next to category names',
+              label: t('settings.prefs.icons.category'),
+              description: t('settings.prefs.icons.categoryHint'),
               value: showCategoryIcons,
               setter: setShowCategoryIcons,
             },
             {
-              label: 'Account',
-              description: 'Account logos (or colored initials) next to account names',
+              label: t('settings.prefs.icons.account'),
+              description: t('settings.prefs.icons.accountHint'),
               value: showAccountIcons,
               setter: setShowAccountIcons,
             },
@@ -198,8 +205,8 @@ export function PreferencesPanel() {
             </div>
             <div className="flex gap-2 shrink-0">
               {[
-                { v: true, l: 'Show' },
-                { v: false, l: 'Hide' },
+                { v: true, l: t('settings.prefs.show') },
+                { v: false, l: t('settings.prefs.hide') },
               ].map((opt) => (
                 <button
                   key={String(opt.v)}
@@ -224,27 +231,26 @@ export function PreferencesPanel() {
       >
         <div>
           <h3 id="amounts-heading" className="text-sm font-medium text-text">
-            Amounts
+            {t('settings.prefs.amounts')}
           </h3>
-          <p className="text-xs text-text-tertiary mt-0.5">
-            How amounts are shown and typed on this device. Automatic follows your device's
-            language. You can always type 12.50 or 12,50.
-          </p>
+          <p className="text-xs text-text-tertiary mt-0.5">{t('settings.prefs.amountsHint')}</p>
         </div>
 
-        <div className="space-y-2" role="group" aria-label="Number format">
-          <div className="text-xs font-medium text-text-secondary">Number format</div>
+        <div className="space-y-2" role="group" aria-label={t('settings.prefs.numberFormat')}>
+          <div className="text-xs font-medium text-text-secondary">
+            {t('settings.prefs.numberFormat')}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {amountFormats.map((opt) => (
               <button
                 key={opt}
                 type="button"
                 aria-pressed={amountFormat === opt}
-                aria-label={opt === 'auto' ? 'Automatic' : numberExample(opt)}
+                aria-label={opt === 'auto' ? t('common.automatic') : numberExample(opt)}
                 onClick={() => setAmountFormat(opt)}
                 className={choiceClass(amountFormat === opt)}
               >
-                <span>{opt === 'auto' ? 'Automatic' : numberExample(opt)}</span>
+                <span>{opt === 'auto' ? t('common.automatic') : numberExample(opt)}</span>
                 {opt === 'auto' && (
                   <span className="text-xs text-text-tertiary">{numberExample(auto.format)}</span>
                 )}
@@ -253,15 +259,21 @@ export function PreferencesPanel() {
           </div>
         </div>
 
-        <div className="space-y-2" role="group" aria-label="Currency symbol position">
+        <div
+          className="space-y-2"
+          role="group"
+          aria-label={t('settings.prefs.currencySymbolPosition')}
+        >
           <div className="text-xs font-medium text-text-secondary">
-            {budgetCurrency ? `${budgetCurrency} symbol` : 'Currency symbol'}
+            {budgetCurrency
+              ? t('settings.currency.symbol', { currency: budgetCurrency })
+              : t('settings.prefs.currencySymbol')}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {!budgetCurrency && (
               <input
                 type="text"
-                aria-label="Currency symbol"
+                aria-label={t('settings.prefs.currencySymbol')}
                 value={currencySymbol}
                 onChange={(e) => setCurrencySymbol(e.target.value.slice(0, 3))}
                 maxLength={3}
@@ -276,34 +288,34 @@ export function PreferencesPanel() {
                 onClick={() => setSymbolPosition(opt.value)}
                 className={choiceClass(symbolPosition === opt.value)}
               >
-                {opt.label}
+                {t(opt.label)}
               </button>
             ))}
           </div>
           <p className="text-xs text-text-tertiary">
             {budgetCurrency ? (
               <>
-                Automatic writes it as {budgetCurrency} is written at home. Symbols of other
-                currencies are in{' '}
+                {t('settings.prefs.symbolHintBudgetBefore', { currency: budgetCurrency })}{' '}
                 <Link to="/settings?tab=currencies" className="underline hover:no-underline">
-                  Currencies
-                </Link>
-                .
+                  {t('settings.tab.currencies')}
+                </Link>{' '}
+                {t('settings.prefs.symbolHintBudgetAfter')}
               </>
             ) : (
               <>
-                Up to 3 characters (e.g. $, €, EUR, kr). Or choose your budget&apos;s currency in{' '}
+                {t('settings.prefs.symbolHintLegacyBefore')}{' '}
                 <Link to="/settings?tab=currencies" className="underline hover:no-underline">
-                  Currencies
-                </Link>
-                .
+                  {t('settings.tab.currencies')}
+                </Link>{' '}
+                {t('settings.prefs.symbolHintLegacyAfter')}
               </>
             )}
           </p>
         </div>
 
         <p className="text-sm text-text-secondary">
-          Example: <span className="font-medium text-text tabular-nums">{example}</span>
+          {t('settings.prefs.example')}{' '}
+          <span className="font-medium text-text tabular-nums">{example}</span>
           {otherExamples.map((e) => (
             <span key={e} className="font-medium text-text tabular-nums">
               {' · '}
@@ -314,7 +326,7 @@ export function PreferencesPanel() {
       </section>
 
       <div className="bg-surface-alt rounded-lg p-5 space-y-4">
-        <h3 className="text-sm font-medium text-text">Date Format</h3>
+        <h3 className="text-sm font-medium text-text">{t('settings.prefs.dateFormat')}</h3>
         <div className="grid grid-cols-2 gap-2">
           {dateFormats.map((opt) => (
             <button

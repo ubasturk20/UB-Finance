@@ -21,16 +21,16 @@ test('a budget with one currency sees nothing new', async ({ page, api }) => {
 
   // The symbol is still the device's own setting
   await open(page, '/settings?tab=preferences');
-  await expect(page.getByRole('textbox', { name: 'Currency symbol' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Para birimi simgesi' })).toBeVisible();
   await expect(page.getByRole('main').getByText('$100.00')).toHaveCount(0);
 });
 
 test('choosing the budget currency, then adding accounts in others', async ({ page, api }) => {
   await api.createAccount('Girokonto', 100_000);
   await open(page, '/settings?tab=currencies');
-  await page.getByRole('combobox', { name: 'Budget currency' }).selectOption('EUR');
-  await page.getByRole('button', { name: 'Use this currency' }).click();
-  await expect(page.getByRole('heading', { name: 'Exchange rates' })).toBeVisible();
+  await page.getByRole('combobox', { name: 'Bütçe para birimi' }).selectOption('EUR');
+  await page.getByRole('button', { name: 'Bu para birimini kullan' }).click();
+  await expect(page.getByRole('heading', { name: 'Döviz kurları' })).toBeVisible();
   await expect.poll(async () => (await api.call('GET', '/currency')).currency).toBe('EUR');
 
   // An account in yen: no decimals, typed and shown that way
@@ -122,9 +122,9 @@ test('a purchase without a rate is flagged until one is added', async ({ page, a
   await expect(page.getByText('No rate').first()).toBeVisible();
 
   await open(page, '/settings?tab=currencies');
-  await page.getByRole('combobox', { name: 'Currency', exact: true }).selectOption('GBP');
-  await page.getByRole('textbox', { name: /1 GBP in EUR/ }).fill('1,25');
-  await page.getByRole('button', { name: 'Add rate' }).click();
+  await page.getByRole('combobox', { name: 'Para birimi', exact: true }).selectOption('GBP');
+  await page.getByRole('textbox', { name: /EUR cinsinden 1 GBP/ }).fill('1,25');
+  await page.getByRole('button', { name: 'Kur ekle' }).click();
   await expect(page.getByText('1 GBP = 1.25 EUR', { exact: true })).toBeVisible();
 
   await open(page, '/budget');
@@ -146,10 +146,10 @@ test('ECB rates download only when turned on', async ({ page, api }) => {
   expect((await api.call('GET', '/currency/rates')).length).toBe(0);
 
   await open(page, '/settings?tab=currencies');
-  const download = page.getByRole('checkbox', { name: 'Download ECB reference rates' });
+  const download = page.getByRole('checkbox', { name: 'AMB referans kurlarını indir' });
   await download.click();
   await expect(download).toBeChecked();
-  await page.getByRole('button', { name: 'Download now' }).click();
+  await page.getByRole('button', { name: 'Şimdi indir' }).click();
   await expect(page.getByText('1 PLN = 0.235294 EUR')).toBeVisible();
   const [tx] = await api.call('GET', `/transactions?account_id=${zloty.id}`);
   expect(tx).toMatchObject({ mainAmount: -2_000, mainAmountSource: 'rate' });

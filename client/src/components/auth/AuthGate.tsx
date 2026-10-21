@@ -13,6 +13,7 @@ import { ReconnectScreen } from '../connection/ReconnectScreen';
 import { Button } from '../ui/Button';
 import { AuthScreen } from './AuthScreen';
 import { MIN_PASSWORD_LENGTH } from './passwordRules';
+import { t } from '../../i18n';
 
 /**
  * Shows the login (or first-run setup) screen when FlyBudget runs as a server and
@@ -108,9 +109,9 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
     e.preventDefault();
     setError(null);
     if (isSetup && password.length < MIN_PASSWORD_LENGTH) {
-      return setError(`Use at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return setError(t('shell.auth.tooShort', { count: MIN_PASSWORD_LENGTH }));
     }
-    if (isSetup && password !== confirm) return setError("The passwords don't match.");
+    if (isSetup && password !== confirm) return setError(t('shell.auth.mismatch'));
     setBusy(true);
     try {
       await (isSetup ? authApi.setupPassword(password, code) : authApi.login(password));
@@ -128,18 +129,16 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
 
   return (
     <AuthScreen
-      title={isSetup ? 'Set up your FlyBudget server' : 'Sign in to FlyBudget'}
+      title={isSetup ? t('shell.auth.setupTitle') : t('shell.auth.signInTitle')}
       subtitle={
         <>
-          <span className="block font-mono text-xs break-all" aria-label="Server address">
+          <span
+            className="block font-mono text-xs break-all"
+            aria-label={t('shell.auth.serverAddress')}
+          >
             {host}
           </span>
-          {isSetup && (
-            <span className="block mt-2">
-              Create the password that protects this server. Anyone who can reach it will need this
-              password.
-            </span>
-          )}
+          {isSetup && <span className="block mt-2">{t('shell.auth.setupIntro')}</span>}
         </>
       }
     >
@@ -150,8 +149,8 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
         >
           <AlertTriangle size={14} className="text-caution shrink-0 mt-0.5" aria-hidden />
           <p>
-            <span className="font-semibold">Not a secure connection.</span> Your password would
-            travel unencrypted. Only continue on a network you trust.
+            <span className="font-semibold">{t('shell.auth.insecureTitle')}</span>{' '}
+            {t('shell.auth.insecureBody')}
           </p>
         </div>
       )}
@@ -162,7 +161,7 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
               htmlFor="setup-code"
               className="block text-sm font-medium text-text-secondary mb-1"
             >
-              Setup code
+              {t('shell.auth.setupCode')}
             </label>
             <input
               id="setup-code"
@@ -175,14 +174,15 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
               className={`${inputClass} font-mono uppercase`}
             />
             <p className="text-xs text-text-tertiary mt-1">
-              Printed in the server log. With Docker, run{' '}
-              <code className="font-mono">docker logs flybudget</code>.
+              {t('shell.auth.setupCodeHintBefore')}{' '}
+              <code className="font-mono">docker logs flybudget</code>{' '}
+              {t('shell.auth.setupCodeHintAfter')}
             </p>
           </div>
         )}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1">
-            {isSetup ? 'New password' : 'Password'}
+            {isSetup ? t('shell.auth.newPassword') : t('shell.auth.password')}
           </label>
           <input
             id="password"
@@ -197,7 +197,7 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
         {isSetup && (
           <div>
             <label htmlFor="confirm" className="block text-sm font-medium text-text-secondary mb-1">
-              Confirm password
+              {t('shell.auth.confirmPassword')}
             </label>
             <input
               id="confirm"
@@ -212,7 +212,7 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
         {error && <p className="text-xs text-negative">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy || !password || (isSetup && !code)}>
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
-          {isSetup ? 'Create password' : 'Sign in'}
+          {isSetup ? t('shell.auth.createPassword') : t('shell.auth.signIn')}
         </Button>
       </form>
     </AuthScreen>

@@ -12,6 +12,7 @@ import { PlaidSetupModal } from '../plaid/PlaidSetupModal';
 import { SimplefinConnectModal } from '../simplefin/SimplefinConnectModal';
 import { ConnectEnableBankingModal } from '../enablebanking/ConnectEnableBankingModal';
 import type { Account } from '../../types';
+import { t } from '../../i18n';
 
 /** Four 36px rows plus padding */
 const MENU_HEIGHT = 152;
@@ -101,7 +102,7 @@ export function SidebarAccountList() {
   const offBudgetTotal = totalValue(offBudget);
   const missing = unconvertedCurrencies(accounts);
   const missingTitle = missing.length
-    ? `Without ${missing.join(', ')}: no exchange rate yet`
+    ? t('shell.accounts.missingRates', { currencies: missing.join(', ') })
     : undefined;
 
   return (
@@ -113,7 +114,7 @@ export function SidebarAccountList() {
           to="/accounts"
           className="flex items-center justify-between py-1.5 text-[13px] font-bold text-sidebar-text-hi hover:text-sidebar-text-hi transition-colors"
         >
-          <span>All accounts</span>
+          <span>{t('shell.accounts.all')}</span>
           <span className="tabular-nums ml-2" title={missingTitle}>
             {formatCurrency(allTotal)}
             {missing.length > 0 && '*'}
@@ -126,7 +127,7 @@ export function SidebarAccountList() {
             onClick={() => setForBudgetOpen((o) => !o)}
             className="flex items-center justify-between w-full py-1.5 text-[13px] font-semibold text-sidebar-text-hi border-b border-sidebar-text/20 hover:text-sidebar-text-hi transition-colors"
           >
-            <span>For budget</span>
+            <span>{t('shell.accounts.forBudget')}</span>
             <span className="flex items-center gap-1">
               <span className="tabular-nums text-[12px]">{formatCurrency(onBudgetTotal)}</span>
               {forBudgetOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -138,7 +139,7 @@ export function SidebarAccountList() {
                 <AccountRow key={a.id} account={a} />
               ))}
               {onBudget.length === 0 && (
-                <p className="pl-5 py-1 text-xs text-sidebar-text/50">No accounts yet</p>
+                <p className="pl-5 py-1 text-xs text-sidebar-text/50">{t('shell.accounts.none')}</p>
               )}
             </div>
           )}
@@ -151,7 +152,7 @@ export function SidebarAccountList() {
               onClick={() => setOffBudgetOpen((o) => !o)}
               className="flex items-center justify-between w-full py-1.5 text-[13px] font-semibold text-sidebar-text-hi border-b border-sidebar-text/20 hover:text-sidebar-text-hi transition-colors"
             >
-              <span>Off budget</span>
+              <span>{t('shell.accounts.offBudget')}</span>
               <span className="flex items-center gap-1">
                 <span className="tabular-nums text-[12px]">{formatCurrency(offBudgetTotal)}</span>
                 {offBudgetOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -175,7 +176,7 @@ export function SidebarAccountList() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-sidebar-text hover:text-sidebar-text-hi transition-colors"
           >
             <Plus size={14} />
-            <span>Add account</span>
+            <span>{t('shell.accounts.add')}</span>
           </button>
 
           {/* Portaled so the sidebar's scroll area can't clip it */}
@@ -194,7 +195,7 @@ export function SidebarAccountList() {
                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm whitespace-nowrap text-text-secondary hover:bg-hover hover:text-text transition-colors"
                 >
                   <Plus size={14} className="shrink-0" />
-                  Add Manual Account
+                  {t('shell.accounts.addManual')}
                 </button>
                 <button
                   onClick={() => {
@@ -205,7 +206,7 @@ export function SidebarAccountList() {
                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm whitespace-nowrap text-text-secondary hover:bg-hover hover:text-text transition-colors"
                 >
                   <Building2 size={14} className="shrink-0" />
-                  Connect via Plaid
+                  {t('shell.accounts.connectPlaid')}
                 </button>
                 <button
                   onClick={() => {
@@ -215,7 +216,7 @@ export function SidebarAccountList() {
                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm whitespace-nowrap text-text-secondary hover:bg-hover hover:text-text transition-colors"
                 >
                   <Link2 size={14} className="shrink-0" />
-                  Connect via SimpleFIN
+                  {t('shell.accounts.connectSimplefin')}
                 </button>
                 <button
                   onClick={() => {
@@ -225,7 +226,7 @@ export function SidebarAccountList() {
                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm whitespace-nowrap text-text-secondary hover:bg-hover hover:text-text transition-colors"
                 >
                   <Euro size={14} className="shrink-0" />
-                  Connect via Enable Banking
+                  {t('shell.accounts.connectEnableBanking')}
                 </button>
               </div>,
               document.body,

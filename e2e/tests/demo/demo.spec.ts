@@ -88,7 +88,7 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
   await expect(page.getByText('Harbor Checking').first()).toBeVisible();
   await expect(page.getByText('My test account')).toHaveCount(0);
 
-  await page.getByRole('link', { name: 'Payees' }).click();
+  await page.getByRole('link', { name: 'Alıcılar' }).click();
   await page.getByRole('button', { name: 'Delete Corner Grocer' }).click();
   await page
     .getByRole('dialog')
@@ -98,7 +98,7 @@ test('changes stay in the tab, and "Start over" brings the demo budget back', as
 
   await page.getByRole('button', { name: 'Start over' }).click();
   await expect(page.getByText('Left to Spend')).toBeVisible();
-  await page.getByRole('link', { name: 'Payees' }).click();
+  await page.getByRole('link', { name: 'Alıcılar' }).click();
   await expect(page.getByRole('row', { name: /Corner Grocer/ })).toBeVisible();
 });
 
@@ -107,8 +107,8 @@ test("bank connections can't be set up in the demo", async ({ page }) => {
   await expect(page.getByText('Not available in the demo')).toBeVisible();
   await expect(page.getByRole('textbox')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Add account' }).click();
-  await page.getByRole('button', { name: 'Connect via SimpleFIN' }).click();
+  await page.getByRole('button', { name: 'Hesap ekle' }).click();
+  await page.getByRole('button', { name: 'SimpleFIN ile bağlan' }).click();
   const dialog = page.getByRole('dialog', { name: 'Connect a bank' });
   await expect(dialog).toContainText('need the FlyBudget app');
   await expect(dialog.getByRole('textbox')).toHaveCount(0);
@@ -127,8 +127,8 @@ test("bank connections can't be set up in the demo", async ({ page }) => {
   expect(status).toBe(403);
 
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Add account' }).click();
-  await page.getByRole('button', { name: 'Connect via Enable Banking' }).click();
+  await page.getByRole('button', { name: 'Hesap ekle' }).click();
+  await page.getByRole('button', { name: 'Enable Banking ile bağlan' }).click();
   await expect(page.getByRole('dialog', { name: 'Connect a bank' })).toContainText(
     'Enable Banking',
   );
@@ -201,19 +201,19 @@ test('nothing leaves the browser: imports, backups and restores stay in the tab'
 
   // A backup downloads from the tab
   const download = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download Backup' }).click();
+  await page.getByRole('button', { name: 'Yedeği indir' }).click();
   const backupFile = await (await download).path();
   const backup = JSON.parse(fs.readFileSync(backupFile, 'utf8'));
   expect(backup).toMatchObject({ format: 'flybudget-backup' });
   expect(Object.keys(backup)).not.toContain('plaidItems');
 
   // Restoring it works in the tab too
-  await page.getByLabel('Backup file').setInputFiles(backupFile);
+  await page.getByLabel('Yedek dosyası').setInputFiles(backupFile);
   await page
-    .getByRole('dialog', { name: 'Restore this backup?' })
-    .getByRole('button', { name: 'Replace my data' })
+    .getByRole('dialog', { name: 'Bu yedek geri yüklensin mi?' })
+    .getByRole('button', { name: 'Verilerimi değiştir' })
     .click();
-  await expect(page.getByRole('status')).toContainText('Restored');
+  await expect(page.getByRole('status')).toContainText('geri yüklendi');
 
   // A CSV import, all the way through
   await page.evaluate(() => (location.hash = '#/accounts/demo-acct-checking'));
@@ -232,8 +232,8 @@ test('nothing leaves the browser: imports, backups and restores stay in the tab'
 
 test("the demo's preferences stay in the tab, and Start over resets them", async ({ page }) => {
   await openDemo(page, '/settings?tab=preferences');
-  await expect(page.getByText('Settings are kept in this tab')).toBeVisible();
-  await page.getByRole('button', { name: 'Dark', exact: true }).click();
+  await expect(page.getByText('Demoyu denerken ayarlar bu sekmede tutulur')).toBeVisible();
+  await page.getByRole('button', { name: 'Koyu', exact: true }).click();
   await expect(page.locator('html')).toHaveClass(/dark/);
 
   // Not in the website's localStorage, which would outlive the tab
