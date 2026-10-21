@@ -20,6 +20,9 @@ export const transactions = {
   'tx.empty.allDescription':
     'İşlemleri elle ekleyin, bir hesap sayfasından CSV dosyası içe aktarın ya da ' +
     'işlemlerin otomatik gelmesi için bir banka bağlayın.',
+  'tx.empty.allDescriptionNoBank':
+    'İşlemleri elle ekleyin ya da bir hesap sayfasından bankanızın CSV veya CAMT dosyasını ' +
+    'içe aktarın.',
   'tx.empty.importCsvFile': 'CSV dosyası içe aktar',
   'tx.empty.addFirst': 'İlk işlemi ekle',
   'tx.empty.connectBank': 'Banka bağla',

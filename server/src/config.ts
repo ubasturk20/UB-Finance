@@ -9,6 +9,13 @@
 /** Self-hosted server: require a password login for everything. */
 export const serverMode = process.env.FLYBUDGET_SERVER_MODE === 'true';
 
+/**
+ * Bank sync (Plaid, SimpleFIN, Enable Banking). None of them covers Turkish banks, so
+ * UB-Finance turns them off unless FLYBUDGET_BANK_SYNC=true: their routes aren't mounted
+ * and nothing syncs on startup. The client needs VITE_BANK_SYNC=true at build time too.
+ */
+export const bankSyncEnabled = process.env.FLYBUDGET_BANK_SYNC === 'true';
+
 /** Address to listen on. Only server mode should listen beyond this machine. */
 export const listenHost = process.env.FLYBUDGET_HOST ?? '127.0.0.1';
 

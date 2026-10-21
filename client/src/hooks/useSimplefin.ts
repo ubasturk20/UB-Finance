@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as simplefinApi from '../api/simplefin';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 
 export function useSimplefinConnections() {
   return useQuery({
     queryKey: ['simplefin-connections'],
     queryFn: simplefinApi.getSimplefinConnections,
+    enabled: BANK_SYNC_ENABLED,
   });
 }
 

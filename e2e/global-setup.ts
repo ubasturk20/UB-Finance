@@ -40,14 +40,20 @@ function buildClient(outDir: string, mode?: string) {
   const vite = path.join(root, 'client/node_modules/vite/bin/vite.js');
   const args = [vite, 'build', '--outDir', outDir, '--emptyOutDir', '--logLevel', 'warn'];
   if (mode) args.push('--mode', mode);
-  execFileSync(process.execPath, args, { cwd: path.join(root, 'client'), stdio: 'inherit' });
+  execFileSync(process.execPath, args, {
+    cwd: path.join(root, 'client'),
+    stdio: 'inherit',
+    // UB-Finance hides bank sync unless built with it; the tests cover it
+    env: { ...process.env, VITE_BANK_SYNC: 'true' },
+  });
 }
 
 function startServer(name: string, env: Record<string, string>, log: string[]): ChildProcess {
   const tsx = path.join(root, 'server/node_modules/tsx/dist/cli.mjs');
   const child = spawn(process.execPath, [tsx, 'src/index.ts'], {
     cwd: path.join(root, 'server'),
-    env: { ...process.env, NODE_ENV: 'test', ...env },
+    // Bank sync is off by default in UB-Finance; the tests cover it
+    env: { ...process.env, NODE_ENV: 'test', FLYBUDGET_BANK_SYNC: 'true', ...env },
     stdio: ['ignore', 'pipe', 'pipe'],
     // Its own process group (Linux/macOS), so stopping it also stops the server tsx starts
     detached: !isWindows,

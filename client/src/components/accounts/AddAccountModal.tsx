@@ -17,9 +17,11 @@ import { t } from '../../i18n';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  /** Called with the new account's id once it's saved (e.g. to open its page) */
+  onCreated?: (id: string) => void;
 }
 
-export function AddAccountModal({ isOpen, onClose }: Props) {
+export function AddAccountModal({ isOpen, onClose, onCreated }: Props) {
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('checking');
   const [amount, setAmount] = useState(0);
@@ -52,7 +54,7 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !amountValid) return;
-    await createAccount.mutateAsync({
+    const created = await createAccount.mutateAsync({
       name: name.trim(),
       type,
       // Debts are entered as the amount owed and stored as a negative balance
@@ -61,6 +63,7 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
       ...(currency ? { currency } : {}),
     });
     handleClose();
+    onCreated?.(created.id);
   }
 
   const amountLabel = info.liability

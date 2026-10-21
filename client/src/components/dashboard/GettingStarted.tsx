@@ -8,6 +8,7 @@ import { useSchedules } from '../../hooks/useSchedules';
 import { useRules } from '../../hooks/useRules';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import { docsUrl } from '../../utils/project';
+import { BANK_SYNC_ENABLED } from '../../utils/features';
 import { AddAccountModal } from '../accounts/AddAccountModal';
 import { ExternalLink } from '../ui/ExternalLink';
 import { Card } from '../ui/Card';
@@ -51,11 +52,15 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
     {
       id: 'transactions',
       title: t('dash.start.transactions.title'),
-      description: t('dash.start.transactions.description'),
+      description: BANK_SYNC_ENABLED
+        ? t('dash.start.transactions.description')
+        : t('dash.start.transactions.descriptionNoBank'),
       done: (transactions.data?.length ?? 0) > 0,
       action: firstAccount
         ? { label: t('dash.start.transactions.import'), to: `/accounts/${firstAccount.id}` }
-        : { label: t('dash.start.transactions.connect'), to: '/settings?tab=connections' },
+        : BANK_SYNC_ENABLED
+          ? { label: t('dash.start.transactions.connect'), to: '/settings?tab=connections' }
+          : { label: t('dash.start.transactions.addManual'), to: '/transactions?add=1' },
     },
     {
       id: 'recurring',

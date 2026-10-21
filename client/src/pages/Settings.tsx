@@ -16,10 +16,11 @@ import { PreferencesPanel } from '../components/settings/PreferencesPanel';
 import { CurrencySettings } from '../components/settings/CurrencySettings';
 import { ConnectedAccounts } from '../components/settings/ConnectedAccounts';
 import { LICENSE_URL, SOURCE_CODE_URL } from '../utils/project';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 import { t } from '../i18n';
 
 // `label` is a message key; the ids are the ?tab= values in the URL and stay English
-const tabs = [
+const allTabs = [
   { id: 'categories', label: 'settings.tab.categories', icon: Layers },
   { id: 'accounts', label: 'settings.tab.accounts', icon: ArrowUpDown },
   { id: 'connections', label: 'settings.tab.connections', icon: Link2 },
@@ -31,7 +32,11 @@ const tabs = [
   { id: 'server', label: 'settings.tab.server', icon: Server },
 ] as const;
 
-type TabId = (typeof tabs)[number]['id'];
+type TabId = (typeof allTabs)[number]['id'];
+
+// Without bank sync (VITE_BANK_SYNC) there is no Connected Banks tab; ?tab=connections
+// then opens the first tab
+const tabs = allTabs.filter((tab) => BANK_SYNC_ENABLED || tab.id !== 'connections');
 
 const tabIds = new Set<string>(tabs.map((tab) => tab.id));
 

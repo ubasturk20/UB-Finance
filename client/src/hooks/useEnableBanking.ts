@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ebApi from '../api/enableBanking';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 import type { EnableBankingAuthPoll, EnableBankingConnectionResult } from '../types';
 
 export function useEnableBankingStatus() {
   return useQuery({
     queryKey: ['enable-banking-status'],
     queryFn: ebApi.getEnableBankingStatus,
+    enabled: BANK_SYNC_ENABLED,
   });
 }
 
@@ -14,6 +16,7 @@ export function useEnableBankingConnections() {
   return useQuery({
     queryKey: ['enable-banking-connections'],
     queryFn: ebApi.getEnableBankingConnections,
+    enabled: BANK_SYNC_ENABLED,
   });
 }
 
@@ -22,7 +25,7 @@ export function useEnableBankingBanks(country: string | null) {
   return useQuery({
     queryKey: ['enable-banking-banks', country],
     queryFn: () => ebApi.getEnableBankingBanks(country!),
-    enabled: !!country,
+    enabled: BANK_SYNC_ENABLED && !!country,
     staleTime: 60 * 60 * 1000,
     retry: false,
   });
