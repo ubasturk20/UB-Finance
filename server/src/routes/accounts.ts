@@ -193,7 +193,7 @@ const storedImportSettings = (id: string) =>
 
 accountsRouter.get('/:id/import-settings', (req, res) => {
   const account = storedImportSettings(req.params.id);
-  if (!account) return res.status(404).json({ error: 'Not found' });
+  if (!account) return res.status(404).json({ error: 'Bulunamadı' });
   res.json({
     settings: readImportSettings(account.importSettings),
     statementAccount: readStatementAccount(account.importSettings),
@@ -224,7 +224,7 @@ accountsRouter.put('/:id/import-settings', (req, res) => {
   const parsed = importSettingsSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   if (!saveImportSettingsPart(req.params.id, { settings: parsed.data })) {
-    return res.status(404).json({ error: 'Not found' });
+    return res.status(404).json({ error: 'Bulunamadı' });
   }
   res.json({ settings: parsed.data });
 });
@@ -233,7 +233,7 @@ accountsRouter.put('/:id/statement-account', (req, res) => {
   const parsed = z.object({ account: statementAccountSchema }).safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   if (!saveImportSettingsPart(req.params.id, { statementAccount: parsed.data.account })) {
-    return res.status(404).json({ error: 'Not found' });
+    return res.status(404).json({ error: 'Bulunamadı' });
   }
   res.json({ statementAccount: parsed.data.account });
 });
@@ -242,7 +242,7 @@ accountsRouter.put('/:id', (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = db.select().from(accounts).where(eq(accounts.id, req.params.id)).get();
-  if (!existing) return res.status(404).json({ error: 'Not found' });
+  if (!existing) return res.status(404).json({ error: 'Bulunamadı' });
 
   const data = { ...parsed.data };
   if (data.currency !== undefined) {
@@ -259,7 +259,7 @@ accountsRouter.put('/:id', (req, res) => {
       if (any) {
         return res.status(409).json({
           error:
-            "An account's currency can't change once it has transactions. Add a new account in the other currency and move the money with a transfer.",
+            'İşlemi olan bir hesabın para birimi değiştirilemez. Diğer para biriminde yeni bir hesap açıp parayı transferle taşıyın.',
         });
       }
     }

@@ -112,8 +112,8 @@ function loadDismissed(): Set<string> {
 
 /** Why `row` can't be one side of a transfer, or null if it can */
 function ineligibleReason(row: TransactionRow): string | null {
-  if (row.reconciled === 1) return 'Reconciled transactions are locked';
-  if (row.transferTransactionId) return 'This is already a transfer';
+  if (row.reconciled === 1) return 'Mutabık işlemler kilitlidir';
+  if (row.transferTransactionId) return 'Bu zaten bir transfer';
   if (row.isParent === 1 || row.parentTransactionId)
     return "A split transaction can't be a transfer";
   if (row.isAdjustment === 1) return "A balance correction can't be a transfer";
@@ -123,14 +123,14 @@ function ineligibleReason(row: TransactionRow): string | null {
 
 function getRow(id: string): TransactionRow {
   const row = db.select().from(transactions).where(eq(transactions.id, id)).get();
-  if (!row) throw new TransferError('Transaction not found', 404);
+  if (!row) throw new TransferError('İşlem bulunamadı', 404);
   return row;
 }
 
 function getOpenAccount(id: string) {
   const account = db.select().from(accounts).where(eq(accounts.id, id)).get();
-  if (!account) throw new TransferError('Account not found', 404);
-  if (account.closedAt) throw new TransferError('That account is closed');
+  if (!account) throw new TransferError('Hesap bulunamadı', 404);
+  if (account.closedAt) throw new TransferError('O hesap kapalı');
   return account;
 }
 
@@ -199,16 +199,16 @@ function linkRows(id: string, otherId: string): LinkResult {
     const reason = ineligibleReason(row);
     if (reason) throw new TransferError(reason, row.reconciled === 1 ? 403 : 400);
   }
-  if (a.accountId === b.accountId) throw new TransferError('Choose two different accounts');
+  if (a.accountId === b.accountId) throw new TransferError('İki farklı hesap seçin');
   // Between currencies, what left and what arrived are different numbers: only the direction
   // has to match
   const ctx = currencyContext();
   if (accountCurrency(a.accountId, ctx) !== accountCurrency(b.accountId, ctx)) {
     if (Math.sign(a.amount) === Math.sign(b.amount)) {
-      throw new TransferError('One side of a transfer must leave an account and the other arrive');
+      throw new TransferError('Transferin bir tarafı hesaptan çıkmalı, diğeri hesaba girmeli');
     }
   } else if (a.amount !== -b.amount) {
-    throw new TransferError('The two sides of a transfer must be the same amount, in and out');
+    throw new TransferError('Transferin iki tarafı aynı tutarda olmalı: biri giriş, biri çıkış');
   }
   const accountA = getOpenAccount(a.accountId);
   const accountB = getOpenAccount(b.accountId);
@@ -240,7 +240,7 @@ export function transferToAccount(
     const tx = getRow(id);
     const reason = ineligibleReason(tx);
     if (reason) throw new TransferError(reason, tx.reconciled === 1 ? 403 : 400);
-    if (tx.accountId === accountId) throw new TransferError('Choose a different account');
+    if (tx.accountId === accountId) throw new TransferError('Farklı bir hesap seçin');
     const from = getOpenAccount(tx.accountId);
     const to = getOpenAccount(accountId);
 
@@ -251,7 +251,7 @@ export function transferToAccount(
     const toCurrency = accountCurrency(to.id, ctx);
     const crossCurrency = fromCurrency !== toCurrency;
     if (!crossCurrency && otherAmount !== undefined && otherAmount !== Math.abs(tx.amount)) {
-      throw new TransferError('Both accounts have the same currency: the amounts must match');
+      throw new TransferError('İki hesabın para birimi aynı: tutarlar eşit olmalı');
     }
 
     const [self] = loadCandidates(tx.accountId).filter((c) => c.id === tx.id);
@@ -265,7 +265,7 @@ export function transferToAccount(
           ? otherAmount
           : convertAmount(Math.abs(tx.amount), fromCurrency, toCurrency, tx.date, ctx);
       if (converted === null) {
-        throw new TransferError(`Enter the amount that arrived in ${toCurrency}`, 422);
+        throw new TransferError(`${toCurrency} olarak gelen tutarı girin`, 422);
       }
       amount = tx.amount < 0 ? Math.abs(converted) : -Math.abs(converted);
     }
@@ -302,14 +302,14 @@ export function unlinkTransfer(
 ): [TransactionRow, TransactionRow | null] {
   return db.transaction(() => {
     const tx = getRow(id);
-    if (!tx.transferTransactionId) throw new TransferError('This is not a transfer');
+    if (!tx.transferTransactionId) throw new TransferError('Bu bir transfer değil');
     const other = db
       .select()
       .from(transactions)
       .where(eq(transactions.id, tx.transferTransactionId))
       .get();
     if (tx.reconciled === 1 || other?.reconciled === 1) {
-      throw new TransferError('Reconciled transactions are locked', 403);
+      throw new TransferError('Mutabık işlemler kilitlidir', 403);
     }
     for (const row of other ? [tx, other] : [tx]) {
       db.update(transactions).set(restoreBankPayee(row)).where(eq(transactions.id, row.id)).run();
@@ -323,7 +323,7 @@ export function unlinkTransfer(
 
 /** Never suggest these two as a transfer again */
 export function dismissPair(id: string, otherId: string): void {
-  if (id === otherId) throw new TransferError('Choose two different transactions');
+  if (id === otherId) throw new TransferError('İki farklı işlem seçin');
   getRow(id);
   getRow(otherId);
   db.insert(transferMatchDismissals)

@@ -89,15 +89,15 @@ export type ParsedBackup = Record<BackupTable, Row[]> & { beforeCurrencies?: boo
 
 export function parseBackup(input: unknown): ParsedBackup {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    throw new InvalidBackupError('This is not a FlyBudget backup file');
+    throw new InvalidBackupError('Bu bir UB-Finance yedek dosyası değil.');
   }
   const body = input as Record<string, unknown>;
   const isV1 = body.format === undefined && Array.isArray(body.accounts);
   if (!isV1 && body.format !== BACKUP_FORMAT) {
-    throw new InvalidBackupError('This is not a FlyBudget backup file');
+    throw new InvalidBackupError('Bu bir UB-Finance yedek dosyası değil.');
   }
   if (typeof body.version === 'number' && body.version > BACKUP_VERSION) {
-    throw new InvalidBackupError('This backup was made by a newer version of FlyBudget');
+    throw new InvalidBackupError("Bu yedek UB-Finance'ın daha yeni bir sürümüyle alınmış");
   }
 
   const result = {} as ParsedBackup;
@@ -109,19 +109,19 @@ export function parseBackup(input: unknown): ParsedBackup {
   for (const name of BACKUP_TABLES) {
     const rows = body[name] ?? [];
     if (!Array.isArray(rows) || rows.length > MAX_ROWS_PER_TABLE) {
-      throw new InvalidBackupError(`"${name}" in the backup is not a list of rows`);
+      throw new InvalidBackupError(`Yedekteki "${name}" bir satır listesi değil`);
     }
     const columns = Object.entries(getTableColumns(TABLES[name]));
     result[name] = rows.map((raw, i) => {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-        throw new InvalidBackupError(`Row ${i + 1} of "${name}" is not valid`);
+        throw new InvalidBackupError(`"${name}" tablosunun ${i + 1}. satırı geçersiz`);
       }
       const row: Row = {};
       for (const [key, column] of columns) {
         const value = (raw as Row)[key];
         if (value === undefined || value === null) {
           if (column.notNull && !column.hasDefault) {
-            throw new InvalidBackupError(`Row ${i + 1} of "${name}" is missing "${key}"`);
+            throw new InvalidBackupError(`"${name}" tablosunun ${i + 1}. satırında "${key}" eksik`);
           }
           if (value === null && !column.notNull) row[key] = null;
           continue;
@@ -130,7 +130,11 @@ export function parseBackup(input: unknown): ParsedBackup {
           column.columnType === 'SQLiteInteger'
             ? Number.isSafeInteger(value)
             : typeof value === 'string' && value.length <= 1_000_000;
-        if (!ok) throw new InvalidBackupError(`Row ${i + 1} of "${name}" has an invalid "${key}"`);
+        if (!ok) {
+          throw new InvalidBackupError(
+            `"${name}" tablosunun ${i + 1}. satırında "${key}" geçersiz`,
+          );
+        }
         row[key] = value;
       }
       return row;

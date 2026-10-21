@@ -25,7 +25,7 @@ import {
 export const rulesRouter = Router();
 
 // Regexes run against every transaction; keep them short to limit catastrophic backtracking
-const regexSchema = z.string().min(1).max(200).refine(isValidRegex, 'Invalid regular expression');
+const regexSchema = z.string().min(1).max(200).refine(isValidRegex, 'Geçersiz düzenli ifade');
 
 function isValidRegex(pattern: string): boolean {
   try {
@@ -71,7 +71,7 @@ const splitPartSchema = z
     categoryId: id.nullable(),
     notes: z.string().max(5_000).nullable(),
   })
-  .refine((p) => p.kind !== 'percent' || p.value <= 100, 'Percent must be 0–100');
+  .refine((p) => p.kind !== 'percent' || p.value <= 100, 'Yüzde 0–100 arasında olmalı');
 
 const actionSchema = z.union([
   z.object({ type: z.enum(['set_category', 'set_payee']), value: id }),
@@ -186,7 +186,7 @@ rulesRouter.put('/:id', (req, res) => {
     db.update(rules).set(update).where(eq(rules.id, req.params.id)).run();
   }
   const updated = db.select().from(rules).where(eq(rules.id, req.params.id)).get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(parseRuleRow(updated));
 });
 

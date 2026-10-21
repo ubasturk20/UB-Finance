@@ -310,8 +310,8 @@ describe('multiple currencies', () => {
   it('exports the currency and the value with each transaction', async () => {
     const csv = (await call('GET', '/export/transactions/csv')).body as string;
     const [header] = csv.split('\n');
-    expect(header).toContain('Currency');
-    expect(header).toContain('Amount (EUR)');
+    expect(header).toContain('Para birimi');
+    expect(header).toContain('Tutar (EUR)');
     expect(csv).toContain('JPY');
   });
 

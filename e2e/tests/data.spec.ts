@@ -577,7 +577,7 @@ test.describe('export, backup and restore', () => {
     await page.getByRole('button', { name: 'CSV indir' }).click();
     const csv = fs.readFileSync(await (await download).path(), 'utf8');
     // Turkish amounts have a decimal comma, so columns are separated by semicolons
-    expect(csv.split('\n')[0]).toBe('Date;Account;Payee;Category;Notes;Amount;Reconciled');
+    expect(csv.split('\n')[0]).toBe('Tarih;Hesap;Alıcı;Kategori;Notlar;Tutar;Mutabık');
     expect(csv).toContain(`"'=HYPERLINK(""http://evil.example"")"`);
     expect(csv).toContain('-10,00');
   });
@@ -642,7 +642,7 @@ test.describe('export, backup and restore', () => {
       .getByRole('dialog', { name: 'Bu yedek geri yüklensin mi?' })
       .getByRole('button', { name: 'Verilerimi değiştir' })
       .click();
-    await expect(page.getByRole('status')).toContainText('This is not a FlyBudget backup file');
+    await expect(page.getByRole('status')).toContainText('Bu bir UB-Finance yedek dosyası değil.');
     expect((await api.accounts()).map((a) => a.name)).toEqual(['Checking']);
 
     await page.getByLabel('Yedek dosyası').setInputFiles({

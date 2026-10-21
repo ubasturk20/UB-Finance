@@ -5,9 +5,9 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   api,
 }) => {
   const account = await api.createAccount('Checking');
-  const grocery = await api.category('Groceries');
-  const dining = await api.category('Restaurants');
-  const income = await api.category('Paychecks');
+  const grocery = await api.category('Market alışverişi');
+  const dining = await api.category('Restoran');
+  const income = await api.category('Maaş');
   const prior = new Date();
   prior.setDate(1);
   prior.setMonth(prior.getMonth() - 1);
@@ -22,7 +22,7 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
     await api.createTransaction({ accountId: account.id, ...tx });
   await open(page, '/cash-flow');
   await page.getByRole('button', { name: '1 ay', exact: true }).click();
-  await page.getByRole('button', { name: /İşlemleri göster: .*Groceries$/ }).click();
+  await page.getByRole('button', { name: /İşlemleri göster: .*Market alışverişi$/ }).click();
   const list = page.getByRole('region', { name: /İşlemler:/ });
   await expect(list).toContainText('Current groceries');
   await expect(list).not.toContainText('Previous groceries');
@@ -47,7 +47,7 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   await expect(list).not.toContainText('Unknown merchant');
   // Switching date ranges must issue the chart's month bounds, not the register's defaults.
   await page.getByRole('button', { name: '6 ay', exact: true }).click();
-  await page.getByRole('button', { name: /İşlemleri göster: .*Groceries$/ }).click();
+  await page.getByRole('button', { name: /İşlemleri göster: .*Market alışverişi$/ }).click();
   await expect(list).toContainText('Previous groceries');
   await expect(list).toContainText('Current groceries');
 });

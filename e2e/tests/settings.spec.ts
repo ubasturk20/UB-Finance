@@ -63,7 +63,7 @@ test.describe('categories', () => {
   });
 
   test('changes a category icon in the edit dialog', async ({ page, api }) => {
-    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).click();
+    await page.getByRole('button', { name: 'Otopark kategorisini düzenle' }).click();
     const dialog = page.getByRole('dialog', { name: 'Kategoriyi düzenle' });
     await dialog.getByRole('button', { name: 'Simgeyi değiştir' }).click();
     await pickEmoji(page, 'dog face');
@@ -71,25 +71,25 @@ test.describe('categories', () => {
 
     await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect(dialog).toBeHidden();
-    await expect.poll(async () => (await api.category('Parking'))?.icon).toBe('🐶');
+    await expect.poll(async () => (await api.category('Otopark'))?.icon).toBe('🐶');
   });
 
   test('renames a category from the keyboard', async ({ page, api }) => {
-    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).focus();
+    await page.getByRole('button', { name: 'Otopark kategorisini düzenle' }).focus();
     await page.keyboard.press('Enter');
     const dialog = page.getByRole('dialog', { name: 'Kategoriyi düzenle' });
-    await dialog.getByRole('textbox', { name: 'Kategori adı' }).fill('Parking & Tolls');
+    await dialog.getByRole('textbox', { name: 'Kategori adı' }).fill('Otopark & Tolls');
     await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect(
-      page.getByRole('button', { name: 'Parking & Tolls kategorisini düzenle' }),
+      page.getByRole('button', { name: 'Otopark & Tolls kategorisini düzenle' }),
     ).toBeVisible();
-    await expect.poll(() => api.category('Parking & Tolls')).toBeTruthy();
+    await expect.poll(() => api.category('Otopark & Tolls')).toBeTruthy();
   });
 
   test('deleting a used category moves its transactions first', async ({ page, api }) => {
     const [checking] = await api.accounts();
-    const parking = await api.category('Parking');
-    const transit = await api.category('Public Transit');
+    const parking = await api.category('Otopark');
+    const transit = await api.category('Toplu taşıma');
     await api.createTransaction({
       accountId: checking.id,
       date: isoDay(),
@@ -98,20 +98,20 @@ test.describe('categories', () => {
       categoryId: parking.id,
     });
 
-    await page.getByRole('button', { name: 'Parking kategorisini düzenle' }).click();
+    await page.getByRole('button', { name: 'Otopark kategorisini düzenle' }).click();
     await page
       .getByRole('dialog', { name: 'Kategoriyi düzenle' })
       .getByRole('button', { name: 'Sil' })
       .click();
     const dialog = page.getByRole('dialog', { name: 'Kategoriyi sil' });
-    await expect(dialog).toContainText('Parking kategorisinde 1 işlem var');
+    await expect(dialog).toContainText('Otopark kategorisinde 1 işlem var');
     await expect(dialog.getByRole('button', { name: 'Taşı ve sil' })).toBeDisabled();
     await dialog
       .getByRole('combobox', { name: 'İşlemlerin taşınacağı kategori' })
       .selectOption(transit.id);
     await dialog.getByRole('button', { name: 'Taşı ve sil' }).click();
 
-    await expect(page.getByRole('button', { name: 'Parking kategorisini düzenle' })).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Otopark kategorisini düzenle' })).toBeHidden();
     const [tx] = await api.transactions();
     expect(tx.categoryId).toBe(transit.id);
   });
@@ -210,7 +210,7 @@ test.describe('preferences', () => {
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'CSV indir' }).click();
     const csv = fs.readFileSync(await (await download).path(), 'utf8');
-    expect(csv.split('\n')[0]).toBe('Date;Account;Payee;Category;Notes;Amount;Reconciled');
+    expect(csv.split('\n')[0]).toBe('Tarih;Hesap;Alıcı;Kategori;Notlar;Tutar;Mutabık');
     expect(csv).toContain(';Girokonto;Bäckerei;');
     expect(csv).toContain(';-12,50;');
   });

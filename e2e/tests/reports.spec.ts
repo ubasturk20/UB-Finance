@@ -6,8 +6,8 @@ import { test, expect, open, isoDay, thisMonth, type Api } from './fixtures';
 async function seed(api: Api) {
   const checking = await api.createAccount('Checking', 100_000);
   const savings = await api.createAccount('Savings', 0, 'savings');
-  const groceries = await api.category('Groceries');
-  const paychecks = await api.category('Paychecks');
+  const groceries = await api.category('Market alışverişi');
+  const paychecks = await api.category('Maaş');
   await api.createTransaction({
     accountId: checking.id,
     date: isoDay(),
@@ -46,7 +46,7 @@ test.describe('reports', () => {
   test('the overview dashboard summarizes income and spending', async ({ page, api }) => {
     await seed(api);
     await open(page, '/reports');
-    await expect(page.getByRole('button', { name: 'Overview' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Genel Bakış' })).toBeVisible();
     const main = page.getByRole('main');
     // A new budget's reports start on this month
     await expect(main.getByRole('button', { name: 'Bu ay', pressed: true })).toBeVisible();
@@ -73,8 +73,8 @@ test.describe('reports', () => {
     await page.getByRole('button', { name: 'Tablo' }).click();
     await page.getByRole('combobox', { name: 'Gruplama' }).selectOption('category');
     const table = page.getByRole('table');
-    await expect(table.getByRole('row', { name: 'Groceries 48,50 ₺' })).toBeVisible();
-    await expect(table.getByRole('row', { name: 'Uncategorized 4 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Market alışverişi 48,50 ₺' })).toBeVisible();
+    await expect(table.getByRole('row', { name: 'Kategorisiz 4 ₺' })).toBeVisible();
     await expect(table.getByRole('row', { name: 'Toplam 52,50 ₺' })).toBeVisible();
 
     await page.getByRole('combobox', { name: 'Gruplama' }).selectOption('payee');
@@ -107,9 +107,7 @@ test.describe('reports', () => {
     await open(page, '/reports/custom');
     await page.getByRole('button', { name: 'Tablo' }).click();
     await page.getByRole('button', { name: 'Gelir', exact: true }).click();
-    await expect(
-      page.getByRole('table').getByRole('row', { name: 'Paychecks 2.000 ₺' }),
-    ).toBeVisible();
+    await expect(page.getByRole('table').getByRole('row', { name: 'Maaş 2.000 ₺' })).toBeVisible();
   });
 
   test('a new dashboard can be added', async ({ page, api }) => {
@@ -122,7 +120,7 @@ test.describe('reports', () => {
     await expect(page.getByRole('button', { name: 'Taxes' })).toBeVisible();
     await expect
       .poll(async () => (await api.call<any[]>('GET', '/dashboards')).map((d) => d.name))
-      .toEqual(['Overview', 'Taxes']);
+      .toEqual(['Genel Bakış', 'Taxes']);
   });
 });
 

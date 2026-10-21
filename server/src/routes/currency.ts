@@ -98,12 +98,12 @@ function relabelBlocker(current: string | null, next: string): string | null {
       .all()
       .some((s) => !s.accountId || inBudgetCurrency.has(s.accountId));
     if (planned || goal || schedule || all.some((a) => !a.currency && hasAmounts(a))) {
-      return `Your budget already has amounts in ${current ?? 'its currency'}, and ${next} has a different number of decimals, so they would change. Choose a currency with ${minorUnits(current)} decimals, or start a new budget.`;
+      return `Bütçenizde zaten ${current ?? 'bütçe para birimi'} cinsinden tutarlar var ve ${next} farklı sayıda ondalık basamak kullanıyor, bu yüzden tutarlar değişir. ${minorUnits(current)} ondalık basamaklı bir para birimi seçin ya da yeni bir bütçe başlatın.`;
     }
   }
   const blocked = all.some((a) => hasAmounts(a) && a.currency && a.currency !== next);
   return blocked
-    ? "Your budget has accounts in other currencies. Changing its currency would mean converting every amount, which FlyBudget can't do yet."
+    ? 'Bütçenizde başka para birimlerinde hesaplar var. Para birimini değiştirmek her tutarı çevirmek demek ve UB-Finance bunu henüz yapamıyor.'
     : null;
 }
 
@@ -175,7 +175,9 @@ currencyRouter.put('/download', (req, res) => {
     try {
       checkRatesUrl(url);
     } catch {
-      return res.status(400).json({ error: 'Use an https:// address of a public server' });
+      return res
+        .status(400)
+        .json({ error: 'Herkese açık bir sunucunun https:// adresini kullanın' });
     }
   }
   updateBudgetSettings({
@@ -190,7 +192,7 @@ currencyRouter.put('/download', (req, res) => {
 // POST /currency/download — "Download now"
 currencyRouter.post('/download', async (_req, res) => {
   if (!downloadRates) {
-    return res.status(403).json({ error: "Downloading rates isn't available here." });
+    return res.status(403).json({ error: 'Kur indirme burada kullanılamıyor.' });
   }
   try {
     const result = await downloadRates();
@@ -199,7 +201,7 @@ currencyRouter.post('/download', async (_req, res) => {
     // RateFetchError messages are written for the user; anything else stays generic
     const message = err instanceof Error && err.name === 'RateFetchError' ? err.message : null;
     res.status(422).json({
-      error: message ?? getBudgetSettings().ratesLastError ?? "Couldn't download exchange rates",
+      error: message ?? getBudgetSettings().ratesLastError ?? 'Döviz kurları indirilemedi',
     });
   }
 });
@@ -274,9 +276,9 @@ const manualRateSchema = z
     quote: currencySchema,
     rate: z.string().trim().max(30),
   })
-  .refine((r) => r.base !== r.quote, 'Choose two different currencies')
+  .refine((r) => r.base !== r.quote, 'İki farklı para birimi seçin')
   .refine((r) => parseRate(r.rate) !== null, {
-    message: 'Type the rate as a positive number, like 1.0812',
+    message: 'Kuru 1,0812 gibi pozitif bir sayı olarak yazın',
     path: ['rate'],
   });
 
@@ -302,7 +304,7 @@ currencyRouter.delete('/rates/:id', (req, res) => {
     .delete(exchangeRates)
     .where(and(eq(exchangeRates.id, req.params.id), eq(exchangeRates.source, 'manual')))
     .run();
-  if (!result.changes) return res.status(404).json({ error: 'Not found' });
+  if (!result.changes) return res.status(404).json({ error: 'Bulunamadı' });
   ratesChanged();
   res.status(204).send();
 });
@@ -333,28 +335,28 @@ currencyRouter.post('/difference', (req, res) => {
     .safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const account = db.select().from(accounts).where(eq(accounts.id, parsed.data.accountId)).get();
-  if (!account) return res.status(404).json({ error: 'Account not found' });
+  if (!account) return res.status(404).json({ error: 'Hesap bulunamadı' });
   const ctx = currencyContext();
   const currency = account.currency ?? ctx.budget;
   if (!isForeign(currency, ctx.budget)) {
-    return res.status(400).json({ error: "This account is in the budget's currency" });
+    return res.status(400).json({ error: 'Bu hesap bütçe para biriminde' });
   }
   const balance = account.startingBalance + accountTransactionSum(account.id);
   const now = valueToday(balance, currency, ctx).mainBalance;
   const booked = bookedValue(account, ctx);
   if (now === null || booked === null) {
-    return res.status(422).json({ error: 'Some of its rates are missing: add them first' });
+    return res.status(422).json({ error: 'Bazı kurları eksik: önce onları ekleyin' });
   }
   const difference = now - booked;
-  if (difference === 0) return res.status(400).json({ error: 'There is no difference to record' });
+  if (difference === 0) return res.status(400).json({ error: 'Kaydedilecek bir fark yok' });
   const { transaction } = insertNewTransaction({
     accountId: account.id,
     date: todayIso(),
     amount: 0,
     payeeId: null,
-    payeeName: 'Currency difference',
+    payeeName: 'Kur farkı',
     importedPayee: null,
-    notes: `${currency} rate change`,
+    notes: `${currency} kur değişimi`,
     categoryId: parsed.data.categoryId,
     importedId: null,
     isAdjustment: true,

@@ -47,7 +47,7 @@ const currenciesResponse = z.record(z.string(), z.string());
 export function ratesFromResponse(body: unknown) {
   const parsed = ratesResponse.safeParse(body);
   if (!parsed.success || parsed.data.base !== ECB_BASE) {
-    throw new RateFetchError('The exchange rate server sent something unexpected');
+    throw new RateFetchError('Döviz kuru sunucusu beklenmedik bir yanıt gönderdi');
   }
   const rows: Array<typeof exchangeRates.$inferInsert> = [];
   for (const [date, quotes] of Object.entries(parsed.data.rates)) {
@@ -88,15 +88,15 @@ async function getJson(url: string, trusted: boolean): Promise<unknown> {
       ? await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) })
       : await safeFetch(url, {}, { timeoutMs: TIMEOUT_MS });
   } catch {
-    throw new RateFetchError("Couldn't reach the exchange rate server");
+    throw new RateFetchError('Döviz kuru sunucusuna ulaşılamadı');
   }
   if (!response.ok) {
-    throw new RateFetchError(`The exchange rate server answered ${response.status}`);
+    throw new RateFetchError(`Döviz kuru sunucusu ${response.status} yanıtı verdi`);
   }
   try {
     return JSON.parse(await readTextLimited(response, MAX_RESPONSE_BYTES));
   } catch {
-    throw new RateFetchError('The exchange rate server sent something unexpected');
+    throw new RateFetchError('Döviz kuru sunucusu beklenmedik bir yanıt gönderdi');
   }
 }
 
@@ -196,7 +196,7 @@ async function download(): Promise<FetchResult> {
     const base = url.replace(/\/+$/, '');
     const offered = currenciesResponse.safeParse(await getJson(`${base}/currencies`, trusted));
     if (!offered.success)
-      throw new RateFetchError('The exchange rate server sent something unexpected');
+      throw new RateFetchError('Döviz kuru sunucusu beklenmedik bir yanıt gönderdi');
     const quotes = wanted.filter((c) => c in offered.data);
     const unsupported = wanted.filter((c) => !(c in offered.data));
 
@@ -224,8 +224,7 @@ async function download(): Promise<FetchResult> {
     updateBudgetSettings({ ratesLastFetchedAt: new Date().toISOString(), ratesLastError: null });
     return { stored, unsupported };
   } catch (err) {
-    const message =
-      err instanceof RateFetchError ? err.message : "Couldn't download exchange rates";
+    const message = err instanceof RateFetchError ? err.message : 'Döviz kurları indirilemedi';
     if (!(err instanceof RateFetchError)) console.error('Exchange rate download failed:', err);
     updateBudgetSettings({ ratesLastError: message });
     throw new RateFetchError(message);

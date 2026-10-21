@@ -66,7 +66,7 @@ test.describe('payees', () => {
 
   test('a default category applies to new transactions from that payee', async ({ page, api }) => {
     const checking = await seed(api);
-    const shopping = await api.category('Groceries');
+    const shopping = await api.category('Market alışverişi');
     await open(page, '/payees');
     await page
       .getByRole('combobox', { name: 'Amazon için varsayılan kategori' })

@@ -23,7 +23,7 @@ const onBudget = inArray(transactions.accountId, onBudgetAccountIds);
 
 // Every route here takes a YYYY-MM month
 budgetRouter.param('month', (_req, res, next, month) => {
-  if (!isMonth(month)) return res.status(400).json({ error: 'Expected a month as YYYY-MM' });
+  if (!isMonth(month)) return res.status(400).json({ error: 'Ay YYYY-AA biçiminde olmalı' });
   next();
 });
 
@@ -146,7 +146,7 @@ budgetRouter.get('/category/:categoryId/history', (req, res) => {
     `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   const cat = db.select().from(categories).where(eq(categories.id, categoryId)).get();
-  if (!cat) return res.status(404).json({ error: 'Category not found' });
+  if (!cat) return res.status(404).json({ error: 'Kategori bulunamadı' });
 
   const group = db.select().from(categoryGroups).where(eq(categoryGroups.id, cat.groupId)).get();
   const isIncome = group?.isIncome === 1;

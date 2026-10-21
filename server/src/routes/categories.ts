@@ -72,7 +72,7 @@ categoriesRouter.put('/groups/:id', (req, res) => {
     .from(categoryGroups)
     .where(eq(categoryGroups.id, req.params.id))
     .get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(updated);
 });
 
@@ -118,7 +118,7 @@ categoriesRouter.put('/:id', (req, res) => {
     db.update(categories).set(parsed.data).where(eq(categories.id, req.params.id)).run();
   }
   const updated = db.select().from(categories).where(eq(categories.id, req.params.id)).get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(updated);
 });
 
@@ -134,9 +134,11 @@ categoriesRouter.get('/:id/transaction-count', (req, res) => {
 categoriesRouter.delete('/:id', (req, res) => {
   const reassignTo = typeof req.query.reassignTo === 'string' ? req.query.reassignTo : undefined;
 
-  if (reassignTo === req.params.id) return res.status(400).json({ error: 'Pick another category' });
+  if (reassignTo === req.params.id) {
+    return res.status(400).json({ error: 'Başka bir kategori seçin' });
+  }
   if (reassignTo && !db.select().from(categories).where(eq(categories.id, reassignTo)).get()) {
-    return res.status(400).json({ error: 'Unknown category' });
+    return res.status(400).json({ error: 'Bilinmeyen kategori' });
   }
 
   if (reassignTo) {

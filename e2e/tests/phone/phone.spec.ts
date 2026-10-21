@@ -50,7 +50,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
   test.setTimeout(120_000);
   const checking = await api.createAccount('Everyday Checking', 250_000);
   await api.createAccount('Rainy Day Savings', 1_000_000, 'savings');
-  const groceries = await api.category('Groceries');
+  const groceries = await api.category('Market alışverişi');
   for (const [i, payee] of ['Corner Grocery', 'Coffee Corner', 'City Power & Light'].entries()) {
     await api.createTransaction({
       accountId: checking.id,

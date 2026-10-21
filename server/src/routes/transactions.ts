@@ -81,7 +81,7 @@ const transferSchema = z
     toAmount: cents.positive().optional(),
     notes: z.string().max(5_000).nullable().optional(),
   })
-  .refine((t) => t.fromAccountId !== t.toAccountId, 'Choose two different accounts');
+  .refine((t) => t.fromAccountId !== t.toAccountId, 'İki farklı hesap seçin');
 
 // Imported files are untrusted: validate dates and cap sizes
 const importRowSchema = z.object({
@@ -240,7 +240,9 @@ transactionsRouter.post('/', (req, res) => {
     const finalPayeeId = payee.payeeId;
     const splitSum = splits.reduce((sum, s) => sum + s.amount, 0);
     if (splitSum !== rest.amount) {
-      return res.status(400).json({ error: 'Split amounts must equal transaction total' });
+      return res
+        .status(400)
+        .json({ error: 'Bölünmüş tutarların toplamı işlem tutarına eşit olmalı' });
     }
 
     const parentId = txId ?? nanoid();
@@ -315,7 +317,7 @@ transactionsRouter.post('/transfer', (req, res) => {
   if (existing) return res.status(200).json(existing);
   const fromAcct = db.select().from(accounts).where(eq(accounts.id, fromAccountId)).get();
   const toAcct = db.select().from(accounts).where(eq(accounts.id, toAccountId)).get();
-  if (!fromAcct || !toAcct) return res.status(404).json({ error: 'Account not found' });
+  if (!fromAcct || !toAcct) return res.status(404).json({ error: 'Hesap bulunamadı' });
   // Between currencies: what left and what arrived (at the day's rate when it isn't given);
   // within one currency, one amount
   const ctx = currencyContext();
@@ -323,13 +325,13 @@ transactionsRouter.post('/transfer', (req, res) => {
   const toCurrency = accountCurrency(toAccountId, ctx);
   const crossCurrency = fromCurrency !== toCurrency;
   if (!crossCurrency && toAmount !== undefined && toAmount !== amount) {
-    return res.status(400).json({ error: 'Both accounts have the same currency: use one amount' });
+    return res.status(400).json({ error: 'İki hesabın para birimi aynı: tek bir tutar kullanın' });
   }
   const arrived = crossCurrency
     ? (toAmount ?? convertAmount(amount, fromCurrency, toCurrency, date, ctx))
     : amount;
   if (arrived === null || arrived <= 0) {
-    return res.status(422).json({ error: `Enter the amount that arrived in ${toCurrency}` });
+    return res.status(422).json({ error: `${toCurrency} olarak gelen tutarı girin` });
   }
 
   const fromId = txId ?? nanoid();
@@ -456,7 +458,7 @@ transactionsRouter.post('/import/confirm', (req, res) => {
 
   const { accountId, rows } = parsed.data;
   if (!db.select({ id: accounts.id }).from(accounts).where(eq(accounts.id, accountId)).get()) {
-    return res.status(404).json({ error: 'Account not found' });
+    return res.status(404).json({ error: 'Hesap bulunamadı' });
   }
   let imported = 0;
   const ruleOpts = { rules: loadRules(), ctx: buildRuleContext(), currencies: currencyContext() };
@@ -502,9 +504,9 @@ transactionsRouter.put('/:id', (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const existing = db.select().from(transactions).where(eq(transactions.id, req.params.id)).get();
-  if (!existing) return res.status(404).json({ error: 'Not found' });
+  if (!existing) return res.status(404).json({ error: 'Bulunamadı' });
   if (existing.reconciled === 1)
-    return res.status(403).json({ error: 'Cannot modify a reconciled transaction' });
+    return res.status(403).json({ error: 'Mutabık bir işlem değiştirilemez' });
 
   const data = parsed.data;
   const changes = (key: keyof typeof data) =>
@@ -513,20 +515,22 @@ transactionsRouter.put('/:id', (req, res) => {
     existing.parentTransactionId &&
     (changes('accountId') || changes('date') || changes('amount'))
   ) {
-    return res
-      .status(400)
-      .json({ error: "Change the split transaction's account, date or amount instead of a part" });
+    return res.status(400).json({
+      error: 'Bir parça yerine bölünmüş işlemin hesabını, tarihini ya da tutarını değiştirin',
+    });
   }
   if (existing.isParent === 1 && (changes('amount') || data.categoryId)) {
-    return res.status(400).json({ error: 'Edit the parts of a split transaction instead' });
+    return res.status(400).json({ error: 'Bunun yerine bölünmüş işlemin parçalarını düzenleyin' });
   }
   if (existing.transferTransactionId && (changes('accountId') || data.categoryId)) {
-    return res.status(400).json({ error: 'Transfers have no category and stay in their accounts' });
+    return res
+      .status(400)
+      .json({ error: 'Transferlerin kategorisi olmaz ve kendi hesaplarında kalır' });
   }
   const ctx = currencyContext();
   const accountId = data.accountId ?? existing.accountId;
   if (data.accountId !== undefined && !ctx.currencies.has(data.accountId)) {
-    return res.status(404).json({ error: 'Account not found' });
+    return res.status(404).json({ error: 'Hesap bulunamadı' });
   }
   if (
     data.mainAmount !== undefined &&
@@ -534,8 +538,8 @@ transactionsRouter.put('/:id', (req, res) => {
   ) {
     return res.status(400).json({
       error: existing.parentTransactionId
-        ? 'Change the value of the whole split transaction instead of a part'
-        : "This account is in the budget's currency: its amount is already the value",
+        ? 'Bir parça yerine bölünmüş işlemin tamamının değerini değiştirin'
+        : 'Bu hesap bütçe para biriminde: tutarı zaten değeridir',
     });
   }
   const other = existing.transferTransactionId
@@ -596,9 +600,9 @@ transactionsRouter.put('/:id', (req, res) => {
 // DELETE /transactions/:id — handles transfer unlinking and split cascade
 transactionsRouter.delete('/:id', (req, res) => {
   const existing = db.select().from(transactions).where(eq(transactions.id, req.params.id)).get();
-  if (!existing) return res.status(404).json({ error: 'Not found' });
+  if (!existing) return res.status(404).json({ error: 'Bulunamadı' });
   if (existing.reconciled === 1)
-    return res.status(403).json({ error: 'Cannot modify a reconciled transaction' });
+    return res.status(403).json({ error: 'Mutabık bir işlem değiştirilemez' });
 
   deleteTransactionRow(existing);
   res.status(204).send();
