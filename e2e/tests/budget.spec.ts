@@ -18,7 +18,7 @@ async function plan(page: Page, category: string, amount: string) {
   await input.fill(amount);
   await input.press('Enter');
   await expect(
-    page.getByRole('button', { name: new RegExp(`^Planned for ${category}: \\$`) }),
+    page.getByRole('button', { name: new RegExp(`^Planned for ${category}: -?[\\d.,]+\\s₺$`) }),
   ).toBeVisible();
 }
 
