@@ -3,6 +3,7 @@ import { getTableColumns, isNotNull, sql } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { databasePath, db, sqlite } from '../db/index.js';
 import {
+  accountDetails,
   accounts,
   budgetSettings,
   exchangeRates,
@@ -13,6 +14,7 @@ import {
   dashboardPages,
   dashboardWidgets,
   goals,
+  installmentPlans,
   payees,
   plaidAccountMappings,
   rules,
@@ -56,6 +58,8 @@ const TABLES = {
   dashboardPages,
   dashboardWidgets,
   goals,
+  accountDetails,
+  installmentPlans,
 } satisfies Record<string, SQLiteTable>;
 
 export type BackupTable = keyof typeof TABLES;

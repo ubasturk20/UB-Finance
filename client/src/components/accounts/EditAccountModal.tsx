@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useFormReset } from '../../hooks/useFormReset';
 import { Modal } from '../ui/Modal';
 import { useCanSave } from '../../hooks/useConnection';
@@ -14,6 +14,16 @@ import { usePreferencesStore } from '../../store/preferencesStore';
 import { CurrencySelect } from '../currency/CurrencySelect';
 import { useBudgetCurrency, useCurrencySettings } from '../../hooks/useCurrency';
 import { t } from '../../i18n';
+import { isCardType } from '../../utils/accountTypes';
+import { useAccountDetails, useSaveAccountDetails } from '../../hooks/useCreditCards';
+import {
+  CardDetailsFields,
+  cardFormPatch,
+  emptyCardForm,
+  fillEmptyCardFields,
+  type CardForm,
+} from './CardDetailsFields';
+import { AmountFields, useAmountValidity } from '../ui/amountValidity';
 
 interface Props {
   account: Account | null;
@@ -37,6 +47,17 @@ export function EditAccountModal({ account, onClose }: Props) {
 
   const updateAccount = useUpdateAccount();
   const closeAccount = useCloseAccount();
+  const saveDetails = useSaveAccountDetails();
+  const { allValid, report } = useAmountValidity();
+  const [card, setCard] = useState<CardForm>(emptyCardForm);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const isCard = isCardType(type);
+  const { data: details, isFetching: detailsLoading } = useAccountDetails(
+    account?.id ?? null,
+    !!account && isCard,
+  );
+  // The saved details arrive after the dialog opens: fill them in once, never over typing
+  const detailsFilled = useRef(false);
 
   // Filled once per opening, not on every refetch of the account (that would undo edits)
   useFormReset(account?.id ?? null, () => {
@@ -48,11 +69,26 @@ export function EditAccountModal({ account, onClose }: Props) {
     setCurrency(account.currency);
     setLogo(account.logo ?? null);
     setLogoError(null);
+    setCard(emptyCardForm);
+    setSaveError(null);
+    detailsFilled.current = false;
   });
+
+  useEffect(() => {
+    // Waits for the answer to this opening's request: an older copy may predate the last save
+    if (!account || !details || detailsLoading || details.accountId !== account.id) return;
+    if (detailsFilled.current) return;
+    detailsFilled.current = true;
+    setCard((current) => fillEmptyCardFields(current, details));
+  }, [account, details, detailsLoading]);
+
+  const cardPatch = isCard ? cardFormPatch(card) : null;
+  const cardValid = !isCard || cardPatch !== null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!account || !name.trim()) return;
+    if (!account || !name.trim() || !cardValid) return;
+    setSaveError(null);
     await updateAccount.mutateAsync({
       id: account.id,
       data: {
@@ -64,6 +100,20 @@ export function EditAccountModal({ account, onClose }: Props) {
         ...(currency !== account.currency ? { currency } : {}),
       },
     });
+    // After the account: a type just changed to credit card takes card details from now on
+    // A card left without details gets no empty row
+    const nothingToSave =
+      cardPatch &&
+      Object.values(cardPatch).every((v) => v === null) &&
+      (!details || details.updatedAt === '');
+    if (cardPatch && !nothingToSave) {
+      try {
+        await saveDetails.mutateAsync({ accountId: account.id, data: cardPatch });
+      } catch {
+        setSaveError(t('card.details.saveError'));
+        return;
+      }
+    }
     onClose();
   }
 
@@ -178,6 +228,7 @@ export function EditAccountModal({ account, onClose }: Props) {
             <label className="block text-sm font-medium text-text-secondary mb-1">
               {t('acc.form.startingBalance')}
             </label>
+            {/* Not gated: unreadable text keeps the balance it had (as before card details) */}
             <CurrencyInput
               value={startingBalance}
               onChange={setStartingBalance}
@@ -186,6 +237,12 @@ export function EditAccountModal({ account, onClose }: Props) {
               currency={currency}
             />
           </div>
+
+          {isCard && (
+            <AmountFields report={report}>
+              <CardDetailsFields value={card} onChange={setCard} currency={currency} />
+            </AmountFields>
+          )}
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -197,6 +254,11 @@ export function EditAccountModal({ account, onClose }: Props) {
             <span className="text-sm text-text-secondary">{t('acc.form.offBudgetExcluded')}</span>
           </label>
 
+          {saveError && (
+            <p role="alert" className="text-xs text-negative text-right">
+              {saveError}
+            </p>
+          )}
           <SavingPausedHint className="text-right" />
           <div className="flex items-center justify-between pt-2 border-t border-border-light">
             <button
@@ -216,10 +278,19 @@ export function EditAccountModal({ account, onClose }: Props) {
               </button>
               <button
                 type="submit"
-                disabled={!name.trim() || updateAccount.isPending || !canSave}
+                disabled={
+                  !name.trim() ||
+                  updateAccount.isPending ||
+                  saveDetails.isPending ||
+                  !canSave ||
+                  !allValid ||
+                  !cardValid
+                }
                 className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {updateAccount.isPending ? t('common.saving') : t('common.save')}
+                {updateAccount.isPending || saveDetails.isPending
+                  ? t('common.saving')
+                  : t('common.save')}
               </button>
             </div>
           </div>

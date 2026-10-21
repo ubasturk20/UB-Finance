@@ -52,3 +52,10 @@ export function isLiabilityType(type: string): boolean {
 export function defaultOffBudget(type: string): 0 | 1 {
   return ON_BUDGET_TYPES.has(type) ? 0 : 1;
 }
+
+/** Accounts with card details: a limit, statements and installments (credit card, KMH) */
+const CARD_TYPES = new Set<string>(['credit', 'line_of_credit']);
+
+export function isCardType(type: string): boolean {
+  return CARD_TYPES.has(type);
+}

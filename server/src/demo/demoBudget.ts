@@ -16,6 +16,7 @@ import {
   subMonths,
 } from 'date-fns';
 import type {
+  accountDetails,
   accounts,
   budgetSettings,
   exchangeRates,
@@ -70,6 +71,8 @@ export interface DemoBudget {
   dashboardPages: Row<typeof dashboardPages>[];
   dashboardWidgets: Row<typeof dashboardWidgets>[];
   goals: Row<typeof goals>[];
+  /** The credit card's limit, statement and due days */
+  accountDetails: Row<typeof accountDetails>[];
 }
 
 // ─── Random numbers ────────────────────────────────────────────────────────────
@@ -325,6 +328,7 @@ export function buildDemoBudget(today: Date): DemoBudget {
     dashboardPages: [],
     dashboardWidgets: [],
     goals: [],
+    accountDetails: [],
   };
   const budgetTypes = {} as Record<CategoryKey, BudgetType | undefined>;
   GROUPS.forEach((group, gi) => {
@@ -1416,6 +1420,16 @@ export function buildDemoBudget(today: Date): DemoBudget {
       sortOrder: 2,
     },
   );
+
+  // The card's limit, statement on the 15th, payment due on the 25th
+  result.accountDetails.push({
+    accountId: acct.card,
+    creditLimit: 800_000,
+    statementDay: 15,
+    dueDay: 25,
+    minPaymentRate: 2_000,
+    interestRate: 425,
+  });
 
   // ─── Reports: two dashboards and three saved custom reports ─────────────────
   const range = (preset: string, months: number) => ({

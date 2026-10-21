@@ -8,6 +8,7 @@ import { db } from '../db/index.js';
 import { errorHandler } from '../middleware/security.js';
 import { BACKUP_TABLES } from '../services/backupService.js';
 import { accountsRouter } from './accounts.js';
+import { creditCardsRouter } from './creditCards.js';
 import { dashboardsRouter } from './dashboards.js';
 import { exportRouter } from './export.js';
 import { goalsRouter } from './goals.js';
@@ -29,6 +30,7 @@ beforeAll(async () => {
   app.use('/api/goals', goalsRouter);
   app.use('/api/schedules', schedulesRouter);
   app.use('/api/transactions', transactionsRouter);
+  app.use('/api', creditCardsRouter);
   app.use(errorHandler);
   server = await new Promise<Server>((r) => {
     const s = app.listen(0, '127.0.0.1', () => r(s));
@@ -97,6 +99,19 @@ describe('backup and restore', () => {
             name: 'Trip',
             targetAmount: 50_000,
             accountId: account.id,
+          });
+          const { body: card } = await send('POST', '/accounts', { name: 'Card', type: 'credit' });
+          await send('PUT', `/accounts/${card.id}/details`, {
+            creditLimit: 5_000_000,
+            statementDay: 15,
+            dueDay: 25,
+            minPaymentRate: 2_000,
+          });
+          await send('POST', `/accounts/${card.id}/installments`, {
+            description: 'Phone',
+            totalAmount: 1_200_000,
+            installmentCount: 6,
+            firstMonth: '2025-05',
           });
           await send('GET', '/dashboards');
 

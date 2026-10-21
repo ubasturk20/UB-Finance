@@ -5,6 +5,7 @@
 import { accounts } from './messages/accounts';
 import { budget } from './messages/budget';
 import { common } from './messages/common';
+import { creditCards } from './messages/creditCards';
 import { dashboard } from './messages/dashboard';
 import { importing } from './messages/importing';
 import { recurring } from './messages/recurring';
@@ -23,6 +24,7 @@ const MESSAGES = {
   ...settings,
   ...dashboard,
   ...accounts,
+  ...creditCards,
   ...transactions,
   ...transactionDetail,
   ...importing,

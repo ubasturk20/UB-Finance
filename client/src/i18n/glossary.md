@@ -88,3 +88,9 @@ eklenir. Ton: sade, kısa, "siz" dili (Kaydedin değil, düğmelerde mastar/emir
 | Group by / Chart type     | Gruplama / Grafik türü             |
 | Condition / Action        | Koşul / Eylem                      |
 | Merge                     | Birleştir                          |
+| Credit limit / Available  | Limit / Kullanılabilir limit       |
+| Statement (date)          | Hesap kesim (günü)                 |
+| Due date                  | Son ödeme tarihi                   |
+| Minimum payment           | Asgari ödeme                       |
+| Installment(s)            | Taksit(ler)                        |
+| Interest rate (monthly)   | Aylık faiz oranı                   |

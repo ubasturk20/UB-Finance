@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { addDays, format } from 'date-fns';
 import { db } from '../db/index.js';
 import {
+  accountDetails,
   accounts,
   budgetSettings,
   exchangeRates,
@@ -58,6 +59,7 @@ export function loadDemoBudget(today: Date): void {
     insert(dashboardPages, demo.dashboardPages);
     insert(dashboardWidgets, demo.dashboardWidgets);
     insert(goals, demo.goals);
+    insert(accountDetails, demo.accountDetails);
   });
 
   // Recurring items get their occurrences the way the app makes them (three months ahead,
