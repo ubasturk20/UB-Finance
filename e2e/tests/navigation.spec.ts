@@ -5,8 +5,8 @@ import { test, expect, open, isoDay } from './fixtures';
 
 const PAGES: { link: string; route: string; heading?: string }[] = [
   { link: 'Genel Bakış', route: '/dashboard' },
-  { link: 'Hesaplar', route: '/accounts', heading: 'Accounts' },
-  { link: 'İşlemler', route: '/transactions', heading: 'All Transactions' },
+  { link: 'Hesaplar', route: '/accounts', heading: 'Hesaplar' },
+  { link: 'İşlemler', route: '/transactions', heading: 'Tüm İşlemler' },
   { link: 'Bütçe', route: '/budget' },
   { link: 'Düzenli İşlemler', route: '/recurring', heading: 'Recurring' },
   { link: 'Raporlar', route: '/reports', heading: 'Reports' },
@@ -19,7 +19,7 @@ const PAGES: { link: string; route: string; heading?: string }[] = [
 
 test('a new budget starts on the welcome screen', async ({ page }) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to UB-Finance' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: "UB-Finance'a hoş geldiniz" })).toBeVisible();
   await expect(page).toHaveURL(/#\/welcome$/);
 });
 

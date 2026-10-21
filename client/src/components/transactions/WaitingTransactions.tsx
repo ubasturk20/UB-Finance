@@ -8,6 +8,7 @@ import { useAccountCurrency } from '../../hooks/useCurrency';
 import { outboxEntryFor, type OutboxItem } from '../../utils/offline';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { formatDay } from '../../utils/dates';
+import { t } from '../../i18n';
 
 interface Props {
   /** The account whose register this is (all accounts when absent) */
@@ -33,35 +34,33 @@ export function WaitingTransactions({ accountId, categoryName, accountName }: Pr
     .filter((x): x is { item: OutboxItem; entry: NonNullable<typeof x.entry> } => x.entry !== null);
   if (shown.length === 0) return null;
 
-  const status = sending
-    ? 'Sending…'
-    : connected
-      ? null
-      : 'Sent when FlyBudget reconnects. Not in balances or the budget yet.';
+  const status = sending ? t('tx.waiting.sending') : connected ? null : t('tx.waiting.offline');
 
   function payeeOf(item: OutboxItem) {
     if (item.kind === 'transfer') {
       const other =
         accountId === item.data.toAccountId ? item.data.fromAccountId : item.data.toAccountId;
-      return `Transfer: ${accountName(other) ?? 'another account'}`;
+      return t('tx.transferTo', {
+        account: accountName(other) ?? t('tx.waiting.anotherAccount'),
+      });
     }
-    return item.data.payeeName || 'No payee';
+    return item.data.payeeName || t('tx.waiting.noPayee');
   }
 
   function detailOf(item: OutboxItem) {
-    if (item.kind === 'transfer') return 'Transfer';
-    if (item.data.splits?.length) return `Split (${item.data.splits.length})`;
-    return (item.data.categoryId && categoryName(item.data.categoryId)) || 'Uncategorized';
+    if (item.kind === 'transfer') return t('tx.transfer');
+    if (item.data.splits?.length) return t('tx.split', { count: item.data.splits.length });
+    return (item.data.categoryId && categoryName(item.data.categoryId)) || t('tx.uncategorized');
   }
 
   return (
     <section
-      aria-label="Saved on this device"
+      aria-label={t('tx.waiting.title')}
       className="border-b border-caution/30 bg-caution-subtle/40"
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 border-b border-caution/20">
         <CloudUpload size={15} className="text-caution shrink-0" aria-hidden />
-        <span className="text-sm font-medium text-text">Saved on this device</span>
+        <span className="text-sm font-medium text-text">{t('tx.waiting.title')}</span>
         {status && (
           <span className="text-xs text-text-secondary flex items-center gap-1">
             {sending && <Loader2 size={12} className="animate-spin" aria-hidden />}
@@ -95,31 +94,32 @@ export function WaitingTransactions({ accountId, categoryName, accountName }: Pr
             {item.error ? (
               <span className="basis-full flex flex-wrap items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 text-negative">
-                  <AlertCircle size={12} aria-hidden /> Not saved: {item.error}
+                  <AlertCircle size={12} aria-hidden />{' '}
+                  {t('tx.waiting.notSaved', { error: item.error })}
                 </span>
                 <button
                   onClick={() => void retryWaiting(item.id).then(() => sendWaiting(qc))}
-                  aria-label={`Try again: ${payeeOf(item)}`}
+                  aria-label={t('tx.waiting.retryLabel', { payee: payeeOf(item) })}
                   disabled={!connected}
                   className="px-2 py-1 max-md:min-h-11 rounded border border-border bg-surface text-text-secondary hover:text-text disabled:opacity-50"
                 >
-                  Try again
+                  {t('common.retry')}
                 </button>
                 <button
                   onClick={() => setDiscarding(item)}
-                  aria-label={`Discard ${payeeOf(item)}`}
+                  aria-label={t('tx.waiting.discardLabel', { payee: payeeOf(item) })}
                   className="px-2 py-1 max-md:min-h-11 rounded border border-border bg-surface text-negative hover:bg-negative-subtle"
                 >
-                  Discard
+                  {t('tx.waiting.discard')}
                 </button>
               </span>
             ) : (
               <button
                 onClick={() => setDiscarding(item)}
-                aria-label={`Discard ${payeeOf(item)}`}
+                aria-label={t('tx.waiting.discardLabel', { payee: payeeOf(item) })}
                 className="text-xs px-2 py-1 max-md:min-h-11 rounded text-text-tertiary hover:text-negative hover:bg-surface"
               >
-                Discard
+                {t('tx.waiting.discard')}
               </button>
             )}
           </li>
@@ -132,9 +132,9 @@ export function WaitingTransactions({ accountId, categoryName, accountName }: Pr
           if (discarding) void discardWaiting(discarding.id);
           setDiscarding(null);
         }}
-        title="Discard this transaction?"
-        message="It was only saved on this device and hasn't been sent to FlyBudget, so it will be gone."
-        confirmLabel="Discard"
+        title={t('tx.waiting.discardTitle')}
+        message={t('tx.waiting.discardMessage')}
+        confirmLabel={t('tx.waiting.discard')}
         danger
       />
     </section>

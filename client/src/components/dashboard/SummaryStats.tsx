@@ -6,6 +6,7 @@ import { formatCurrency } from '../../utils/currency';
 import { StatCard } from '../ui/StatCard';
 import { monthsToAverage } from '../../utils/reportSummary';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { formatPercent, t } from '../../i18n';
 
 interface Props {
   currentMonth: string;
@@ -56,31 +57,36 @@ export default function SummaryStats({ currentMonth }: Props) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {totalBudgeted > 0 ? (
-        <StatCard label="Left to Spend" value={formatCurrency(leftToSpend)} valueColor={ltsColor} />
+        <StatCard
+          label={t('dash.stats.leftToSpend')}
+          value={formatCurrency(leftToSpend)}
+          valueColor={ltsColor}
+        />
       ) : (
-        <StatCard label="Left to Spend" value="—" sub="No budget set this month" />
+        <StatCard label={t('dash.stats.leftToSpend')} value="—" sub={t('dash.stats.noBudget')} />
       )}
       <StatCard
-        label="Avg Monthly Income"
+        label={t('dash.stats.avgIncome')}
         value={formatCurrency(avgIncome)}
         valueColor={avgIncome > 0 ? 'text-positive' : undefined}
       />
       <StatCard
-        label="Avg Monthly Expenses"
+        label={t('dash.stats.avgExpenses')}
         value={formatCurrency(avgExpenses)}
         valueColor={avgExpenses > 0 ? 'text-negative' : undefined}
       />
       <div className="bg-surface-alt rounded-lg px-4 py-3 border border-border-light">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-text-tertiary">Savings Rate</p>
+          <p className="text-xs font-medium text-text-tertiary">{t('dash.stats.savingsRate')}</p>
           <select
             value={savingsGoal}
             onChange={(e) => setSavingsGoal(Number(e.target.value))}
+            aria-label={t('dash.stats.savingsGoal')}
             className="text-[10px] border border-border rounded px-1 py-0.5 bg-surface text-text-secondary cursor-pointer focus:outline-none"
           >
             {GOAL_OPTIONS.map((g) => (
               <option key={g} value={g}>
-                {g}% goal
+                {t('dash.stats.goalOption', { percent: formatPercent(g / 100) })}
               </option>
             ))}
           </select>
@@ -89,12 +95,12 @@ export default function SummaryStats({ currentMonth }: Props) {
           <p
             className={`text-lg font-semibold tabular-nums mt-0.5 ${savingsRate >= savingsGoal ? 'text-positive' : 'text-negative'}`}
           >
-            {savingsRate}%
+            {formatPercent(savingsRate / 100)}
           </p>
         ) : (
           <>
             <p className="text-lg font-semibold tabular-nums mt-0.5 text-text">—</p>
-            <p className="text-xs text-text-tertiary mt-0.5">Shown once you have income</p>
+            <p className="text-xs text-text-tertiary mt-0.5">{t('dash.stats.noIncome')}</p>
           </>
         )}
       </div>

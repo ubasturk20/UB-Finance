@@ -28,6 +28,7 @@ import type { FilterState } from './TransactionFilters';
 import type { CategoryGroup } from '../../types';
 import type { CreateTransactionData } from '../../api/transactions';
 import { formatDay, formatDayLong } from '../../utils/dates';
+import { t } from '../../i18n';
 
 /** Rows drawn at a time: every match is loaded, but drawing thousands at once is slow */
 const ROWS_PER_PAGE = 300;
@@ -177,8 +178,8 @@ export function TransactionTable({
   // together add their values in the budget's currency
   const ownCurrency = useAccountCurrency()(accountId);
   const budgetCurrency = useBudgetCurrency();
-  const dayAmount = (t: (typeof transactions)[number]) =>
-    accountId ? t.amount : transactionValue(t);
+  const dayAmount = (tx: (typeof transactions)[number]) =>
+    accountId ? tx.amount : transactionValue(tx);
   const groupedByDate = useMemo(() => {
     const result: Array<{ date: string; txs: typeof transactions; total: number }> = [];
     let currentDate = '';
@@ -190,7 +191,7 @@ export function TransactionTable({
           result.push({
             date: currentDate,
             txs: currentTxs,
-            total: currentTxs.reduce((sum, t) => sum + Math.abs(dayAmount(t)), 0),
+            total: currentTxs.reduce((sum, tx) => sum + Math.abs(dayAmount(tx)), 0),
           });
         }
         currentDate = tx.date;
@@ -204,7 +205,7 @@ export function TransactionTable({
       result.push({
         date: currentDate,
         txs: currentTxs,
-        total: currentTxs.reduce((sum, t) => sum + Math.abs(dayAmount(t)), 0),
+        total: currentTxs.reduce((sum, tx) => sum + Math.abs(dayAmount(tx)), 0),
       });
     }
 
@@ -263,25 +264,27 @@ export function TransactionTable({
         externalRange={from && to ? `${formatDay(from)} – ${formatDay(to)}` : undefined}
       />
       <div className="px-4 py-2 border-b border-border-light bg-surface flex flex-wrap gap-2 justify-between items-center">
-        <span className="text-xs text-text-tertiary">{transactions.length} transactions</span>
+        <span className="text-xs text-text-tertiary">
+          {t('tx.count', { count: transactions.length })}
+        </span>
         {accountId && (
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
-              <Upload size={13} /> Import CSV
+              <Upload size={13} /> {t('tx.importCsv')}
             </Button>
             <Button
               size="sm"
               disabled={!newTx.allowed}
               title={
                 !newTx.allowed
-                  ? 'Saving is paused until FlyBudget reconnects'
+                  ? t('shell.hint.savingPaused')
                   : newTx.onDevice
-                    ? 'Saved on this device and sent when FlyBudget reconnects'
+                    ? t('tx.savedOnDeviceTitle')
                     : undefined
               }
               onClick={startAdd}
             >
-              <Plus size={13} /> Add Transaction
+              <Plus size={13} /> {t('tx.addTransaction')}
             </Button>
           </div>
         )}
@@ -315,36 +318,36 @@ export function TransactionTable({
           )}
 
           {isLoading ? (
-            <div className="px-4 py-10 text-center text-sm text-text-tertiary">Loading...</div>
+            <div className="px-4 py-10 text-center text-sm text-text-tertiary">
+              {t('common.loading')}
+            </div>
           ) : transactions.length === 0 && (!showAdd || isPhone) ? (
             isFirstRun ? (
               <EmptyState
                 icon={<Receipt size={26} />}
-                title="No transactions yet"
+                title={t('tx.empty.title')}
                 description={
-                  accountId
-                    ? 'Import a CSV file downloaded from your bank, or add transactions by hand as you spend.'
-                    : 'Add transactions by hand, import a CSV file from an account page, or connect a bank to bring them in automatically.'
+                  accountId ? t('tx.empty.accountDescription') : t('tx.empty.allDescription')
                 }
                 learnMoreHref={docsUrl('transactions')}
                 actions={
                   accountId ? (
                     <>
                       <Button variant="secondary" onClick={() => setShowImport(true)}>
-                        <Upload size={14} /> Import a CSV file
+                        <Upload size={14} /> {t('tx.empty.importCsvFile')}
                       </Button>
                       <Button disabled={!newTx.allowed} onClick={startAdd}>
-                        <Plus size={14} /> Add a transaction
+                        <Plus size={14} /> {t('tx.empty.addFirst')}
                       </Button>
                     </>
                   ) : (
                     <>
                       <ButtonLink variant="secondary" to="/settings?tab=connections">
-                        <Link2 size={14} /> Connect a bank
+                        <Link2 size={14} /> {t('tx.empty.connectBank')}
                       </ButtonLink>
                       {onAddTransaction && (
                         <Button disabled={!newTx.allowed} onClick={onAddTransaction}>
-                          <Plus size={14} /> Add a transaction
+                          <Plus size={14} /> {t('tx.empty.addFirst')}
                         </Button>
                       )}
                     </>
@@ -355,13 +358,13 @@ export function TransactionTable({
               <EmptyState
                 compact
                 icon={<SearchX size={20} />}
-                title="No transactions found"
+                title={t('tx.notFound.title')}
                 description={
                   filtersChanged
-                    ? 'Nothing matches your search and filters.'
+                    ? t('tx.notFound.filtered')
                     : filters.datePreset === 'all'
-                      ? 'There are no transactions here.'
-                      : 'There are no transactions in this date range.'
+                      ? t('tx.notFound.none')
+                      : t('tx.notFound.range')
                 }
                 actions={
                   (filtersChanged || filters.datePreset !== 'all') && (
@@ -370,7 +373,9 @@ export function TransactionTable({
                       size="sm"
                       onClick={() => setFilters({ ...DEFAULT_FILTERS, datePreset: 'all' })}
                     >
-                      {filtersChanged ? 'Clear filters' : 'Show all dates'}
+                      {filtersChanged
+                        ? t('tx.notFound.clearFilters')
+                        : t('tx.notFound.showAllDates')}
                     </Button>
                   )
                 }
@@ -388,7 +393,7 @@ export function TransactionTable({
                       className="text-sm font-medium text-text-secondary tabular-nums"
                       title={
                         !accountId && budgetCurrency
-                          ? `In ${budgetCurrency}, at each day's rate`
+                          ? t('tx.dayTotalHint', { currency: budgetCurrency })
                           : undefined
                       }
                     >
@@ -450,14 +455,17 @@ export function TransactionTable({
               {hiddenRows > 0 && (
                 <div className="flex flex-col items-center gap-2 px-4 py-6">
                   <span className="text-xs text-text-tertiary">
-                    Showing {transactions.length - hiddenRows} of {transactions.length} transactions
+                    {t('tx.showing', {
+                      shown: transactions.length - hiddenRows,
+                      total: transactions.length,
+                    })}
                   </span>
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => setShown({ params, rows: shownRows + ROWS_PER_PAGE })}
                   >
-                    Show {Math.min(hiddenRows, ROWS_PER_PAGE)} more
+                    {t('tx.showMore', { count: Math.min(hiddenRows, ROWS_PER_PAGE) })}
                   </Button>
                 </div>
               )}
@@ -489,7 +497,7 @@ export function TransactionTable({
 
       {/* Phones: the entry form in a sheet (splits and transfers included) */}
       {accountId && isPhone && (
-        <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="New transaction">
+        <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title={t('tx.newTransaction')}>
           <TransactionFormRow
             layout="sheet"
             accountId={accountId}

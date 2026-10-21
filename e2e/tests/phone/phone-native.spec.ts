@@ -59,7 +59,7 @@ test.describe('register', () => {
     await open(page, `/accounts/${checking.id}`);
 
     const card = page.getByTestId('transaction-card').filter({ hasText: 'Streamflix' });
-    await expect(card).toContainText('Uncategorized');
+    await expect(card).toContainText('Kategorisiz');
     await expect(card).toContainText('family plan');
     await expect(card).toContainText('19,99 ₺');
     // No desktop hover controls on a phone
@@ -67,14 +67,14 @@ test.describe('register', () => {
     await expectTouchSize(card);
 
     await card.click();
-    const details = page.getByRole('complementary', { name: 'Transaction details' });
+    const details = page.getByRole('complementary', { name: 'İşlem ayrıntıları' });
     await expect(details).toBeVisible();
     const box = (await details.boundingBox())!;
     expect(Math.round(box.width)).toBe(page.viewportSize()!.width);
-    await expectTouchSize(details.getByRole('button', { name: 'Close details' }));
+    await expectTouchSize(details.getByRole('button', { name: 'Ayrıntıları kapat' }));
 
-    await details.getByRole('button', { name: 'Uncategorized' }).click();
-    await page.getByPlaceholder('Search categories...').fill('stream');
+    await details.getByRole('button', { name: 'Kategorisiz' }).click();
+    await page.getByPlaceholder('Kategori ara…').fill('stream');
     await page.getByRole('button', { name: /Streaming Services/ }).click();
     const streaming = await api.category('Streaming Services');
     await expect
@@ -86,7 +86,7 @@ test.describe('register', () => {
       )
       .toBe(streaming.id);
 
-    await details.getByRole('button', { name: 'Close details' }).click();
+    await details.getByRole('button', { name: 'Ayrıntıları kapat' }).click();
     await expect(details).toBeHidden();
     await expect(card).toContainText('Streaming Services');
   });
@@ -94,39 +94,39 @@ test.describe('register', () => {
   test('adds a split transaction from a bottom sheet', async ({ page, api }) => {
     const { checking } = await seedAccount(api);
     await open(page, `/accounts/${checking.id}`);
-    await page.getByRole('button', { name: 'Add Transaction' }).click();
+    await page.getByRole('button', { name: 'İşlem ekle' }).click();
 
-    const sheet = page.getByRole('dialog', { name: 'New transaction' });
+    const sheet = page.getByRole('dialog', { name: 'Yeni işlem' });
     await expect(sheet).toBeVisible();
     await expectBottomSheet(page, sheet);
-    const form = sheet.getByRole('form', { name: 'New transaction' });
+    const form = sheet.getByRole('form', { name: 'Yeni işlem' });
     // 16px text, so iOS doesn't zoom in when a field is focused
     const fontSize = await form
-      .getByRole('textbox', { name: 'Payee' })
+      .getByRole('textbox', { name: 'Alıcı' })
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(fontSize).toBeGreaterThanOrEqual(16);
 
-    await form.getByRole('textbox', { name: 'Payee' }).fill('Big Box Store');
+    await form.getByRole('textbox', { name: 'Alıcı' }).fill('Big Box Store');
     // A decimal keypad, and a decimal comma works as well as a point
-    const outflow = form.getByRole('textbox', { name: 'Outflow' });
+    const outflow = form.getByRole('textbox', { name: 'Çıkış' });
     await expect(outflow).toHaveAttribute('inputmode', 'decimal');
     await outflow.fill('100');
-    await form.getByRole('button', { name: 'Split transaction' }).click();
+    await form.getByRole('button', { name: 'İşlemi böl' }).click();
     await form
-      .getByRole('combobox', { name: 'Split 1 category' })
+      .getByRole('combobox', { name: 'Parça 1 kategorisi' })
       .selectOption({ label: '🛒 Groceries' });
-    await form.getByRole('textbox', { name: 'Split 1 amount' }).fill('60,50');
-    await form.getByRole('textbox', { name: 'Split 2 amount' }).fill('39.50');
-    await expect(form.getByText('Balanced')).toBeVisible();
-    for (const name of ['Save', 'Split transaction', 'Cancel']) {
+    await form.getByRole('textbox', { name: 'Parça 1 tutarı' }).fill('60,50');
+    await form.getByRole('textbox', { name: 'Parça 2 tutarı' }).fill('39.50');
+    await expect(form.getByText('Dengede')).toBeVisible();
+    for (const name of ['Kaydet', 'İşlemi böl', 'İptal']) {
       await expectTouchSize(form.getByRole('button', { name, exact: true }));
     }
-    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await form.getByRole('button', { name: 'Kaydet', exact: true }).click();
 
     await expect(sheet).toBeHidden();
     await expect(
       page.getByTestId('transaction-card').filter({ hasText: 'Big Box Store' }),
-    ).toContainText('Split (2)');
+    ).toContainText('Bölünmüş (2)');
     // 1.000 ₺ − 42,50 ₺ − 19,99 ₺ − 100 ₺: the split counts once
     await expect.poll(() => api.balance(checking.id)).toBe(100_000 - 4_250 - 1_999 - 10_000);
   });
@@ -295,8 +295,8 @@ test.describe('dialogs and touch targets', () => {
   test('dialogs open as bottom sheets with a full-size close button', async ({ page, api }) => {
     await api.createAccount('Checking');
     await open(page, '/accounts');
-    await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Add Account' });
+    await page.getByRole('main').getByRole('button', { name: 'Hesap Ekle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
     await expectBottomSheet(page, dialog);
     await expectTouchSize(dialog.getByRole('button', { name: 'Kapat' }));
     await dialog.getByRole('button', { name: 'Kapat' }).click();
@@ -308,7 +308,7 @@ test.describe('dialogs and touch targets', () => {
     await open(page, `/accounts/${checking.id}`);
     const menu = page.getByRole('button', { name: 'Menüyü aç' });
     await expectTouchSize(menu);
-    for (const name of ['Add Transaction', 'Import CSV', 'This Month', 'All Time']) {
+    for (const name of ['İşlem ekle', 'CSV içe aktar', 'Bu ay', 'Tüm zamanlar']) {
       await expectTouchSize(page.getByRole('button', { name, exact: true }));
     }
     await menu.click();

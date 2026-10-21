@@ -8,6 +8,7 @@ import { formatCurrency } from '../../utils/currency';
 import { chartColors } from '../../utils/chartColors';
 import { formatDateAxisLabels, formatDateLabel } from '../../utils/chartTicks';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
+import { formatPercent, t } from '../../i18n';
 
 function MiniTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -26,12 +27,12 @@ function MiniTooltip({ active, payload, label }: any) {
 type Preset = '1m' | '3m' | '6m' | 'ytd' | '1y' | 'all';
 
 const PRESETS: { value: Preset; label: string }[] = [
-  { value: '1m', label: '1 month' },
-  { value: '3m', label: '3 months' },
-  { value: '6m', label: '6 months' },
-  { value: 'ytd', label: 'Year to date' },
-  { value: '1y', label: '1 year' },
-  { value: 'all', label: 'All time' },
+  { value: '1m', label: t('dash.range.1m') },
+  { value: '3m', label: t('dash.range.3m') },
+  { value: '6m', label: t('dash.range.6m') },
+  { value: 'ytd', label: t('dash.range.ytd') },
+  { value: '1y', label: t('dash.range.1y') },
+  { value: 'all', label: t('dash.range.all') },
 ];
 
 function computeRange(preset: Preset): {
@@ -107,7 +108,7 @@ export default function NetWorthMini() {
   const latest = data.length > 0 ? data[data.length - 1].netWorth : 0;
   const first = data.length > 0 ? data[0].netWorth : latest;
   const change = latest - first;
-  const pct = first !== 0 ? (change / Math.abs(first)) * 100 : 0;
+  const pct = first !== 0 ? change / Math.abs(first) : 0;
 
   if (isLoading) {
     return (
@@ -126,7 +127,7 @@ export default function NetWorthMini() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide">
-            Net Worth
+            {t('dash.netWorth.title')}
           </p>
           <p
             className={`text-3xl font-semibold tabular-nums mt-1 ${latest >= 0 ? 'text-text' : 'text-negative'}`}
@@ -134,28 +135,27 @@ export default function NetWorthMini() {
             {formatCurrency(latest)}
           </p>
           {noAccounts && (
-            <p className="text-sm text-text-tertiary mt-1">
-              What you own minus what you owe, across all your accounts.
-            </p>
+            <p className="text-sm text-text-tertiary mt-1">{t('dash.netWorth.empty')}</p>
           )}
           {data.length > 1 && !noAccounts && (
             <p
               className={`text-sm tabular-nums mt-0.5 ${change >= 0 ? 'text-positive' : 'text-negative'}`}
             >
               {change >= 0 ? '+' : ''}
-              {formatCurrency(change)} ({Math.abs(pct).toFixed(1)}%)
+              {formatCurrency(change)} ({formatPercent(Math.abs(pct))})
             </p>
           )}
         </div>
 
         {noAccounts ? (
           <ButtonLink size="sm" to="/accounts?add=1">
-            Add an account
+            {t('dash.netWorth.addAccount')}
           </ButtonLink>
         ) : (
           <select
             value={preset}
             onChange={(e) => setPreset(e.target.value as Preset)}
+            aria-label={t('dash.netWorth.range')}
             className="text-sm border border-border rounded-lg px-3 py-1.5 bg-surface text-text cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-600"
           >
             {PRESETS.map((p) => (
@@ -184,7 +184,7 @@ export default function NetWorthMini() {
               <Area
                 type="monotone"
                 dataKey="netWorth"
-                name="Net Worth"
+                name={t('dash.netWorth.title')}
                 stroke={chartColors.brand}
                 strokeWidth={2}
                 fill="url(#gNetMini)"

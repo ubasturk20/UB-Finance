@@ -31,14 +31,14 @@ test('Cash Flow clicks scope transactions to the category, group and chart range
   const request = new URL(page.url());
   expect(request.hash).toContain('cash-flow');
   // A stale search must not hide the next chart selection.
-  await list.getByPlaceholder('Search payee or notes…').fill('no such payee');
+  await list.getByPlaceholder('Alıcı veya notlarda ara…').fill('no such payee');
   await page
     .getByRole('button', { name: 'Show transactions: Uncategorized', exact: true })
     .first()
     .click();
   await expect(list).toContainText('Unknown merchant');
   await expect(list).not.toContainText('Current groceries');
-  await expect(list.getByPlaceholder('Search payee or notes…')).toHaveValue('');
+  await expect(list.getByPlaceholder('Alıcı veya notlarda ara…')).toHaveValue('');
   const group = (await api.categoryGroups()).find((g) =>
     g.categories.some((c) => c.id === grocery.id),
   )!;

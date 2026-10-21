@@ -1,4 +1,5 @@
 import type { ImportRow } from '../api/transactions';
+import { t } from '../i18n';
 
 export type Delimiter = ',' | ';' | '\t';
 
@@ -128,14 +129,14 @@ export function detectSkipRows(records: string[][]): number {
 }
 
 export const CSV_ENCODINGS = [
-  { value: 'auto', label: 'Detect' },
+  { value: 'auto', label: t('import.encoding.detect') },
   { value: 'utf-8', label: 'UTF-8' },
   { value: 'utf-16le', label: 'UTF-16 LE' },
   { value: 'utf-16be', label: 'UTF-16 BE' },
   { value: 'windows-1254', label: 'Türkçe (Windows-1254)' },
-  { value: 'windows-1252', label: 'Western European (Windows-1252)' },
-  { value: 'windows-1250', label: 'Central European (Windows-1250)' },
-  { value: 'iso-8859-2', label: 'Central European (ISO-8859-2)' },
+  { value: 'windows-1252', label: t('import.encoding.westernEuropean') },
+  { value: 'windows-1250', label: t('import.encoding.centralEuropean') },
+  { value: 'iso-8859-2', label: t('import.encoding.centralEuropeanIso') },
 ] as const;
 
 export type CsvEncoding = (typeof CSV_ENCODINGS)[number]['value'];
@@ -439,6 +440,21 @@ const COLUMN_HINTS: Record<string, ColumnRole> = {
   crédit: 'inflow',
   verwendungszweck: 'notes', // German
   mededelingen: 'notes', // Dutch
+  // Turkish bank exports. Headers are lowercased with toLowerCase(), which turns a capital İ
+  // into "i" plus a combining dot (U+0307) and a capital I into "i": both spellings are listed.
+  tarih: 'date', // Tarih, TARIH
+  'tari\u0307h': 'date', // TARİH
+  'işlem tarihi': 'date',
+  'i\u0307şlem tarihi': 'date', // İşlem Tarihi
+  'i\u0307şlem tari\u0307hi\u0307': 'date', // İŞLEM TARİHİ
+  açıklama: 'payee',
+  açiklama: 'payee', // AÇIKLAMA
+  tutar: 'amount',
+  'işlem tutarı': 'amount',
+  'i\u0307şlem tutarı': 'amount', // İşlem Tutarı
+  'i\u0307şlem tutari': 'amount', // İŞLEM TUTARI
+  borç: 'outflow',
+  alacak: 'inflow',
   // Columns saying which way the money went, when amounts have no sign
   'af bij': 'direction', // ING Netherlands
   'af/bij': 'direction',
@@ -584,9 +600,9 @@ export function buildImportRows(
   const notesIdx = roles.indexOf('notes');
   const directionIdx = roles.indexOf('direction');
 
-  if (dateIdx === -1) return 'Date column is required';
+  if (dateIdx === -1) return t('import.rows.dateRequired');
   if (amountIdx === -1 && inflowIdx === -1 && outflowIdx === -1) {
-    return 'At least one amount column is required';
+    return t('import.rows.amountRequired');
   }
 
   /** Cents, 0 for an empty cell, or null if the cell holds something that isn't a number */
@@ -648,12 +664,25 @@ export function buildImportRows(
   return { rows, skipped };
 }
 
-/** "2 rows skipped: row 3, amount "N/A"; row 7, date "13/45/2024"." (the first `max` named) */
+const SKIPPED_FIELD = {
+  date: 'import.rows.field.date',
+  amount: 'import.rows.field.amount',
+  direction: 'import.rows.field.direction',
+} as const;
+
+/**
+ * "2 satır atlandı: 3. satır, tutar "N/A"; 7. satır, tarih "13/45/2024"." (the first `max`
+ * named)
+ */
 export function describeSkippedRows(skipped: SkippedRow[], max = 5): string {
-  const listed = skipped
-    .slice(0, max)
-    .map((s) => `row ${s.row}, ${s.field} ${s.value ? `"${s.value}"` : '(empty)'}`);
-  if (skipped.length > max) listed.push(`and ${skipped.length - max} more`);
-  const count = `${skipped.length} ${skipped.length === 1 ? 'row' : 'rows'} skipped`;
+  const listed = skipped.slice(0, max).map((s) =>
+    t('import.rows.skippedItem', {
+      row: s.row,
+      field: t(SKIPPED_FIELD[s.field]),
+      value: s.value ? `"${s.value}"` : t('import.rows.empty'),
+    }),
+  );
+  if (skipped.length > max) listed.push(t('import.rows.more', { count: skipped.length - max }));
+  const count = t('import.rows.skippedCount', { count: skipped.length });
   return `${count}: ${listed.join('; ')}.`;
 }

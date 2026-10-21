@@ -12,12 +12,12 @@ const addRate = (api: Api, base: string, quote: string, rate: string, date = iso
 test('a budget with one currency sees nothing new', async ({ page, api }) => {
   await api.createAccount('Checking', 10_000);
   await open(page, '/accounts');
-  await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Add Account' });
+  await page.getByRole('main').getByRole('button', { name: 'Hesap Ekle' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
   // No currency to pick until asked for
-  await expect(dialog.getByRole('combobox', { name: 'Currency' })).toHaveCount(0);
-  await expect(dialog.getByRole('button', { name: 'Choose a currency' })).toBeVisible();
-  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog.getByRole('combobox', { name: 'Para birimi' })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Para birimi seç' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'İptal' }).click();
 
   // The symbol is still the device's own setting
   await open(page, '/settings?tab=preferences');
@@ -35,15 +35,15 @@ test('choosing the budget currency, then adding accounts in others', async ({ pa
 
   // An account in yen: no decimals, typed and shown that way
   await open(page, '/accounts');
-  await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Add Account' });
-  await dialog.getByRole('textbox', { name: 'Account name' }).fill('Tokyo cash');
-  await dialog.getByRole('combobox', { name: 'Currency' }).selectOption('JPY');
-  const balance = dialog.getByRole('textbox', { name: 'Current Balance' });
+  await page.getByRole('main').getByRole('button', { name: 'Hesap Ekle' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
+  await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Tokyo cash');
+  await dialog.getByRole('combobox', { name: 'Para birimi' }).selectOption('JPY');
+  const balance = dialog.getByRole('textbox', { name: 'Güncel Bakiye' });
   await typeAmount(balance, '12.5');
   await expect(balance).toHaveAttribute('aria-invalid', 'true');
   await typeAmount(balance, '15000');
-  await dialog.getByRole('button', { name: 'Add Account' }).click();
+  await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
   await expect(dialog).toBeHidden();
   await expect
     .poll(async () => (await api.accounts()).find((a) => a.name === 'Tokyo cash'))
@@ -77,18 +77,18 @@ test('money moved between currencies keeps both amounts and the budget unchanged
   await addRate(api, 'EUR', 'USD', '1.25');
 
   await open(page, '/transactions?add=1');
-  const dialog = page.getByRole('dialog', { name: 'Add transaction' });
-  await typeAmount(dialog.getByLabel('Amount', { exact: true }), '100');
-  await dialog.getByRole('button', { name: /Select account/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'İşlem ekle' });
+  await typeAmount(dialog.getByLabel('Tutar', { exact: true }), '100');
+  await dialog.getByRole('button', { name: /Hesap seçin/ }).click();
   await dialog.getByRole('button', { name: /Girokonto/ }).click();
-  await dialog.getByRole('button', { name: /^Category:/ }).click();
+  await dialog.getByRole('button', { name: /^Kategori:/ }).click();
   await dialog.getByRole('button', { name: 'Transfer: US checking' }).click();
 
   // What arrives is filled in at the day's rate, and can be typed over (the bank's own rate)
-  const arrived = dialog.getByRole('textbox', { name: 'Amount in USD' });
+  const arrived = dialog.getByRole('textbox', { name: 'USD cinsinden tutar' });
   await expect(arrived).toHaveValue('$125');
   await typeAmount(arrived, '123.40');
-  await dialog.getByRole('button', { name: 'Add transaction' }).click();
+  await dialog.getByRole('button', { name: 'İşlem ekle' }).click();
   await expect(dialog).toBeHidden();
 
   const accounts = await api.accounts();
@@ -113,13 +113,13 @@ test('a purchase without a rate is flagged until one is added', async ({ page, a
   });
 
   await open(page, '/budget');
-  const banner = page.getByRole('status').filter({ hasText: 'no EUR value yet' });
+  const banner = page.getByRole('status').filter({ hasText: 'henüz EUR değeri yok' });
   await expect(banner).toBeVisible();
-  await expect(banner).toContainText('1 GBP transaction');
+  await expect(banner).toContainText('1 GBP işleminin');
 
   // In the register, it says why
   await open(page, `/accounts/${pounds.id}`);
-  await expect(page.getByText('No rate').first()).toBeVisible();
+  await expect(page.getByText('Kur yok').first()).toBeVisible();
 
   await open(page, '/settings?tab=currencies');
   await page.getByRole('combobox', { name: 'Para birimi', exact: true }).selectOption('GBP');
@@ -128,7 +128,7 @@ test('a purchase without a rate is flagged until one is added', async ({ page, a
   await expect(page.getByText('1 GBP = 1.25 EUR', { exact: true })).toBeVisible();
 
   await open(page, '/budget');
-  await expect(page.getByRole('status').filter({ hasText: 'no EUR value yet' })).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'henüz EUR değeri yok' })).toHaveCount(0);
   const [tx] = await api.call('GET', `/transactions?account_id=${pounds.id}`);
   expect(tx).toMatchObject({ mainAmount: -5_000, mainAmountSource: 'rate' });
 });

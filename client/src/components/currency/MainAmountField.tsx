@@ -3,13 +3,13 @@ import { useUpdateTransaction } from '../../hooks/useTransactions';
 import { useBudgetCurrency } from '../../hooks/useCurrency';
 import { formatMoney } from '../../utils/currency';
 import type { Transaction } from '../../types';
+import { t } from '../../i18n';
 
 const SOURCE_TEXT: Record<string, string> = {
-  rate: "At the day's exchange rate.",
-  manual: 'As you typed it.',
-  transfer: 'What the other side of the transfer is worth.',
-  missing:
-    'No exchange rate for this day yet, so the budget counts it as nothing. Type what it cost, or add a rate in Settings → Currencies.',
+  rate: t('currency.mainAmount.rate'),
+  manual: t('currency.mainAmount.manual'),
+  transfer: t('currency.mainAmount.transfer'),
+  missing: t('currency.mainAmount.missing'),
 };
 
 /**
@@ -39,15 +39,17 @@ export function MainAmountField({ tx, disabled }: { tx: Transaction; disabled?: 
   return (
     <div>
       <label className="text-xs font-medium text-text-secondary mb-1.5 block">
-        Value in {budgetCurrency}
+        {t('currency.mainAmount.label', { currency: budgetCurrency })}
       </label>
       {editable ? (
         <CurrencyInput
           value={value}
           onChange={save}
           currency={budgetCurrency}
-          aria-label={`Value in ${budgetCurrency}`}
-          placeholder={tx.mainAmountSource === 'missing' ? 'No rate yet' : undefined}
+          aria-label={t('currency.mainAmount.label', { currency: budgetCurrency })}
+          placeholder={
+            tx.mainAmountSource === 'missing' ? t('currency.mainAmount.noRateYet') : undefined
+          }
         />
       ) : tx.mainAmount !== null && tx.mainAmount !== undefined ? (
         <div className="text-sm tabular-nums text-text">{formatMoney(value, budgetCurrency)}</div>
@@ -64,7 +66,7 @@ export function MainAmountField({ tx, disabled }: { tx: Transaction; disabled?: 
               onClick={() => updateTx.mutate({ id: tx.id, data: { mainAmount: null } })}
               className="underline hover:no-underline"
             >
-              Use the day&apos;s rate
+              {t('currency.mainAmount.useRate')}
             </button>
           </>
         )}

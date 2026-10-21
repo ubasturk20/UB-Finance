@@ -22,9 +22,9 @@ const GERMAN_CSV =
   '17.01.2025;Baumarkt;;-1.089,99\r\n';
 
 async function importCsv(page: Page, csv: string, encoding: BufferEncoding = 'utf8') {
-  await page.getByRole('button', { name: 'Import CSV' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-  await dialog.getByLabel('Bank file').setInputFiles({
+  await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+  await dialog.getByLabel('Banka dosyası').setInputFiles({
     name: 'bank-export.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(csv, encoding),
@@ -38,18 +38,18 @@ test.describe('CSV import', () => {
     await open(page, `/accounts/${checking.id}`);
     const dialog = await importCsv(page, BANK_CSV);
 
-    await expect(dialog).toContainText('Found 4 rows');
+    await expect(dialog).toContainText('4 satır bulundu');
     // Columns are recognized from their headers, the BOM notwithstanding
-    await expect(dialog.getByRole('combobox', { name: 'Column Date' })).toHaveValue('date');
-    await expect(dialog.getByRole('combobox', { name: 'Column Description' })).toHaveValue('payee');
-    await expect(dialog.getByRole('combobox', { name: 'Column Amount' })).toHaveValue('amount');
-    await expect(dialog.getByRole('combobox', { name: 'Column Memo' })).toHaveValue('notes');
+    await expect(dialog.getByRole('combobox', { name: 'SütunDate' })).toHaveValue('date');
+    await expect(dialog.getByRole('combobox', { name: 'SütunDescription' })).toHaveValue('payee');
+    await expect(dialog.getByRole('combobox', { name: 'SütunAmount' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'SütunMemo' })).toHaveValue('notes');
 
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await expect(dialog).toContainText('4 transactions found. 0 duplicates detected.');
-    await dialog.getByRole('button', { name: 'Import 4 Transactions' }).click();
-    await expect(dialog).toContainText('4 imported, 0 skipped');
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await expect(dialog).toContainText('4 işlem bulundu. 0 yinelenen işlem algılandı.');
+    await dialog.getByRole('button', { name: '4 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('4 içe aktarıldı, 0 atlandı');
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     const txs = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     const summary = txs
@@ -68,18 +68,18 @@ test.describe('CSV import', () => {
     const checking = await api.createAccount('Checking', 0);
     await open(page, `/accounts/${checking.id}`);
     let dialog = await importCsv(page, BANK_CSV);
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 4 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '4 işlemi içe aktar' }).click();
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     // The next month's export overlaps: one new row
     dialog = await importCsv(page, BANK_CSV + '01/20/2025,Bakery,(7.25),\r\n');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
     await expect(dialog).toContainText(
-      '5 transactions found. 4 duplicates detected. 1 will be imported.',
+      '5 işlem bulundu. 4 yinelenen işlem algılandı. 1 işlem içe aktarılacak.',
     );
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await expect(dialog).toContainText('1 imported, 0 skipped');
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
     expect(await api.transactions(`?account_id=${checking.id}&from=2025-01-01`)).toHaveLength(5);
   });
 
@@ -91,19 +91,19 @@ test.describe('CSV import', () => {
     await open(page, `/accounts/${checking.id}`);
     const dialog = await importCsv(page, GERMAN_CSV, 'latin1');
 
-    await expect(dialog).toContainText('Found 3 rows');
-    await expect(dialog.getByRole('combobox', { name: 'Separator' })).toHaveValue(';');
-    await expect(dialog.getByRole('combobox', { name: 'Dates' })).toHaveValue('dmy');
-    await expect(dialog.getByRole('combobox', { name: 'Amounts' })).toHaveValue('comma');
-    await expect(dialog.getByRole('combobox', { name: 'Column Buchungstag' })).toHaveValue('date');
+    await expect(dialog).toContainText('3 satır bulundu');
+    await expect(dialog.getByRole('combobox', { name: 'Ayırıcı' })).toHaveValue(';');
+    await expect(dialog.getByRole('combobox', { name: 'Tarihler' })).toHaveValue('dmy');
+    await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
+    await expect(dialog.getByRole('combobox', { name: 'SütunBuchungstag' })).toHaveValue('date');
     await expect(
-      dialog.getByRole('combobox', { name: 'Column Auftraggeber / Empfänger' }),
+      dialog.getByRole('combobox', { name: 'SütunAuftraggeber / Empfänger' }),
     ).toHaveValue('payee');
-    await expect(dialog.getByRole('combobox', { name: 'Column Betrag' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'SütunBetrag' })).toHaveValue('amount');
 
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 3 Transactions' }).click();
-    await expect(dialog).toContainText('3 imported, 0 skipped');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '3 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('3 içe aktarıldı, 0 atlandı');
 
     const txs = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     const summary = txs
@@ -130,14 +130,12 @@ test.describe('CSV import', () => {
         '"20250125","Werkgever BV","NL01INGB0001234567","Bij","2500,00","Salaris"\r\n',
     );
 
-    await expect(dialog.getByRole('combobox', { name: 'Column Af Bij' })).toHaveValue('direction');
-    await expect(dialog.getByRole('combobox', { name: 'Column Bedrag (EUR)' })).toHaveValue(
-      'amount',
-    );
-    await expect(dialog.getByRole('combobox', { name: 'Amounts' })).toHaveValue('comma');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await expect(dialog.getByRole('combobox', { name: 'SütunAf Bij' })).toHaveValue('direction');
+    await expect(dialog.getByRole('combobox', { name: 'SütunBedrag (EUR)' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
 
     const txs = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     const summary = txs
@@ -155,16 +153,16 @@ test.describe('CSV import', () => {
     // 01.02.2025 could be January 2 or 1 February; 1.234 could be 1234 or 1.234
     const dialog = await importCsv(page, 'Date;Description;Amount\r\n01.02.2025;Rent;-1.234\r\n');
 
-    await expect(dialog).toContainText('Choose the format your bank uses');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await expect(dialog).toContainText('Choose how this file writes dates');
+    await expect(dialog).toContainText('Bankanızın kullandığı biçimi seçin');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await expect(dialog).toContainText('Bu dosyanın tarihleri nasıl yazdığını seçin');
 
-    await dialog.getByRole('combobox', { name: 'Dates' }).selectOption('dmy');
-    await dialog.getByRole('combobox', { name: 'Amounts' }).selectOption('comma');
-    await expect(dialog).not.toContainText('Choose the format your bank uses');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await expect(dialog).toContainText('1 imported, 0 skipped');
+    await dialog.getByRole('combobox', { name: 'Tarihler' }).selectOption('dmy');
+    await dialog.getByRole('combobox', { name: 'Tutarlar' }).selectOption('comma');
+    await expect(dialog).not.toContainText('Bankanızın kullandığı biçimi seçin');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
 
     const [tx] = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     expect([tx.date, tx.amount]).toEqual(['2025-02-01', -123_400]);
@@ -176,27 +174,27 @@ test.describe('CSV import', () => {
     // Every day is 12 or less, and 1.234 could be either: the first import has to ask
     const csv = (rows: string) => `Datum;Empfänger;Betrag\r\n${rows}`;
     let dialog = await importCsv(page, csv('01.02.2025;Miete;-1.234\r\n'));
-    await dialog.getByRole('combobox', { name: 'Dates' }).selectOption('dmy');
-    await dialog.getByRole('combobox', { name: 'Amounts' }).selectOption('comma');
-    await dialog.getByRole('combobox', { name: 'Column Empfänger' }).selectOption('notes');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('combobox', { name: 'Tarihler' }).selectOption('dmy');
+    await dialog.getByRole('combobox', { name: 'Tutarlar' }).selectOption('comma');
+    await dialog.getByRole('combobox', { name: 'SütunEmpfänger' }).selectOption('notes');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     // Next month's file is just as ambiguous, but this account has answered before
     dialog = await importCsv(page, csv('03.04.2025;Miete;-1.234\r\n'));
-    await expect(dialog).toContainText('Using the settings from your last import');
-    await expect(dialog).not.toContainText('Choose the format your bank uses');
+    await expect(dialog).toContainText('Bu hesaba son içe aktarmanızdaki ayarlar kullanılıyor');
+    await expect(dialog).not.toContainText('Bankanızın kullandığı biçimi seçin');
     await expect(dialog).toContainText(
-      "This file doesn't show how it writes dates or amounts: using DD/MM/YYYY and 1.234,56, " +
-        'as in your last import into this account.',
+      'Bu dosya tarihleri ya da tutarları nasıl yazdığını göstermiyor: bu hesaba son içe ' +
+        'aktarmanızdaki gibi GG/AA/YYYY ve 1.234,56 kullanılıyor.',
     );
-    await expect(dialog.getByRole('combobox', { name: 'Dates' })).toHaveValue('dmy');
-    await expect(dialog.getByRole('combobox', { name: 'Amounts' })).toHaveValue('comma');
-    await expect(dialog.getByRole('combobox', { name: 'Column Empfänger' })).toHaveValue('notes');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await expect(dialog).toContainText('1 imported, 0 skipped');
+    await expect(dialog.getByRole('combobox', { name: 'Tarihler' })).toHaveValue('dmy');
+    await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
+    await expect(dialog.getByRole('combobox', { name: 'SütunEmpfänger' })).toHaveValue('notes');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
 
     const txs = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     expect(txs.map((t) => [t.date, t.amount, t.notes]).sort()).toEqual([
@@ -220,14 +218,14 @@ test.describe('CSV import', () => {
         '"20.01.2025";"Arbeitgeber";"Gehalt";"2.500,00";\r\n',
     );
 
-    await expect(dialog.getByRole('spinbutton', { name: 'Rows above the header' })).toHaveValue(
-      '3',
-    );
-    await expect(dialog).toContainText('Found 2 rows');
-    await expect(dialog.getByRole('combobox', { name: 'Column Betrag' })).toHaveValue('amount');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await expect(
+      dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }),
+    ).toHaveValue('3');
+    await expect(dialog).toContainText('2 satır bulundu');
+    await expect(dialog.getByRole('combobox', { name: 'SütunBetrag' })).toHaveValue('amount');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
     expect(await api.balance(checking.id)).toBe(249_550);
   });
 
@@ -238,22 +236,22 @@ test.describe('CSV import', () => {
     const header = Buffer.from('Data;Opis;Kwota\r\n2025-01-15;', 'latin1');
     const lodz = Buffer.from([0xa3, 0xf3, 0x64, 0x9f]);
     const rest = Buffer.from(';-12,50\r\n', 'latin1');
-    await page.getByRole('button', { name: 'Import CSV' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-    await dialog.getByLabel('Bank file').setInputFiles({
+    await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+    const dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+    await dialog.getByLabel('Banka dosyası').setInputFiles({
       name: 'wyciag.csv',
       mimeType: 'text/csv',
       buffer: Buffer.concat([header, lodz, rest]),
     });
 
-    await dialog.getByRole('combobox', { name: 'Column Opis' }).selectOption('payee');
-    await dialog.getByRole('combobox', { name: 'Encoding' }).selectOption('windows-1250');
+    await dialog.getByRole('combobox', { name: 'SütunOpis' }).selectOption('payee');
+    await dialog.getByRole('combobox', { name: 'Karakter kodlaması' }).selectOption('windows-1250');
     // Reading the file again in another encoding keeps the mapping
-    await expect(dialog.getByRole('combobox', { name: 'Column Opis' })).toHaveValue('payee');
+    await expect(dialog.getByRole('combobox', { name: 'SütunOpis' })).toHaveValue('payee');
     await expect(dialog.getByRole('cell', { name: 'Łódź' })).toBeVisible();
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await expect(dialog).toContainText('1 imported, 0 skipped');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
 
     const [tx] = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     expect([tx.payeeName, tx.amount]).toEqual(['Łódź', -1_250]);
@@ -268,15 +266,15 @@ test.describe('CSV import', () => {
         '2025-01-15,Albert Heijn,Uit,"12,50"\r\n' +
         '2025-01-25,Werkgever,In,"2500,00"\r\n',
     );
-    await dialog.getByRole('combobox', { name: 'Column Richting' }).selectOption('direction');
-    await expect(dialog).toContainText('doesn\'t know what "Uit"');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await expect(dialog).toContainText('Type the word your bank uses for money going out');
+    await dialog.getByRole('combobox', { name: 'SütunRichting' }).selectOption('direction');
+    await expect(dialog).toContainText('anlamını bilmiyor: "Uit"');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await expect(dialog).toContainText('Bankanızın para çıkışı için kullandığı kelimeyi yazın');
 
-    await dialog.getByRole('textbox', { name: 'Word for money out' }).fill('Uit');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await dialog.getByRole('textbox', { name: 'Para çıkışını belirten kelime' }).fill('Uit');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
     expect(await api.balance(checking.id)).toBe(248_750);
   });
 
@@ -310,9 +308,9 @@ test.describe('CSV import', () => {
   ${entry('A3', '99.00', 'DBIT', 'PDNG', '2025-01-30', 'Pending Shop')}
 </Stmt></BkToCstmrStmt></Document>`;
     const importStatement = async () => {
-      await page.getByRole('button', { name: 'Import CSV' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-      await dialog.getByLabel('Bank file').setInputFiles({
+      await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+      const dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+      await dialog.getByLabel('Banka dosyası').setInputFiles({
         name: 'statement.xml',
         mimeType: 'application/xml',
         buffer: Buffer.from(statement, 'utf8'),
@@ -322,11 +320,11 @@ test.describe('CSV import', () => {
 
     let dialog = await importStatement();
     // No columns to map: straight to the preview
-    await expect(dialog).toContainText('2 transactions found. 0 duplicates detected.');
-    await expect(dialog).toContainText("1 entry is pending or couldn't be read");
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await expect(dialog).toContainText('2 işlem bulundu. 0 yinelenen işlem algılandı.');
+    await expect(dialog).toContainText('1 kayıt beklemede ya da okunamadı');
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     const txs = await api.transactions(`?account_id=${checking.id}&from=2025-01-01`);
     expect(txs.map((t) => [t.date, t.payeeName, t.amount, t.notes]).sort()).toEqual([
@@ -335,7 +333,7 @@ test.describe('CSV import', () => {
     ]);
 
     dialog = await importStatement();
-    await expect(dialog).toContainText('2 transactions found. 2 duplicates detected. 0 will be');
+    await expect(dialog).toContainText('2 işlem bulundu. 2 yinelenen işlem algılandı. 0 işlem');
     await expect(dialog.getByRole('alert')).toHaveCount(0);
   });
 
@@ -349,21 +347,21 @@ test.describe('CSV import', () => {
     <Sts>BOOK</Sts><BookgDt><Dt>2025-02-03</Dt></BookgDt></Ntry>
 </Stmt></BkToCstmrStmt></Document>`;
     const importStatement = async (iban: string, ref: string) => {
-      await page.getByRole('button', { name: 'Import CSV' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-      await dialog.getByLabel('Bank file').setInputFiles({
+      await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+      const dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+      await dialog.getByLabel('Banka dosyası').setInputFiles({
         name: 'statement.xml',
         mimeType: 'application/xml',
         buffer: Buffer.from(statementFor(iban, ref), 'utf8'),
       });
-      await expect(dialog).toContainText('1 transactions found.');
+      await expect(dialog).toContainText('1 işlem bulundu.');
       return dialog;
     };
 
     let dialog = await importStatement('DE89370400440532013000', 'B1');
     await expect(dialog.getByRole('alert')).toHaveCount(0);
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     // The same account written in groups of four is the same account
     dialog = await importStatement('DE89 3704 0044 0532 0130 00', 'B2');
@@ -372,12 +370,12 @@ test.describe('CSV import', () => {
 
     dialog = await importStatement('NL91ABNA0417164300', 'B3');
     await expect(dialog.getByRole('alert')).toContainText(
-      'This statement is for account NL91ABNA0417164300, but the last statement imported into ' +
-        'this account was for DE89370400440532013000.',
+      'Bu ekstre NL91ABNA0417164300 hesabına ait, ancak bu hesaba en son içe aktarılan ekstre ' +
+        'DE89370400440532013000 hesabına aitti.',
     );
     // It's a warning: the import still goes ahead if it's meant
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await expect(dialog).toContainText('1 imported, 0 skipped');
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
   });
 
   test("a file with other columns doesn't inherit the last import's formats", async ({
@@ -387,17 +385,17 @@ test.describe('CSV import', () => {
     const checking = await api.createAccount('Checking', 0);
     await open(page, `/accounts/${checking.id}`);
     let dialog = await importCsv(page, 'Datum;Empfänger;Betrag\r\n01.02.2025;Miete;-1.234\r\n');
-    await dialog.getByRole('combobox', { name: 'Dates' }).selectOption('dmy');
-    await dialog.getByRole('combobox', { name: 'Amounts' }).selectOption('comma');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('combobox', { name: 'Tarihler' }).selectOption('dmy');
+    await dialog.getByRole('combobox', { name: 'Tutarlar' }).selectOption('comma');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     // A US export into the same account: just as ambiguous, but it may be another bank
     dialog = await importCsv(page, 'Date,Description,Amount\r\n03/04/2025,Rent,-1.234\r\n');
-    await expect(dialog).toContainText('Choose the format your bank uses');
-    await expect(dialog.getByRole('combobox', { name: 'Dates' })).toHaveValue('');
-    await expect(dialog.getByRole('combobox', { name: 'Amounts' })).toHaveValue('');
+    await expect(dialog).toContainText('Bankanızın kullandığı biçimi seçin');
+    await expect(dialog.getByRole('combobox', { name: 'Tarihler' })).toHaveValue('');
+    await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('');
   });
 
   test('a money-out word typed for one file never flips another file', async ({ page, api }) => {
@@ -407,11 +405,11 @@ test.describe('CSV import', () => {
       page,
       'Datum,Omschrijving,Richting,Bedrag\r\n2025-01-15,Albert Heijn,Uit,"12,50"\r\n',
     );
-    await dialog.getByRole('combobox', { name: 'Column Richting' }).selectOption('direction');
-    await dialog.getByRole('textbox', { name: 'Word for money out' }).fill('Uit');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 1 Transactions' }).click();
-    await dialog.getByRole('button', { name: 'Done' }).click();
+    await dialog.getByRole('combobox', { name: 'SütunRichting' }).selectOption('direction');
+    await dialog.getByRole('textbox', { name: 'Para çıkışını belirten kelime' }).fill('Uit');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
+    await dialog.getByRole('button', { name: 'Bitti' }).click();
 
     // Another export with other columns and the words FlyBudget knows
     dialog = await importCsv(
@@ -420,10 +418,12 @@ test.describe('CSV import', () => {
         '2025-02-15,Jumbo,Af,"20,00"\r\n' +
         '2025-02-25,Werkgever,Bij,"2500,00"\r\n',
     );
-    await expect(dialog.getByRole('textbox', { name: 'Word for money out' })).toHaveValue('');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await expect(
+      dialog.getByRole('textbox', { name: 'Para çıkışını belirten kelime' }),
+    ).toHaveValue('');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
     expect(await api.balance(checking.id)).toBe(-1_250 - 2_000 + 250_000);
   });
 
@@ -447,12 +447,12 @@ test.describe('CSV import', () => {
     await expect(dialog).toBeHidden();
     release();
 
-    await page.getByRole('button', { name: 'Import CSV' }).click();
-    dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-    await expect(dialog).toContainText('Drag and drop a file from your bank');
+    await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+    dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+    await expect(dialog).toContainText('Bankanızdan aldığınız bir dosyayı sürükleyip bırakın');
     // The abandoned file doesn't turn up later either
     await page.waitForTimeout(300);
-    await expect(dialog).not.toContainText('Map each column');
+    await expect(dialog).not.toContainText('Her sütunu bir alanla eşleştirin');
   });
 
   test('closing while importing starts the next import afresh', async ({ page, api }) => {
@@ -466,8 +466,8 @@ test.describe('CSV import', () => {
     });
 
     let dialog = await importCsv(page, BANK_CSV);
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 4 Transactions' }).click();
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '4 işlemi içe aktar' }).click();
     await dialog.getByRole('button', { name: 'Kapat' }).click();
     await expect(dialog).toBeHidden();
     const confirmed = page.waitForResponse('**/import/confirm');
@@ -478,10 +478,10 @@ test.describe('CSV import', () => {
     await expect
       .poll(async () => (await api.transactions(`?account_id=${checking.id}`)).length)
       .toBe(4);
-    await page.getByRole('button', { name: 'Import CSV' }).click();
-    dialog = page.getByRole('dialog', { name: 'Import Transactions' });
-    await expect(dialog).toContainText('Drag and drop a file from your bank');
-    await expect(dialog).not.toContainText('Import complete');
+    await page.getByRole('button', { name: 'CSV içe aktar' }).click();
+    dialog = page.getByRole('dialog', { name: 'İşlemleri İçe Aktar' });
+    await expect(dialog).toContainText('Bankanızdan aldığınız bir dosyayı sürükleyip bırakın');
+    await expect(dialog).not.toContainText('İçe aktarma tamamlandı');
   });
 
   test('changing the rows above the header keeps the columns mapped by hand', async ({
@@ -495,20 +495,20 @@ test.describe('CSV import', () => {
       page,
       'Export,of,transactions\r\nWhen,Text,Value\r\n2025-01-15,Bakery,-4.50\r\n2025-01-16,Rent,-900.00\r\n',
     );
-    await expect(dialog.getByRole('spinbutton', { name: 'Rows above the header' })).toHaveValue(
-      '0',
-    );
-    await dialog.getByRole('combobox', { name: 'Column Export' }).selectOption('date');
-    await dialog.getByRole('combobox', { name: 'Column of' }).selectOption('notes');
-    await dialog.getByRole('combobox', { name: 'Column transactions' }).selectOption('amount');
+    await expect(
+      dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }),
+    ).toHaveValue('0');
+    await dialog.getByRole('combobox', { name: 'SütunExport' }).selectOption('date');
+    await dialog.getByRole('combobox', { name: 'Sütunof' }).selectOption('notes');
+    await dialog.getByRole('combobox', { name: 'Sütuntransactions' }).selectOption('amount');
 
-    await dialog.getByRole('spinbutton', { name: 'Rows above the header' }).fill('1');
-    await expect(dialog.getByRole('combobox', { name: 'Column When' })).toHaveValue('date');
-    await expect(dialog.getByRole('combobox', { name: 'Column Text' })).toHaveValue('notes');
-    await expect(dialog.getByRole('combobox', { name: 'Column Value' })).toHaveValue('amount');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }).fill('1');
+    await expect(dialog.getByRole('combobox', { name: 'SütunWhen' })).toHaveValue('date');
+    await expect(dialog.getByRole('combobox', { name: 'SütunText' })).toHaveValue('notes');
+    await expect(dialog.getByRole('combobox', { name: 'SütunValue' })).toHaveValue('amount');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
   });
 
   test('a placeholder in the unused inflow or outflow column is read as empty', async ({
@@ -521,11 +521,11 @@ test.describe('CSV import', () => {
       page,
       'Date,Description,Debit,Credit\r\n2026-03-01,Coffee,4.50,-\r\n2026-03-02,Refund,n/a,10.00\r\n',
     );
-    await expect(dialog.getByRole('combobox', { name: 'Column Debit' })).toHaveValue('outflow');
-    await expect(dialog.getByRole('combobox', { name: 'Column Credit' })).toHaveValue('inflow');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await dialog.getByRole('button', { name: 'Import 2 Transactions' }).click();
-    await expect(dialog).toContainText('2 imported, 0 skipped');
+    await expect(dialog.getByRole('combobox', { name: 'SütunDebit' })).toHaveValue('outflow');
+    await expect(dialog.getByRole('combobox', { name: 'SütunCredit' })).toHaveValue('inflow');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
+    await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
     expect(await api.balance(checking.id)).toBe(-450 + 1_000);
   });
 
@@ -542,18 +542,20 @@ test.describe('CSV import', () => {
         '01/16/2025,Bakery,-7.25\r\n' +
         '01/17/2025,Hardware Store,N/A\r\n',
     );
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await expect(dialog).toContainText('2 transactions found.');
-    await expect(dialog.getByRole('status')).toContainText('1 row skipped: row 3, amount "N/A".');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await expect(dialog).toContainText('2 işlem bulundu.');
+    await expect(dialog.getByRole('status')).toContainText(
+      '1 satır atlandı: 3. satır, tutar "N/A".',
+    );
   });
 
   test('unreadable files explain what went wrong', async ({ page, api }) => {
     const checking = await api.createAccount('Checking', 0);
     await open(page, `/accounts/${checking.id}`);
     const dialog = await importCsv(page, 'Name,Notes\r\nfoo,bar\r\n');
-    await dialog.getByRole('combobox', { name: 'Column Name' }).selectOption('payee');
-    await dialog.getByRole('button', { name: 'Preview' }).click();
-    await expect(dialog).toContainText('Date column is required');
+    await dialog.getByRole('combobox', { name: 'SütunName' }).selectOption('payee');
+    await dialog.getByRole('button', { name: 'Önizle' }).click();
+    await expect(dialog).toContainText('Tarih sütunu gerekli');
     expect(await api.transactions(`?account_id=${checking.id}`)).toHaveLength(0);
   });
 });

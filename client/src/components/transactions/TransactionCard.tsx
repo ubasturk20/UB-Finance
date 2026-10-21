@@ -6,6 +6,7 @@ import { useAccountCurrency } from '../../hooks/useCurrency';
 import { ForeignValue } from '../currency/ForeignValue';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import type { Transaction, PayeeWithCount } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   tx: Transaction;
@@ -34,7 +35,7 @@ export function TransactionCard({
   const currencyOf = useAccountCurrency();
   const isTransfer = !!tx.transferTransactionId;
   const isSplit = tx.isParent === 1 && !!tx.children?.length;
-  const payeeName = tx.payeeName || (isTransfer ? 'Transfer' : '—');
+  const payeeName = tx.payeeName || (isTransfer ? t('tx.transfer') : '—');
   const payee = useMemo(
     () => (tx.payeeId ? payees.find((p) => p.id === tx.payeeId) : undefined),
     [payees, tx.payeeId],
@@ -42,11 +43,11 @@ export function TransactionCard({
 
   const category = isSplit ? (
     <span className="inline-flex items-center gap-1 text-brand-600">
-      <Split size={12} aria-hidden /> Split ({tx.children!.length})
+      <Split size={12} aria-hidden /> {t('tx.split', { count: tx.children!.length })}
     </span>
   ) : isTransfer ? (
     <span className="inline-flex items-center gap-1">
-      <ArrowLeftRight size={12} aria-hidden /> Transfer
+      <ArrowLeftRight size={12} aria-hidden /> {t('tx.transfer')}
     </span>
   ) : categoryEntry ? (
     <span>
@@ -54,7 +55,7 @@ export function TransactionCard({
       {categoryEntry.name}
     </span>
   ) : (
-    <span className="text-caution">Uncategorized</span>
+    <span className="text-caution">{t('tx.uncategorized')}</span>
   );
 
   return (
@@ -85,7 +86,11 @@ export function TransactionCard({
           <span className="truncate">{category}</span>
           {accountName && <span className="truncate">· {accountName}</span>}
           {tx.reconciled ? (
-            <Lock size={11} className="shrink-0 text-text-disabled" aria-label="Reconciled" />
+            <Lock
+              size={11}
+              className="shrink-0 text-text-disabled"
+              aria-label={t('tx.reconciled')}
+            />
           ) : null}
         </span>
         {tx.notes && <span className="text-xs text-text-tertiary truncate">{tx.notes}</span>}

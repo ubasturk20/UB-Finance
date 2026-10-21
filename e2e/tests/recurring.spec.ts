@@ -80,18 +80,18 @@ test.describe('recurring', () => {
 
     // A brand-new payee (creating it refreshes the payee list)
     await dialog.getByRole('textbox', { name: 'Payee' }).fill('Iron Temple Gym');
-    await dialog.getByRole('button', { name: /Create new merchant/ }).click();
+    await dialog.getByRole('button', { name: /Yeni alıcı oluştur/ }).click();
     await expect(dialog.getByRole('textbox', { name: 'Payee' })).toHaveValue('Iron Temple Gym');
     await expect(name).toHaveValue('Gym membership');
     await expect(account).toHaveValue(/.+/);
     await expect(account.locator('option:checked')).toHaveText('Savings');
 
     // A brand-new category: none of its buttons may submit the form
-    await dialog.getByRole('button', { name: /^Category:/ }).click();
-    await dialog.getByRole('button', { name: 'Create new category' }).click();
-    await dialog.getByRole('textbox', { name: 'New category name' }).fill('Fitness');
-    await dialog.getByRole('button', { name: 'Create', exact: true }).click();
-    await expect(dialog.getByRole('button', { name: 'Category: Fitness' })).toBeVisible();
+    await dialog.getByRole('button', { name: /^Kategori:/ }).click();
+    await dialog.getByRole('button', { name: 'Yeni kategori oluştur' }).click();
+    await dialog.getByRole('textbox', { name: 'Yeni kategori adı' }).fill('Fitness');
+    await dialog.getByRole('button', { name: 'Oluştur', exact: true }).click();
+    await expect(dialog.getByRole('button', { name: 'Kategori: Fitness' })).toBeVisible();
     await expect(dialog).toBeVisible();
     await expect(name).toHaveValue('Gym membership');
     await expect(account.locator('option:checked')).toHaveText('Savings');

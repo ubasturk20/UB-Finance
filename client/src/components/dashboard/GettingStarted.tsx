@@ -11,6 +11,7 @@ import { docsUrl } from '../../utils/project';
 import { AddAccountModal } from '../accounts/AddAccountModal';
 import { ExternalLink } from '../ui/ExternalLink';
 import { Card } from '../ui/Card';
+import { t } from '../../i18n';
 
 interface Step {
   id: string;
@@ -42,40 +43,40 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
   const steps: Step[] = [
     {
       id: 'account',
-      title: 'Add your first account',
-      description: 'A checking account, credit card or cash: anything that holds money.',
+      title: t('dash.start.account.title'),
+      description: t('dash.start.account.description'),
       done: (accounts.data?.length ?? 0) > 0,
-      action: { label: 'Add account', onClick: () => setAddAccountOpen(true) },
+      action: { label: t('dash.start.account.action'), onClick: () => setAddAccountOpen(true) },
     },
     {
       id: 'transactions',
-      title: 'Bring in your transactions',
-      description: 'Import a CSV file from your bank, connect a bank, or add them by hand.',
+      title: t('dash.start.transactions.title'),
+      description: t('dash.start.transactions.description'),
       done: (transactions.data?.length ?? 0) > 0,
       action: firstAccount
-        ? { label: 'Import or add', to: `/accounts/${firstAccount.id}` }
-        : { label: 'Connect a bank', to: '/settings?tab=connections' },
+        ? { label: t('dash.start.transactions.import'), to: `/accounts/${firstAccount.id}` }
+        : { label: t('dash.start.transactions.connect'), to: '/settings?tab=connections' },
     },
     {
       id: 'recurring',
-      title: 'Add your bills and paychecks',
-      description: 'See what’s due next and never miss a payment.',
+      title: t('dash.start.recurring.title'),
+      description: t('dash.start.recurring.description'),
       done: (schedules.data?.length ?? 0) > 0,
-      action: { label: 'Add recurring', to: '/recurring' },
+      action: { label: t('dash.start.recurring.action'), to: '/recurring' },
     },
     {
       id: 'budget',
-      title: 'Plan this month’s budget',
-      description: 'With your paychecks and bills in, give the rest of your money a job.',
+      title: t('dash.start.budget.title'),
+      description: t('dash.start.budget.description'),
       done: (budget.data ?? []).some((g) => g.categories.some((c) => c.budgeted !== 0)),
-      action: { label: 'Open budget', to: '/budget' },
+      action: { label: t('dash.start.budget.action'), to: '/budget' },
     },
     {
       id: 'rules',
-      title: 'Categorize automatically',
-      description: 'Rules sort new transactions for you, by payee, amount and more.',
+      title: t('dash.start.rules.title'),
+      description: t('dash.start.rules.description'),
       done: (rules.data?.length ?? 0) > 0,
-      action: { label: 'Create a rule', to: '/rules' },
+      action: { label: t('dash.start.rules.action'), to: '/rules' },
     },
   ];
 
@@ -87,15 +88,15 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
     <Card padding="none" className="overflow-hidden">
       <div className="flex items-start justify-between gap-3 px-5 pt-4">
         <div>
-          <h2 className="text-base font-semibold text-text">Get started with FlyBudget</h2>
+          <h2 className="text-base font-semibold text-text">{t('dash.start.title')}</h2>
           <p className="text-sm text-text-tertiary mt-0.5">
-            {doneCount} of {steps.length} done. Each step brings more of your dashboard to life.
+            {t('dash.start.progress', { done: doneCount, total: steps.length })}
           </p>
         </div>
         <button
           onClick={() => setHidden(true)}
-          aria-label="Hide getting started"
-          title="Hide getting started"
+          aria-label={t('dash.start.hide')}
+          title={t('dash.start.hide')}
           className="p-1.5 -mr-1.5 max-md:min-w-11 max-md:min-h-11 flex items-center justify-center rounded-md text-text-tertiary hover:bg-hover hover:text-text"
         >
           <X size={16} />
@@ -105,7 +106,7 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
       <div
         className="mx-5 mt-3 h-1.5 rounded-full bg-surface-alt overflow-hidden"
         role="progressbar"
-        aria-label="Getting started progress"
+        aria-label={t('dash.start.progressLabel')}
         aria-valuemin={0}
         aria-valuemax={steps.length}
         aria-valuenow={doneCount}
@@ -133,7 +134,7 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
                       : 'bg-surface-alt text-text-tertiary'
                 }`}
               >
-                {step.done ? <Check size={14} aria-label="Done" /> : i + 1}
+                {step.done ? <Check size={14} aria-label={t('dash.start.done')} /> : i + 1}
               </span>
               <div className="flex-1 min-w-0">
                 <p
@@ -152,12 +153,12 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
       </ol>
 
       <div className="px-5 py-3 border-t border-border-light text-xs text-text-tertiary">
-        Not sure where to begin?{' '}
+        {t('dash.start.notSure')}{' '}
         <ExternalLink
           href={docsUrl('getting-started')}
           className="font-medium text-brand-600 hover:text-brand-700"
         >
-          Read the getting started guide
+          {t('dash.start.guide')}
         </ExternalLink>
       </div>
 

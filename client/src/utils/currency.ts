@@ -11,6 +11,7 @@ import {
 import { useCurrencyStore } from '../store/currencyStore';
 import { CURRENCY_CODES, minorUnits } from './currencies';
 import { amountChars, readImportAmount } from './csv';
+import { t } from '../i18n';
 
 /** How amounts are shown and typed on this device */
 export interface AmountStyle {
@@ -337,7 +338,7 @@ export const parseAmount = (s: string, style: AmountStyle): number =>
   readTypedAmount(s, style) ?? 0;
 
 /** What an amount field says when it holds text that isn't an amount */
-export const UNREADABLE_AMOUNT = "That isn't an amount. Type it like 12.50 or 12,50.";
+export const UNREADABLE_AMOUNT = t('currency.unreadableAmount');
 
 /** Whether a field holds text that isn't an amount (an empty field is fine) */
 export const isUnreadableAmount = (s: string, style: AmountStyle = amountStyle()): boolean =>

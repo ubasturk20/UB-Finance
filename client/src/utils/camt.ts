@@ -1,5 +1,6 @@
 import { decodeCsvBytes, generateImportId, normalizeDate, readImportAmount } from './csv';
 import { minorUnits } from './currencies';
+import { t } from '../i18n';
 
 /**
  * ISO 20022 bank statements (CAMT.053, also the CAMT.052 report and CAMT.054 notification),
@@ -230,7 +231,8 @@ function readEntry(entry: Element): Draft[] | null {
       return parts.filter((p) => p.amount !== 0);
     }
     // The parts don't add up (or have no amounts): one transaction, as the account saw it
-    return [draft(date, amount, entryInfo, `${details.length} payments`, entryRef)];
+    const batchNotes = t('import.camt.payments', { count: details.length });
+    return [draft(date, amount, entryInfo, batchNotes, entryRef)];
   }
 
   const only = details[0] ?? null;

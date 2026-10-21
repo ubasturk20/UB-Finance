@@ -3,13 +3,13 @@ import { test, expect, open, isoDay, typeAmount } from './fixtures';
 test.describe('accounts', () => {
   test('a new user adds their first account from the welcome screen', async ({ page, api }) => {
     await open(page, '/dashboard');
-    await page.getByRole('button', { name: /Add accounts manually/ }).click();
+    await page.getByRole('button', { name: /Hesapları elle ekle/ }).click();
 
-    const dialog = page.getByRole('dialog', { name: 'Add Account' });
-    await dialog.getByRole('textbox', { name: 'Account name' }).fill('Chase Checking');
-    await dialog.getByRole('combobox', { name: 'Account type' }).selectOption('checking');
-    await dialog.getByRole('textbox', { name: 'Current Balance' }).fill('1234.56');
-    await dialog.getByRole('button', { name: 'Add Account' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
+    await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Chase Checking');
+    await dialog.getByRole('combobox', { name: 'Hesap türü' }).selectOption('checking');
+    await dialog.getByRole('textbox', { name: 'Güncel Bakiye' }).fill('1234.56');
+    await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
 
     await expect
       .poll(async () => (await api.accounts()).map((a) => a.name))
@@ -22,16 +22,20 @@ test.describe('accounts', () => {
 
   test('"Skip for now" opens the app, and it stays open after a reload', async ({ page }) => {
     await open(page, '/welcome');
-    await page.getByRole('button', { name: 'Skip for now and look around' }).click();
+    await page.getByRole('button', { name: 'Şimdilik geç ve etrafa göz at' }).click();
     await expect(page).toHaveURL(/#\/dashboard$/);
     await expect(
       page.getByRole('complementary').getByRole('link', { name: 'Bütçe' }),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: "UB-Finance'ı kullanmaya başlayın" }),
+    ).toBeVisible();
 
     await page.reload();
     await expect(page).toHaveURL(/#\/dashboard$/);
-    await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: "UB-Finance'ı kullanmaya başlayın" }),
+    ).toBeVisible();
   });
 
   test('the assets and liabilities summary lists only the kinds of accounts you have', async ({
@@ -41,26 +45,26 @@ test.describe('accounts', () => {
     await api.createAccount('Checking', 120_000);
     await open(page, '/accounts');
     const main = page.getByRole('main');
-    await expect(main.getByText('Assets', { exact: true })).toBeVisible();
+    await expect(main.getByText('Varlıklar', { exact: true })).toBeVisible();
     // No "0 ₺" rows for kinds of accounts that were never added
-    await expect(main.getByText('Investments', { exact: true })).toHaveCount(0);
-    await expect(main.getByText('Credit', { exact: true })).toHaveCount(0);
-    await expect(main.getByText('No credit cards or loans yet.')).toBeVisible();
+    await expect(main.getByText('Yatırımlar', { exact: true })).toHaveCount(0);
+    await expect(main.getByText('Kredi', { exact: true })).toHaveCount(0);
+    await expect(main.getByText('Henüz kredi kartı ya da kredi yok.')).toBeVisible();
 
-    await main.getByRole('link', { name: 'Add account' }).click();
-    await expect(page.getByRole('dialog', { name: 'Add Account' })).toBeVisible();
+    await main.getByRole('link', { name: 'Hesap ekle' }).click();
+    await expect(page.getByRole('dialog', { name: 'Hesap Ekle' })).toBeVisible();
   });
 
   test('investments, property and loans default to off budget', async ({ page, api }) => {
     await api.createAccount('Checking', 0);
     await open(page, '/accounts');
-    await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Add Account' });
-    await dialog.getByRole('textbox', { name: 'Account name' }).fill('Home');
-    await dialog.getByRole('combobox', { name: 'Account type' }).selectOption('real_estate');
-    await expect(dialog.getByRole('checkbox', { name: /Off budget/ })).toBeChecked();
-    await dialog.getByRole('textbox', { name: 'Current Value' }).fill('350000');
-    await dialog.getByRole('button', { name: 'Add Account' }).click();
+    await page.getByRole('main').getByRole('button', { name: 'Hesap Ekle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
+    await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Home');
+    await dialog.getByRole('combobox', { name: 'Hesap türü' }).selectOption('real_estate');
+    await expect(dialog.getByRole('checkbox', { name: /Bütçe dışı/ })).toBeChecked();
+    await dialog.getByRole('textbox', { name: 'Güncel Değer' }).fill('350000');
+    await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
     await expect(dialog).toBeHidden();
 
     await expect
@@ -71,18 +75,18 @@ test.describe('accounts', () => {
   test("a starting balance that isn't an amount can't be created as 0", async ({ page, api }) => {
     await api.createAccount('Checking', 0);
     await open(page, '/accounts');
-    await page.getByRole('main').getByRole('button', { name: 'Add Account' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Add Account' });
-    await dialog.getByRole('textbox', { name: 'Account name' }).fill('Girokonto');
-    const balance = dialog.getByRole('textbox', { name: 'Current Balance' });
+    await page.getByRole('main').getByRole('button', { name: 'Hesap Ekle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesap Ekle' });
+    await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Girokonto');
+    const balance = dialog.getByRole('textbox', { name: 'Güncel Bakiye' });
     await balance.fill('1.234.5');
     // Refused as soon as it's typed, before the field is left
-    await expect(dialog.getByRole('button', { name: 'Add Account' })).toBeDisabled();
+    await expect(dialog.getByRole('button', { name: 'Hesap Ekle' })).toBeDisabled();
     await balance.press('Enter');
     await expect(dialog).toBeVisible();
 
     await balance.fill('1.234,50');
-    await dialog.getByRole('button', { name: 'Add Account' }).click();
+    await dialog.getByRole('button', { name: 'Hesap Ekle' }).click();
     await expect(dialog).toBeHidden();
     await expect
       .poll(async () => (await api.accounts()).find((a) => a.name === 'Girokonto')?.balance)
@@ -98,10 +102,10 @@ test.describe('accounts', () => {
       payeeName: 'Rent',
     });
     await open(page, `/accounts/${account.id}`);
-    await page.getByRole('button', { name: 'Edit' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Edit Account' });
-    await dialog.getByRole('textbox', { name: 'Account name' }).fill('Joint Checking');
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Düzenle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesabı Düzenle' });
+    await dialog.getByRole('textbox', { name: 'Hesap adı' }).fill('Joint Checking');
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
 
     await expect(page.getByRole('heading', { level: 1, name: 'Joint Checking' })).toBeVisible();
     await expect(page.getByRole('main')).toContainText('2.376,55 ₺');
@@ -111,10 +115,10 @@ test.describe('accounts', () => {
   test('changing the starting balance moves the balance', async ({ page, api }) => {
     const account = await api.createAccount('Checking', 10_000);
     await open(page, `/accounts/${account.id}`);
-    await page.getByRole('button', { name: 'Edit' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Edit Account' });
-    await typeAmount(dialog.getByRole('textbox', { name: 'Starting balance' }), '500');
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Düzenle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesabı Düzenle' });
+    await typeAmount(dialog.getByRole('textbox', { name: 'Açılış bakiyesi' }), '500');
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect.poll(() => api.balance(account.id)).toBe(50_000);
   });
 
@@ -124,16 +128,16 @@ test.describe('accounts', () => {
   }) => {
     const account = await api.createAccount('Checking', 10_000);
     await open(page, `/accounts/${account.id}`);
-    await page.getByRole('button', { name: 'Edit' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Edit Account' });
-    const field = dialog.getByRole('textbox', { name: 'Starting balance' });
+    await page.getByRole('button', { name: 'Düzenle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Hesabı Düzenle' });
+    const field = dialog.getByRole('textbox', { name: 'Açılış bakiyesi' });
     await typeAmount(field, '12.5.0');
     await expect(field).toHaveAttribute('aria-invalid', 'true');
     await expect(field).toHaveValue('12.5.0');
     await expect(dialog.getByRole('alert')).toHaveText(
-      "That isn't an amount. Type it like 12.50 or 12,50.",
+      'Bu bir tutar değil. 12,50 ya da 12.50 gibi yazın.',
     );
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
     await expect.poll(() => api.balance(account.id)).toBe(10_000);
   });
 
@@ -141,19 +145,19 @@ test.describe('accounts', () => {
     await api.createAccount('Keep Me', 100);
     const account = await api.createAccount('Old Card', -500, 'credit');
     await open(page, `/accounts/${account.id}`);
-    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('button', { name: 'Düzenle' }).click();
     await page
-      .getByRole('dialog', { name: 'Edit Account' })
-      .getByRole('button', { name: 'Close Account' })
+      .getByRole('dialog', { name: 'Hesabı Düzenle' })
+      .getByRole('button', { name: 'Hesabı Kapat' })
       .click();
     await page
-      .getByRole('dialog', { name: 'Close Account' })
-      .getByRole('button', { name: 'Close Account' })
+      .getByRole('dialog', { name: 'Hesabı Kapat' })
+      .getByRole('button', { name: 'Hesabı Kapat' })
       .click();
 
     await expect.poll(async () => (await api.accounts()).map((a) => a.name)).toEqual(['Keep Me']);
     await open(page, '/accounts');
-    await expect(page.getByRole('heading', { level: 1, name: 'Accounts' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Hesaplar' })).toBeVisible();
     await expect(page.getByText('Old Card')).toBeHidden();
   });
 
@@ -161,14 +165,18 @@ test.describe('accounts', () => {
     await api.createAccount('Checking', 0);
     const brokerage = await api.createAccount('Brokerage', 1_000_000, 'investment');
     await open(page, `/accounts/${brokerage.id}`);
-    await page.getByRole('button', { name: 'Update value' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Update Value' });
-    await typeAmount(dialog.getByRole('textbox', { name: 'Value today' }), '10500');
-    await dialog.getByRole('button', { name: /Save|Update/ }).click();
+    await page.getByRole('button', { name: 'Değeri güncelle' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Değeri Güncelle' });
+    await typeAmount(dialog.getByRole('textbox', { name: 'Bugünkü değer' }), '10500');
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
 
     await expect.poll(() => api.balance(brokerage.id)).toBe(1_050_000);
     const [adjustment] = await api.transactions(`?account_id=${brokerage.id}`);
-    expect(adjustment).toMatchObject({ amount: 50_000, notes: 'Value update', isAdjustment: 1 });
+    expect(adjustment).toMatchObject({
+      amount: 50_000,
+      notes: 'Değer güncellemesi',
+      isAdjustment: 1,
+    });
 
     // A change in value isn't money earned or spent: reports leave it out
     await open(page, '/reports');
@@ -184,8 +192,8 @@ test.describe('accounts', () => {
     await open(page, '/accounts');
     const main = page.getByRole('main');
     await expect(main).toContainText(/Net Worth\s*-9\.450\s₺/);
-    await expect(main).toContainText(/Assets\s*3\.000\s₺/);
-    await expect(main).toContainText(/Liabilities\s*-12\.450\s₺/);
-    await expect(main).toContainText(/Loans\s*-12\.000\s₺/);
+    await expect(main).toContainText(/Varlıklar\s*3\.000\s₺/);
+    await expect(main).toContainText(/Borçlar\s*-12\.450\s₺/);
+    await expect(main).toContainText(/Krediler\s*-12\.000\s₺/);
   });
 });

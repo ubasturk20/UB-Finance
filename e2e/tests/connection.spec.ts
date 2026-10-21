@@ -61,7 +61,7 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
   await expect(planned).toBeEnabled();
   await open(page, `/accounts/${account.id}`);
   await expect(page.getByText('Corner Grocery')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Add Transaction' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'İşlem ekle' })).toBeEnabled();
 
   await stopDesktopServer();
   try {
@@ -86,14 +86,14 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
     await page.evaluate((id) => (window.location.hash = `#/accounts/${id}`), account.id);
     await expect(page.getByText('Corner Grocery')).toBeVisible();
     // A new transaction is kept on this device until the server is back
-    await page.getByRole('button', { name: 'Add Transaction' }).click();
-    const form = page.getByRole('form', { name: 'New transaction' });
-    await form.getByRole('textbox', { name: 'Payee' }).fill('Coffee Cart');
-    await form.getByRole('textbox', { name: 'Outflow' }).fill('4.75');
-    await form.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'İşlem ekle' }).click();
+    const form = page.getByRole('form', { name: 'Yeni işlem' });
+    await form.getByRole('textbox', { name: 'Alıcı' }).fill('Coffee Cart');
+    await form.getByRole('textbox', { name: 'Çıkış' }).fill('4.75');
+    await form.getByRole('button', { name: 'Kaydet' }).click();
     await expect(form).toBeHidden();
     await expect(
-      page.getByRole('region', { name: 'Saved on this device' }).getByTestId('waiting-transaction'),
+      page.getByRole('region', { name: 'Bu cihaza kaydedildi' }).getByTestId('waiting-transaction'),
     ).toContainText('Coffee Cart');
     await expect(banner).toContainText('1 işlem gönderilmeyi bekliyor');
   } finally {
@@ -111,7 +111,7 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
   );
   await expect(page.getByRole('button', { name: /^Sunucu durumu: Çevrimiçi/ })).toBeVisible();
   // The waiting transaction was sent, once
-  await expect(page.getByRole('region', { name: 'Saved on this device' })).toBeHidden();
+  await expect(page.getByRole('region', { name: 'Bu cihaza kaydedildi' })).toBeHidden();
   await expect(
     page.getByTestId('transaction-row').filter({ hasText: 'Coffee Cart' }),
   ).toBeVisible();

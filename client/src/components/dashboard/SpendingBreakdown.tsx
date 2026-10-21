@@ -7,6 +7,7 @@ import { PieChart } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/EmptyState';
 import { CATEGORY_COLORS } from '../../utils/chartColors';
+import { t } from '../../i18n';
 
 interface Props {
   currentMonth: string;
@@ -45,9 +46,9 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
   return (
     <Card className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text">Spending by Category</h3>
+        <h3 className="text-sm font-semibold text-text">{t('dash.breakdown.title')}</h3>
         <Link to="/reports" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
-          View all
+          {t('dash.viewAll')}
         </Link>
       </div>
 
@@ -56,8 +57,8 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
           compact
           className="flex-1 justify-center"
           icon={<PieChart size={20} />}
-          title="No spending this month"
-          description="As you spend, your biggest categories show up here."
+          title={t('dash.breakdown.emptyTitle')}
+          description={t('dash.breakdown.emptyDescription')}
         />
       ) : (
         <div className="space-y-2.5">
@@ -69,7 +70,7 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-sm text-text-secondary truncate mr-2">
                     {showCategoryIcons && cat.categoryIcon ? `${cat.categoryIcon} ` : ''}
-                    {cat.categoryName || 'Uncategorized'}
+                    {cat.categoryName || t('dash.breakdown.uncategorized')}
                   </span>
                   <span className="text-xs text-text-tertiary tabular-nums whitespace-nowrap">
                     {formatCurrency(cat.amount)}

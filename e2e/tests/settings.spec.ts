@@ -166,11 +166,11 @@ test.describe('preferences', () => {
       ['12,50', -1_250],
       ['7.25', -725],
     ] as const) {
-      await page.getByRole('button', { name: 'Add Transaction' }).click();
-      const form = page.getByRole('form', { name: 'New transaction' });
-      await form.getByRole('textbox', { name: 'Payee' }).fill(`Bäckerei ${typed}`);
-      await form.getByRole('textbox', { name: 'Outflow' }).fill(typed);
-      await form.getByRole('button', { name: 'Save' }).click();
+      await page.getByRole('button', { name: 'İşlem ekle' }).click();
+      const form = page.getByRole('form', { name: 'Yeni işlem' });
+      await form.getByRole('textbox', { name: 'Alıcı' }).fill(`Bäckerei ${typed}`);
+      await form.getByRole('textbox', { name: 'Çıkış' }).fill(typed);
+      await form.getByRole('button', { name: 'Kaydet' }).click();
       await expect(register).toContainText(`Bäckerei ${typed}`);
       const txs = await api.transactions(`?account_id=${girokonto.id}`);
       expect(txs.find((t) => t.payeeName === `Bäckerei ${typed}`)?.amount).toBe(cents);

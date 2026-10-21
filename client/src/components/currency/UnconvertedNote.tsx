@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { t } from '../../i18n';
 
 /**
  * Under a total that left accounts out because their currency has no rate yet: says which,
@@ -18,12 +19,12 @@ export function UnconvertedNote({
   const Tag = link ? 'p' : 'span';
   return (
     <Tag className={`block text-xs text-caution ${className}`}>
-      Without {currencies.join(', ')}: no exchange rate yet.
+      {t('currency.unconverted', { currencies: currencies.join(', ') })}
       {link && (
         <>
           {' '}
           <Link to="/settings?tab=currencies" className="underline hover:no-underline">
-            Add a rate
+            {t('currency.addRate')}
           </Link>
         </>
       )}

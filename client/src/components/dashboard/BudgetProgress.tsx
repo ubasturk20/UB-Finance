@@ -9,6 +9,7 @@ import { EmptyState } from '../ui/EmptyState';
 import { ButtonLink } from '../ui/Button';
 import { docsUrl } from '../../utils/project';
 import type { BudgetType } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   currentMonth: string;
@@ -30,17 +31,19 @@ export default function BudgetProgress({ currentMonth }: Props) {
 
   const groupStats = useMemo(() => {
     const types: { key: BudgetType; name: string }[] = [
-      { key: 'fixed', name: 'Fixed' },
-      { key: 'flexible', name: 'Flexible' },
-      { key: 'non_monthly', name: 'Non-Monthly' },
+      { key: 'fixed', name: t('settings.categories.type.fixed') },
+      { key: 'flexible', name: t('settings.categories.type.flexible') },
+      { key: 'non_monthly', name: t('settings.categories.type.nonMonthly') },
     ];
     const allCats = groups.filter((g) => !g.isIncome).flatMap((g) => g.categories);
     return types
-      .map((t) => ({
-        id: t.key,
-        name: t.name,
-        planned: allCats.filter((c) => c.budgetType === t.key).reduce((s, c) => s + c.budgeted, 0),
-        spent: allCats.filter((c) => c.budgetType === t.key).reduce((s, c) => s + c.spent, 0),
+      .map((type) => ({
+        id: type.key,
+        name: type.name,
+        planned: allCats
+          .filter((c) => c.budgetType === type.key)
+          .reduce((s, c) => s + c.budgeted, 0),
+        spent: allCats.filter((c) => c.budgetType === type.key).reduce((s, c) => s + c.spent, 0),
       }))
       .filter((g) => g.planned > 0);
   }, [groups]);
@@ -69,7 +72,7 @@ export default function BudgetProgress({ currentMonth }: Props) {
     <Card>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <h3 className="text-base font-bold text-text">Budget</h3>
+          <h3 className="text-base font-bold text-text">{t('dash.budget.title')}</h3>
           <Link to="/budget" className="text-sm text-text-tertiary hover:text-text-secondary">
             {monthLabel}
           </Link>
@@ -80,12 +83,12 @@ export default function BudgetProgress({ currentMonth }: Props) {
         <EmptyState
           compact
           icon={<Wallet size={20} />}
-          title={`No budget for ${monthLabel} yet`}
-          description="Set how much you plan to spend in each category, then watch your progress here."
+          title={t('dash.budget.emptyTitle', { month: monthLabel })}
+          description={t('dash.budget.emptyDescription')}
           learnMoreHref={docsUrl('budgeting')}
           actions={
             <ButtonLink size="sm" to="/budget">
-              Plan your budget
+              {t('dash.budget.plan')}
             </ButtonLink>
           }
         />
@@ -101,7 +104,7 @@ export default function BudgetProgress({ currentMonth }: Props) {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-text">{g.name}</span>
                   <span className="text-sm text-text-tertiary tabular-nums">
-                    {formatCurrency(g.planned)} planned
+                    {t('dash.budget.planned', { amount: formatCurrency(g.planned) })}
                   </span>
                 </div>
 
@@ -129,7 +132,7 @@ export default function BudgetProgress({ currentMonth }: Props) {
 
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-sm text-text-tertiary tabular-nums">
-                    {formatCurrency(g.spent)} spent
+                    {t('dash.budget.spent', { amount: formatCurrency(g.spent) })}
                   </span>
                   <span
                     className={`text-sm font-medium tabular-nums ${
@@ -140,8 +143,9 @@ export default function BudgetProgress({ currentMonth }: Props) {
                           : 'text-positive'
                     }`}
                   >
-                    {status === 'over' ? '-' : ''}
-                    {formatCurrency(Math.abs(remaining))} remaining
+                    {t('dash.budget.remaining', {
+                      amount: (status === 'over' ? '-' : '') + formatCurrency(Math.abs(remaining)),
+                    })}
                   </span>
                 </div>
               </div>

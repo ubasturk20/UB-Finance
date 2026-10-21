@@ -29,6 +29,7 @@ import NetWorthMini from '../components/dashboard/NetWorthMini';
 import { ACCOUNT_GROUPS, type Account, type AccountGroup } from '../types';
 import { AccountIcon } from '../components/accounts/AccountIcon';
 import { accountTypeInfo, accountTypeLabel } from '../utils/accountTypes';
+import { formatPercent, t } from '../i18n';
 
 function groupAccountsByType(accounts: Account[]) {
   const groups = new Map<AccountGroup, Account[]>();
@@ -83,10 +84,10 @@ function AccountGroup({ label, accounts, balancesAgo }: AccountGroupProps) {
             >
               {change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
               {change >= 0 ? '+' : ''}
-              {formatCurrency(change)} ({Math.abs(changePct).toFixed(1)}%)
+              {formatCurrency(change)} ({formatPercent(Math.abs(changePct) / 100)})
             </span>
           )}
-          <span className="text-xs text-text-tertiary">past month</span>
+          <span className="text-xs text-text-tertiary">{t('acc.pastMonth')}</span>
         </div>
         <span className="text-right">
           <span
@@ -166,9 +167,9 @@ export default function AccountsPage() {
   return (
     <div className="flex flex-col h-full bg-surface">
       <div className="px-6 py-4 border-b border-border shrink-0 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-text">Accounts</h1>
+        <h1 className="text-lg font-semibold text-text">{t('acc.page.title')}</h1>
         <Button size="sm" onClick={() => setAddOpen(true)}>
-          <Plus size={14} /> Add Account
+          <Plus size={14} /> {t('acc.add')}
         </Button>
       </div>
 
@@ -176,16 +177,16 @@ export default function AccountsPage() {
         <div className="flex-1 flex items-center justify-center overflow-y-auto">
           <EmptyState
             icon={<Landmark size={26} />}
-            title="Add the accounts you want to track"
-            description="Checking, savings, credit cards, loans, investments or your home: each account keeps its own balance and transactions, and together they make up your net worth."
+            title={t('acc.empty.title')}
+            description={t('acc.empty.description')}
             learnMoreHref={docsUrl('accounts')}
             actions={
               <>
                 <Button onClick={() => setAddOpen(true)}>
-                  <Plus size={14} /> Add your first account
+                  <Plus size={14} /> {t('acc.empty.addFirst')}
                 </Button>
                 <ButtonLink variant="secondary" to="/settings?tab=connections">
-                  <Link2 size={14} /> Connect a bank
+                  <Link2 size={14} /> {t('acc.empty.connectBank')}
                 </ButtonLink>
               </>
             }

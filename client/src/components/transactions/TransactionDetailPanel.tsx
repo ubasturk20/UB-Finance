@@ -18,6 +18,7 @@ import { formatMoney } from '../../utils/currency';
 import { useAccountCurrency } from '../../hooks/useCurrency';
 import { MainAmountField } from '../currency/MainAmountField';
 import { RECURRENCE_TYPE_LABELS } from '../../types';
+import { t } from '../../i18n';
 import type {
   Transaction,
   CategoryGroup,
@@ -90,7 +91,7 @@ export function TransactionDetailPanel({
   const isSplitParent = tx.isParent === 1 && tx.children && tx.children.length > 0;
   const canEditCategory = !isReconciled && !isTransfer && !isSplitParent;
 
-  const payeeName = tx.payeeName || (isTransfer ? 'Transfer' : '—');
+  const payeeName = tx.payeeName || (isTransfer ? t('txd.transfer') : '—');
   const payee = tx.payeeId ? payees.find((p) => p.id === tx.payeeId) : undefined;
   const categoryEntry = tx.categoryId ? (categoryMap.get(tx.categoryId) ?? null) : null;
   // Making or undoing a transfer needs the server: not offered while saving is paused, and a
@@ -160,15 +161,15 @@ export function TransactionDetailPanel({
 
   return (
     <aside
-      aria-label="Transaction details"
+      aria-label={t('txd.panel.label')}
       // Phones: a full-screen sheet over the register (see TransactionTable)
       className="w-96 max-md:w-screen max-md:max-w-full max-md:border-l-0 shrink-0 border-l border-border bg-surface flex flex-col h-full max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]"
     >
       <div className="px-5 py-3 border-b border-border flex items-center justify-between">
-        <span className="text-sm font-medium text-text-secondary">Transaction Details</span>
+        <span className="text-sm font-medium text-text-secondary">{t('txd.panel.title')}</span>
         <button
           onClick={onClose}
-          aria-label="Close details"
+          aria-label={t('txd.panel.close')}
           className="p-1 max-md:min-w-11 max-md:min-h-11 max-md:-mr-2 flex items-center justify-center rounded hover:bg-hover text-text-tertiary hover:text-text-secondary"
         >
           <X size={16} />
@@ -207,15 +208,17 @@ export function TransactionDetailPanel({
         {isReconciled && (
           <div className="flex items-center gap-2 px-3 py-2 bg-surface-alt rounded-lg text-text-tertiary text-xs">
             <Lock size={12} />
-            <span>This transaction is reconciled and cannot be edited.</span>
+            <span>{t('txd.panel.reconciled')}</span>
           </div>
         )}
 
         <div>
-          <label className="text-xs font-medium text-text-secondary mb-1.5 block">Date</label>
+          <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+            {t('txd.panel.date')}
+          </label>
           <input
             type="date"
-            aria-label="Date"
+            aria-label={t('txd.panel.date')}
             value={localDate}
             onChange={(e) => setLocalDate(e.target.value)}
             onBlur={saveDate}
@@ -227,11 +230,13 @@ export function TransactionDetailPanel({
         <MainAmountField tx={tx} disabled={isReconciled} />
 
         <div>
-          <label className="text-xs font-medium text-text-secondary mb-1.5 block">Category</label>
+          <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+            {t('txd.panel.category')}
+          </label>
           {isSplitParent ? (
             <div className="space-y-2">
               <div className="text-sm text-brand-600 font-medium">
-                Split ({tx.children!.length})
+                {t('txd.panel.split', { count: tx.children!.length })}
               </div>
               {tx.children!.map((child) => {
                 const childCat = child.categoryId ? categoryMap.get(child.categoryId) : null;
@@ -242,7 +247,7 @@ export function TransactionDetailPanel({
                         <span className="text-sm">{childCat.icon}</span>
                       )}
                       <span className="text-text-secondary">
-                        {childCat?.name ?? 'Uncategorized'}
+                        {childCat?.name ?? t('txd.uncategorized')}
                       </span>
                     </div>
                     <span className="tabular-nums text-text-tertiary">
@@ -255,7 +260,7 @@ export function TransactionDetailPanel({
           ) : isTransfer ? (
             <div className="flex items-center gap-2">
               <div className="flex-1 min-w-0 truncate text-sm text-brand-500 px-3 py-2 border border-border rounded-lg bg-surface-alt">
-                {tx.payeeName || 'Transfer'}
+                {tx.payeeName || t('txd.transfer')}
               </div>
               {!isReconciled && (
                 <Button
@@ -263,10 +268,10 @@ export function TransactionDetailPanel({
                   size="sm"
                   onClick={() => unlinkTransfer.mutate(tx)}
                   disabled={!canSave || unlinkTransfer.isPending}
-                  title="Make both sides ordinary transactions again"
+                  title={t('txd.panel.notTransferHint')}
                 >
                   <Unlink size={13} />
-                  Not a transfer
+                  {t('txd.panel.notTransfer')}
                 </Button>
               )}
             </div>
@@ -281,7 +286,7 @@ export function TransactionDetailPanel({
                   <span className="text-base">{categoryEntry.icon}</span>
                 )}
                 <span className={categoryEntry ? '' : 'text-text-tertiary'}>
-                  {categoryEntry?.name ?? 'Uncategorized'}
+                  {categoryEntry?.name ?? t('txd.uncategorized')}
                 </span>
               </button>
               {showCategoryPicker && (
@@ -299,7 +304,9 @@ export function TransactionDetailPanel({
 
         {!isTransfer && (
           <div>
-            <label className="text-xs font-medium text-text-secondary mb-1.5 block">Payee</label>
+            <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+              {t('txd.panel.payee')}
+            </label>
             <div onBlur={savePayeeOnBlur}>
               <PayeeCombobox
                 value={localPayee}
@@ -312,14 +319,16 @@ export function TransactionDetailPanel({
         )}
 
         <div>
-          <label className="text-xs font-medium text-text-secondary mb-1.5 block">Notes</label>
+          <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+            {t('txd.panel.notes')}
+          </label>
           <textarea
             value={localNotes}
             onChange={(e) => setLocalNotes(e.target.value)}
             onBlur={saveNotes}
             disabled={isReconciled}
-            placeholder="Add notes to this transaction..."
-            aria-label="Notes"
+            placeholder={t('txd.panel.notesPlaceholder')}
+            aria-label={t('txd.panel.notes')}
             rows={3}
             className={`${inputCls} resize-none`}
           />
@@ -328,7 +337,7 @@ export function TransactionDetailPanel({
         {linkedSchedule && (
           <div>
             <label className="text-xs font-medium text-text-secondary mb-1.5 block">
-              Recurring
+              {t('txd.panel.recurring')}
             </label>
             <div className="flex items-center gap-3 px-3 py-2.5 bg-surface-alt rounded-lg border border-border-light">
               <Repeat size={14} className="text-brand-600 shrink-0" />
@@ -342,7 +351,7 @@ export function TransactionDetailPanel({
                 <button
                   onClick={() => unmatchByTx.mutate(tx.id)}
                   className="p-1 rounded text-text-tertiary hover:text-caution hover:bg-caution-subtle transition-colors"
-                  title="Unlink from recurring"
+                  title={t('txd.panel.unlinkRecurring')}
                 >
                   <Unlink size={14} />
                 </button>
@@ -356,13 +365,13 @@ export function TransactionDetailPanel({
         {!isTransfer && (
           <Button variant="secondary" onClick={startRule} className="w-full">
             <Wand2 size={14} />
-            Create rule
+            {t('txd.panel.createRule')}
           </Button>
         )}
         {!isReconciled && (
           <Button variant="danger" onClick={() => setShowDeleteConfirm(true)} className="w-full">
             <Trash2 size={14} />
-            Delete Transaction
+            {t('txd.panel.deleteTransaction')}
           </Button>
         )}
       </div>
@@ -372,15 +381,15 @@ export function TransactionDetailPanel({
           isOpen={ruleModal.isOpen}
           onClose={() => setRuleDraft(null)}
           initial={ruleModal.value}
-          title="New rule from transaction"
+          title={t('txd.panel.ruleTitle')}
         />
       )}
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        title="Delete Transaction"
-        message="Are you sure you want to delete this transaction? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t('txd.panel.deleteTransaction')}
+        message={t('txd.panel.deleteMessage')}
+        confirmLabel={t('common.delete')}
         danger
         onConfirm={handleDelete}
         onClose={() => setShowDeleteConfirm(false)}

@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { format } from 'date-fns';
 import { useSpendingComparison } from '../../hooks/useReports';
 import { formatCentsAxis, formatCurrency } from '../../utils/currency';
 import { TrendingDown } from 'lucide-react';
@@ -16,6 +17,7 @@ import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/EmptyState';
 import { chartColors } from '../../utils/chartColors';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
+import { t, type MessageKey } from '../../i18n';
 
 type Mode =
   | 'week_vs_last_week'
@@ -25,12 +27,36 @@ type Mode =
   | 'year_vs_last_year';
 
 const MODES: { value: Mode; label: string }[] = [
-  { value: 'week_vs_last_week', label: 'This week vs. last week' },
-  { value: 'month_vs_last_month', label: 'This month vs. last month' },
-  { value: 'month_vs_last_year', label: 'This month vs. last year' },
-  { value: 'month_vs_average', label: 'This month vs. average month' },
-  { value: 'year_vs_last_year', label: 'This year vs. last year' },
+  { value: 'week_vs_last_week', label: t('dash.spending.weekVsLastWeek') },
+  { value: 'month_vs_last_month', label: t('dash.spending.monthVsLastMonth') },
+  { value: 'month_vs_last_year', label: t('dash.spending.monthVsLastYear') },
+  { value: 'month_vs_average', label: t('dash.spending.monthVsAverage') },
+  { value: 'year_vs_last_year', label: t('dash.spending.yearVsLastYear') },
 ];
+
+/**
+ * Names of the two lines. The server sends English labels, so they're written here from the
+ * mode instead (null comparison: the server's own label, e.g. the same month last year).
+ */
+const LINE_LABELS: Record<Mode, { current: MessageKey; comparison: MessageKey | null }> = {
+  week_vs_last_week: { current: 'dash.spending.thisWeek', comparison: 'dash.spending.lastWeek' },
+  month_vs_last_month: {
+    current: 'dash.spending.thisMonth',
+    comparison: 'dash.spending.lastMonth',
+  },
+  month_vs_last_year: { current: 'dash.spending.thisMonth', comparison: null },
+  month_vs_average: {
+    current: 'dash.spending.thisMonth',
+    comparison: 'dash.spending.averageMonth',
+  },
+  year_vs_last_year: { current: 'dash.spending.thisYear', comparison: 'dash.spending.lastYear' },
+};
+
+/** The same month last year, from today (the server's label is in English) */
+function sameMonthLastYear(): string {
+  const d = new Date();
+  return format(new Date(d.getFullYear() - 1, d.getMonth(), 1), 'MMM yyyy');
+}
 
 /** Axis label in the budget's currency (always positive: spending is drawn upwards) */
 const formatYAxis = (value: number): string => formatCentsAxis(Math.abs(value));
@@ -68,7 +94,7 @@ export default function SpendingComparison() {
     > = {};
 
     for (let day = 1; day <= data.maxDays; day++) {
-      merged[day] = { day, label: `Day ${day}` };
+      merged[day] = { day, label: t('dash.spending.day', { day }) };
     }
 
     for (const pt of data.current) {
@@ -96,6 +122,10 @@ export default function SpendingComparison() {
     inset: { left: 50, right: 8 },
   });
 
+  const lineLabels = LINE_LABELS[mode];
+  const currentLabel = t(lineLabels.current);
+  const comparisonLabel = lineLabels.comparison ? t(lineLabels.comparison) : sameMonthLastYear();
+
   if (isLoading || !data) {
     return (
       <Card>
@@ -114,15 +144,16 @@ export default function SpendingComparison() {
       <div className="flex items-start justify-between mb-1">
         <div>
           <h3 className="text-sm font-semibold text-text">
-            Spending{' '}
+            {t('dash.spending.title')}{' '}
             <span className="text-text-secondary font-normal tabular-nums">
-              {formatCurrency(data.currentTotal)} {data.periodLabel}
+              {currentLabel.toLocaleLowerCase('tr-TR')} {formatCurrency(data.currentTotal)}
             </span>
           </h3>
         </div>
         <select
           value={mode}
           onChange={(e) => setMode(e.target.value as Mode)}
+          aria-label={t('dash.spending.compare')}
           className="text-xs border border-border rounded-lg px-2 py-1.5 bg-surface text-text cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-600 min-w-0 max-w-[200px]"
         >
           {MODES.map((m) => (
@@ -156,7 +187,7 @@ export default function SpendingComparison() {
               <Line
                 type="monotone"
                 dataKey="comparison"
-                name={data.comparisonLabel}
+                name={comparisonLabel}
                 stroke="#9CA3AF"
                 strokeWidth={1.5}
                 dot={false}
@@ -166,7 +197,7 @@ export default function SpendingComparison() {
               <Area
                 type="monotone"
                 dataKey="current"
-                name={data.currentLabel}
+                name={currentLabel}
                 stroke={chartColors.brand}
                 strokeWidth={2}
                 fill="url(#gSpendingCur)"
@@ -179,8 +210,8 @@ export default function SpendingComparison() {
         <EmptyState
           compact
           icon={<TrendingDown size={20} />}
-          title="Nothing to compare yet"
-          description="Once you have some spending, this shows how this period compares with the last one."
+          title={t('dash.spending.emptyTitle')}
+          description={t('dash.spending.emptyDescription')}
         />
       )}
     </Card>
