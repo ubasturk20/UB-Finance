@@ -131,7 +131,9 @@ test.describe('CSV import', () => {
     );
 
     await expect(dialog.getByRole('combobox', { name: 'Sütun Af Bij' })).toHaveValue('direction');
-    await expect(dialog.getByRole('combobox', { name: 'Sütun Bedrag (EUR)' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Bedrag (EUR)' })).toHaveValue(
+      'amount',
+    );
     await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
