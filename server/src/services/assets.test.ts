@@ -100,7 +100,8 @@ describe('asset values', () => {
     fc.assert(
       fc.property(fc.integer({ min: 0, max: 1e9 }), fc.integer({ min: 1, max: 1e9 }), (a, p) => {
         const units = unitsFor(a, p)!;
-        expect(Math.abs(units - a / p)).toBeLessThanOrEqual(0.005 + 1e-9);
+        // Half a hundredth, plus what a double can't hold at this size
+        expect(Math.abs(units - a / p)).toBeLessThanOrEqual(0.005 + (a / p) * 1e-12 + 1e-9);
       }),
     );
   });
