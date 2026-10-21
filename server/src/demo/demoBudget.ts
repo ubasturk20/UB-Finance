@@ -71,7 +71,7 @@ export interface DemoBudget {
   dashboardPages: Row<typeof dashboardPages>[];
   dashboardWidgets: Row<typeof dashboardWidgets>[];
   goals: Row<typeof goals>[];
-  /** The credit card's limit, statement and due days */
+  /** The credit card's limit, statement and due days, and the car loan's payment plan */
   accountDetails: Row<typeof accountDetails>[];
 }
 
@@ -1429,6 +1429,18 @@ export function buildDemoBudget(today: Date): DemoBudget {
     dueDay: 25,
     minPaymentRate: 2_000,
     interestRate: 425,
+  });
+  // The car loan's payment plan: 72 months at 5.9% a year (0.49% a month), paid on the 20th,
+  // the first payment 18 months before the history starts (about $17,950 was left then, its
+  // starting balance); a US loan has no BSMV or KKDF
+  result.accountDetails.push({
+    accountId: acct.carLoan,
+    loanPrincipal: 2_300_000,
+    loanRate: 49,
+    loanTerm: 72,
+    loanFirstPayment: ymd(new Date(firstMonth.getFullYear(), firstMonth.getMonth() - 18, 20)),
+    loanBsmvRate: 0,
+    loanKkdfRate: 0,
   });
 
   // ─── Reports: two dashboards and three saved custom reports ─────────────────

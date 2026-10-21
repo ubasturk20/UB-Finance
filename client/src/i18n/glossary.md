@@ -94,3 +94,10 @@ eklenir. Ton: sade, kısa, "siz" dili (Kaydedin değil, düğmelerde mastar/emir
 | Minimum payment           | Asgari ödeme                       |
 | Installment(s)            | Taksit(ler)                        |
 | Interest rate (monthly)   | Aylık faiz oranı                   |
+| Term (loan)               | Vade                               |
+| Principal                 | Anapara                            |
+| Remaining principal       | Kalan anapara                      |
+| BSMV (banking tax)        | BSMV                               |
+| KKDF (support fund levy)  | KKDF                               |
+| Payment plan / schedule   | Ödeme planı                        |
+| Early payoff              | Erken kapama                       |

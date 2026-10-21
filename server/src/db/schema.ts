@@ -545,6 +545,19 @@ export const accountDetails = sqliteTable('account_details', {
   minPaymentRate: integer('min_payment_rate'),
   /** Aylık akdi faiz, basis points (shown only) */
   interestRate: integer('interest_rate'),
+  // Loans (ihtiyaç/konut/taşıt/eğitim kredisi), migration 0026: an equal-installment plan
+  /** Çekilen anapara, in the account's minor units */
+  loanPrincipal: integer('loan_principal'),
+  /** Aylık akdi faiz, basis points (349 = %3,49) */
+  loanRate: integer('loan_rate'),
+  /** Vade in months (1-360) */
+  loanTerm: integer('loan_term'),
+  /** İlk taksit tarihi (yyyy-MM-dd); later ones on the same day each month */
+  loanFirstPayment: text('loan_first_payment'),
+  /** BSMV on the interest, basis points (1500 = %15; konut kredisi 0) */
+  loanBsmvRate: integer('loan_bsmv_rate'),
+  /** KKDF on the interest, basis points (1500 = %15; konut kredisi 0) */
+  loanKkdfRate: integer('loan_kkdf_rate'),
   updatedAt: text('updated_at')
     .notNull()
     .default(sql`(datetime('now'))`),

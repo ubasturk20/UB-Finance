@@ -113,9 +113,20 @@ describe('backup and restore', () => {
             installmentCount: 6,
             firstMonth: '2025-05',
           });
+          const { body: loan } = await send('POST', '/accounts', { name: 'Loan', type: 'loan' });
+          await send('PUT', `/accounts/${loan.id}/details`, {
+            loanPrincipal: 10_000_000,
+            loanRate: 349,
+            loanTerm: 36,
+            loanFirstPayment: '2025-05-15',
+            loanBsmvRate: 1_500,
+          });
           await send('GET', '/dashboards');
 
           const before = await backup();
+          expect(before.accountDetails).toContainEqual(
+            expect.objectContaining({ accountId: loan.id, loanTerm: 36, loanRate: 349 }),
+          );
           // Change things, then restore
           await send('POST', '/accounts', { name: 'Extra', type: 'savings' });
           await send('DELETE', `/transactions/${before.transactions[0]?.id ?? 'none'}`);

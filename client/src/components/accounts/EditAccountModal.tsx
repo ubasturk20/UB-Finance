@@ -14,7 +14,7 @@ import { usePreferencesStore } from '../../store/preferencesStore';
 import { CurrencySelect } from '../currency/CurrencySelect';
 import { useBudgetCurrency, useCurrencySettings } from '../../hooks/useCurrency';
 import { t } from '../../i18n';
-import { isCardType } from '../../utils/accountTypes';
+import { isCardType, isLoanType } from '../../utils/accountTypes';
 import { useAccountDetails, useSaveAccountDetails } from '../../hooks/useCreditCards';
 import {
   CardDetailsFields,
@@ -23,6 +23,13 @@ import {
   fillEmptyCardFields,
   type CardForm,
 } from './CardDetailsFields';
+import {
+  LoanDetailsFields,
+  emptyLoanForm,
+  fillEmptyLoanFields,
+  loanFormPatch,
+  type LoanForm,
+} from './LoanDetailsFields';
 import { AmountFields, useAmountValidity } from '../ui/amountValidity';
 
 interface Props {
@@ -50,11 +57,13 @@ export function EditAccountModal({ account, onClose }: Props) {
   const saveDetails = useSaveAccountDetails();
   const { allValid, report } = useAmountValidity();
   const [card, setCard] = useState<CardForm>(emptyCardForm);
+  const [loan, setLoan] = useState<LoanForm>(emptyLoanForm);
   const [saveError, setSaveError] = useState<string | null>(null);
   const isCard = isCardType(type);
+  const isLoan = isLoanType(type);
   const { data: details, isFetching: detailsLoading } = useAccountDetails(
     account?.id ?? null,
-    !!account && isCard,
+    !!account && (isCard || isLoan),
   );
   // The saved details arrive after the dialog opens: fill them in once, never over typing
   const detailsFilled = useRef(false);
@@ -70,6 +79,7 @@ export function EditAccountModal({ account, onClose }: Props) {
     setLogo(account.logo ?? null);
     setLogoError(null);
     setCard(emptyCardForm);
+    setLoan(emptyLoanForm);
     setSaveError(null);
     detailsFilled.current = false;
   });
@@ -80,10 +90,14 @@ export function EditAccountModal({ account, onClose }: Props) {
     if (detailsFilled.current) return;
     detailsFilled.current = true;
     setCard((current) => fillEmptyCardFields(current, details));
+    setLoan((current) => fillEmptyLoanFields(current, details));
   }, [account, details, detailsLoading]);
 
   const cardPatch = isCard ? cardFormPatch(card) : null;
-  const cardValid = !isCard || cardPatch !== null;
+  const loanPatch = isLoan ? loanFormPatch(loan) : null;
+  const cardValid = (!isCard || cardPatch !== null) && (!isLoan || loanPatch !== null);
+  // Card fields go on cards, loan fields on loans (the server refuses the others)
+  const detailsPatch = cardPatch ?? loanPatch;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -100,17 +114,17 @@ export function EditAccountModal({ account, onClose }: Props) {
         ...(currency !== account.currency ? { currency } : {}),
       },
     });
-    // After the account: a type just changed to credit card takes card details from now on
-    // A card left without details gets no empty row
+    // After the account: a type just changed to credit card or loan takes its details from now
+    // on. A card or loan left without details gets no empty row
     const nothingToSave =
-      cardPatch &&
-      Object.values(cardPatch).every((v) => v === null) &&
+      detailsPatch &&
+      Object.values(detailsPatch).every((v) => v === null) &&
       (!details || details.updatedAt === '');
-    if (cardPatch && !nothingToSave) {
+    if (detailsPatch && !nothingToSave) {
       try {
-        await saveDetails.mutateAsync({ accountId: account.id, data: cardPatch });
+        await saveDetails.mutateAsync({ accountId: account.id, data: detailsPatch });
       } catch {
-        setSaveError(t('card.details.saveError'));
+        setSaveError(isLoan ? t('loan.details.saveError') : t('card.details.saveError'));
         return;
       }
     }
@@ -241,6 +255,12 @@ export function EditAccountModal({ account, onClose }: Props) {
           {isCard && (
             <AmountFields report={report}>
               <CardDetailsFields value={card} onChange={setCard} currency={currency} />
+            </AmountFields>
+          )}
+
+          {isLoan && (
+            <AmountFields report={report}>
+              <LoanDetailsFields value={loan} onChange={setLoan} type={type} currency={currency} />
             </AmountFields>
           )}
 
