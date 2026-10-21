@@ -103,7 +103,7 @@ test('money moved between currencies keeps both amounts and the budget unchanged
 test('a purchase without a rate is flagged until one is added', async ({ page, api }) => {
   await setCurrency(api, 'EUR');
   const pounds = await api.createAccount('UK current account', 0, 'checking', { currency: 'GBP' });
-  const groceries = await api.category('Groceries');
+  const groceries = await api.category('Market alışverişi');
   await api.createTransaction({
     accountId: pounds.id,
     date: isoDay(),

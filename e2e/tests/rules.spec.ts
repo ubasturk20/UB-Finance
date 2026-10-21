@@ -38,8 +38,8 @@ async function buildCoffeeRule(page: Page, expectedMatches: number) {
     expectedMatches ? `${expectedMatches} işlemle eşleşiyor` : 'Henüz eşleşen işlem yok',
   );
   await dialog.getByRole('button', { name: 'Kategori seçin…' }).click();
-  await page.getByPlaceholder('Kategori ara…').fill('coffee');
-  await page.getByRole('button', { name: /Coffee Shops/ }).click();
+  await page.getByPlaceholder('Kategori ara…').fill('kafe');
+  await page.getByRole('button', { name: /Kafe/ }).click();
   return dialog;
 }
 
@@ -61,7 +61,7 @@ test.describe('rules', () => {
     await expect(apply).toContainText('2 işlem güncellendi');
     await apply.getByRole('button', { name: 'Bitti' }).click();
 
-    const coffee = (await api.category('Coffee Shops')).id;
+    const coffee = (await api.category('Kafe')).id;
     const txs = await api.transactions();
     const categorized = txs.filter((t) => t.categoryId === coffee).map((t) => t.payeeName);
     expect(categorized).toHaveLength(2);
@@ -75,7 +75,7 @@ test.describe('rules', () => {
     const dialog = await buildCoffeeRule(page, 0);
     await dialog.getByRole('button', { name: 'Kuralı kaydet' }).click();
     await expect(dialog).toBeHidden();
-    await expect(page.getByRole('main')).toContainText('Coffee Shops');
+    await expect(page.getByRole('main')).toContainText('Kafe');
 
     await open(page, `/accounts/${checking.id}`);
     await page.getByRole('button', { name: 'İşlem ekle' }).click();
@@ -85,7 +85,7 @@ test.describe('rules', () => {
     await form.getByRole('button', { name: 'Kaydet' }).click();
     await expect(
       page.getByTestId('transaction-row').filter({ hasText: 'Corner Coffee Co' }),
-    ).toContainText('Coffee Shops');
+    ).toContainText('Kafe');
   });
 
   test('turning a rule off keeps its settings and position', async ({ page, api }) => {

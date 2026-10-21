@@ -122,8 +122,8 @@ describe('fetchRates', () => {
   it('saves a message to show when the server answers with an error', async () => {
     const real = process.env.FLYBUDGET_EXCHANGE_RATES_URL!;
     process.env.FLYBUDGET_EXCHANGE_RATES_URL = `${real}/missing`;
-    await expect(fetchRates()).rejects.toThrow('The exchange rate server answered 404');
-    expect(getBudgetSettings().ratesLastError).toBe('The exchange rate server answered 404');
+    await expect(fetchRates()).rejects.toThrow('Döviz kuru sunucusu 404 yanıtı verdi');
+    expect(getBudgetSettings().ratesLastError).toBe('Döviz kuru sunucusu 404 yanıtı verdi');
     process.env.FLYBUDGET_EXCHANGE_RATES_URL = real;
   });
 });

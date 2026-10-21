@@ -64,7 +64,7 @@ goalsRouter.put('/:id', (req, res) => {
 
   db.update(goals).set(update).where(eq(goals.id, req.params.id)).run();
   const updated = db.select().from(goals).where(eq(goals.id, req.params.id)).get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(updated);
 });
 

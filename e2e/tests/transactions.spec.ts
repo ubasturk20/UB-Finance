@@ -39,20 +39,20 @@ test.describe('account register', () => {
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, {
       payee: 'Corner Grocery',
-      category: '🛒 Groceries',
+      category: '🛒 Market alışverişi',
       notes: 'weekly shop',
       outflow: '42.50',
     });
     await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
 
     await expect(page.getByRole('button', { name: 'Corner Grocery', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: '🛒 Groceries' })).toBeVisible();
+    await expect(page.getByRole('button', { name: '🛒 Market alışverişi' })).toBeVisible();
     await expect(header(page)).toContainText('957,50 ₺');
     expect(await api.balance(checking.id)).toBe(95_750);
 
     const [tx] = await api.transactions(`?account_id=${checking.id}`);
     expect(tx).toMatchObject({ amount: -4_250, payeeName: 'Corner Grocery', notes: 'weekly shop' });
-    expect(tx.categoryId).toBe((await api.category('Groceries')).id);
+    expect(tx.categoryId).toBe((await api.category('Market alışverişi')).id);
     // A new payee was created for it
     const payees = await api.call<{ name: string }[]>('GET', '/payees');
     expect(payees.map((p) => p.name)).toContain('Corner Grocery');
@@ -85,7 +85,7 @@ test.describe('account register', () => {
     await open(page, `/accounts/${checking.id}`);
     await fillNewTransaction(page, {
       payee: 'Acme Corp',
-      category: '💵 Paychecks',
+      category: '💵 Maaş',
       inflow: '2500',
     });
     await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
@@ -118,12 +118,12 @@ test.describe('account register', () => {
     await form.getByRole('button', { name: 'İşlemi böl' }).click();
     await form
       .getByRole('combobox', { name: 'Parça 1 kategorisi' })
-      .selectOption({ label: '🛒 Groceries' });
+      .selectOption({ label: '🛒 Market alışverişi' });
     await form.getByRole('textbox', { name: 'Parça 1 tutarı' }).fill('60');
     await expect(form.getByText('40 ₺ kalan')).toBeVisible();
     await form
       .getByRole('combobox', { name: 'Parça 2 kategorisi' })
-      .selectOption({ label: '🏠 Rent / Mortgage' });
+      .selectOption({ label: '🏠 Kira' });
     await form.getByRole('textbox', { name: 'Parça 2 tutarı' }).fill('40');
     await expect(form.getByText('Dengede')).toBeVisible();
     await newForm(page).getByRole('button', { name: 'Kaydet' }).click();
@@ -172,8 +172,8 @@ test.describe('account register', () => {
 
     // Category via the searchable picker
     await panel.getByRole('button', { name: 'Kategorisiz' }).click();
-    await page.getByPlaceholder('Kategori ara…').fill('stream');
-    await page.getByRole('button', { name: /Streaming Services/ }).click();
+    await page.getByPlaceholder('Kategori ara…').fill('dijital');
+    await page.getByRole('button', { name: /Dijital abonelikler/ }).click();
 
     await panel.getByRole('textbox', { name: 'Notlar' }).fill('family plan');
     await panel.getByRole('textbox', { name: 'Notlar' }).blur();
@@ -186,7 +186,7 @@ test.describe('account register', () => {
         id: tx.id,
         notes: 'family plan',
         date: otherDayThisMonth(),
-        categoryId: (await api.category('Streaming Services')).id,
+        categoryId: (await api.category('Dijital abonelikler')).id,
       });
     await page.getByRole('button', { name: 'Ayrıntıları kapat' }).click();
     await expect(page.getByText('İşlem Ayrıntıları')).toBeHidden();

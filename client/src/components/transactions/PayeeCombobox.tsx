@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Payee } from '../../types';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 interface PayeeValue {
   id: string | null;
@@ -35,10 +36,10 @@ export function PayeeCombobox({ value, onChange, payees, className = '', fieldCl
   }, []);
 
   const filtered = query
-    ? payees.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+    ? payees.filter((p) => foldText(p.name).includes(foldText(query))).slice(0, 8)
     : payees.slice(0, 8);
 
-  const exactMatch = payees.find((p) => p.name.toLowerCase() === query.toLowerCase());
+  const exactMatch = payees.find((p) => foldText(p.name) === foldText(query));
 
   function select(payee: Payee) {
     setQuery(payee.name);

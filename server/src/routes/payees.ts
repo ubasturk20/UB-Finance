@@ -63,7 +63,7 @@ payeesRouter.post('/merge', (req, res) => {
   if (!mergeIds.length) return res.json({ merged: 0 });
 
   const keeper = db.select().from(payees).where(eq(payees.id, keepId)).get();
-  if (!keeper) return res.status(404).json({ error: 'Keeper payee not found' });
+  if (!keeper) return res.status(404).json({ error: 'Tutulacak alıcı bulunamadı' });
 
   db.transaction(() => {
     // Re-point all transactions from merged payees to the keeper
@@ -108,7 +108,7 @@ payeesRouter.put('/:id', (req, res) => {
     });
   }
   const updated = db.select().from(payees).where(eq(payees.id, req.params.id)).get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(updated);
 });
 

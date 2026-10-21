@@ -92,7 +92,7 @@ const scheduleFields = {
 
 const ruleMatchesType = (s: { recurrenceType?: string; recurrenceRule?: { type: string } }) =>
   !s.recurrenceRule || !s.recurrenceType || s.recurrenceRule.type === s.recurrenceType;
-const ruleTypeMessage = { message: 'recurrenceRule.type must match recurrenceType' };
+const ruleTypeMessage = { message: 'recurrenceRule.type, recurrenceType ile aynı olmalı' };
 
 const createSchema = z
   .object({
@@ -156,7 +156,7 @@ schedulesRouter.post('/discover/create', (req, res) => {
 schedulesRouter.get('/occurrences', (req, res) => {
   const { from, to } = req.query;
   if (typeof from !== 'string' || typeof to !== 'string' || !isRealDate(from) || !isRealDate(to)) {
-    return res.status(400).json({ error: 'from and to query params required (YYYY-MM-DD)' });
+    return res.status(400).json({ error: 'from ve to sorgu parametreleri gerekli (YYYY-AA-GG)' });
   }
 
   const rows = db
@@ -211,7 +211,7 @@ schedulesRouter.get('/occurrences', (req, res) => {
 schedulesRouter.get('/summary', (req, res) => {
   const { month } = req.query;
   if (!isMonth(month))
-    return res.status(400).json({ error: 'month query param required (YYYY-MM)' });
+    return res.status(400).json({ error: 'month sorgu parametresi gerekli (YYYY-AA)' });
 
   const from = `${month}-01`;
   const to = `${month}-31`;
@@ -345,7 +345,7 @@ schedulesRouter.post('/', (req, res) => {
 // GET /:id — single schedule with recent occurrences
 schedulesRouter.get('/:id', (req, res) => {
   const schedule = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
-  if (!schedule) return res.status(404).json({ error: 'Not found' });
+  if (!schedule) return res.status(404).json({ error: 'Bulunamadı' });
 
   const recentOccs = db
     .select()
@@ -362,7 +362,7 @@ schedulesRouter.get('/:id', (req, res) => {
 // PUT /:id — update schedule
 schedulesRouter.put('/:id', (req, res) => {
   const existing = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
-  if (!existing) return res.status(404).json({ error: 'Not found' });
+  if (!existing) return res.status(404).json({ error: 'Bulunamadı' });
 
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -430,7 +430,7 @@ schedulesRouter.put('/:id', (req, res) => {
 // DELETE /:id — soft cancel or hard delete
 schedulesRouter.delete('/:id', (req, res) => {
   const existing = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
-  if (!existing) return res.status(404).json({ error: 'Not found' });
+  if (!existing) return res.status(404).json({ error: 'Bulunamadı' });
 
   if (req.query.hard === '1') {
     db.delete(schedules).where(eq(schedules.id, req.params.id)).run();
@@ -467,9 +467,9 @@ schedulesRouter.delete('/:id', (req, res) => {
 // POST /:id/mark-paid — create a real transaction for an occurrence
 schedulesRouter.post('/:id/mark-paid', (req, res) => {
   const schedule = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
-  if (!schedule) return res.status(404).json({ error: 'Not found' });
+  if (!schedule) return res.status(404).json({ error: 'Bulunamadı' });
   if (!schedule.accountId)
-    return res.status(400).json({ error: 'Schedule has no account assigned' });
+    return res.status(400).json({ error: 'Düzenli işleme bir hesap atanmamış' });
 
   const bodySchema = z.object({
     date: isoDate,
@@ -502,7 +502,7 @@ schedulesRouter.post('/:id/mark-paid', (req, res) => {
         return aDiff - bDiff;
       })[0];
 
-    if (!nearestOcc) return res.status(400).json({ error: 'No pending occurrence found' });
+    if (!nearestOcc) return res.status(400).json({ error: 'Bekleyen bir tekrar bulunamadı' });
     occId = nearestOcc.id;
   }
 
@@ -545,7 +545,7 @@ schedulesRouter.post('/occurrences/:occId/skip', (req, res) => {
     .from(scheduleOccurrences)
     .where(eq(scheduleOccurrences.id, req.params.occId))
     .get();
-  if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
+  if (!occ) return res.status(404).json({ error: 'Tekrar bulunamadı' });
 
   db.update(scheduleOccurrences)
     .set({ status: 'skipped', skippedAt: format(new Date(), 'yyyy-MM-dd') })
@@ -566,7 +566,7 @@ schedulesRouter.post('/occurrences/:occId/match', (req, res) => {
     .from(scheduleOccurrences)
     .where(eq(scheduleOccurrences.id, req.params.occId))
     .get();
-  if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
+  if (!occ) return res.status(404).json({ error: 'Tekrar bulunamadı' });
 
   linkOccurrenceToTransaction(req.params.occId, parsed.data.transactionId, 'manual', 100);
   res.json({ ok: true });
@@ -579,7 +579,7 @@ schedulesRouter.post('/occurrences/:occId/unmatch', (_req, res) => {
     .from(scheduleOccurrences)
     .where(eq(scheduleOccurrences.id, _req.params.occId))
     .get();
-  if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
+  if (!occ) return res.status(404).json({ error: 'Tekrar bulunamadı' });
 
   unlinkOccurrence(_req.params.occId);
   res.json({ ok: true });

@@ -28,7 +28,7 @@ function monthRangeParams(req: Request, res: Response): { from: string; to: stri
     from > to ||
     monthIndex(to) - monthIndex(from) >= MAX_MONTHS
   ) {
-    res.status(400).json({ error: 'Expected `from` and `to` as YYYY-MM' });
+    res.status(400).json({ error: '`from` ve `to` YYYY-AA biçiminde olmalı' });
     return null;
   }
   return { from, to };
@@ -38,7 +38,7 @@ function monthRangeParams(req: Request, res: Response): { from: string; to: stri
 function optionalMonthParams(req: Request, res: Response): { from?: string; to?: string } | null {
   const { from, to } = req.query;
   if ((from !== undefined && !isMonth(from)) || (to !== undefined && !isMonth(to))) {
-    res.status(400).json({ error: 'Expected `from` and `to` as YYYY-MM' });
+    res.status(400).json({ error: '`from` ve `to` YYYY-AA biçiminde olmalı' });
     return null;
   }
   return { from, to };
@@ -89,7 +89,7 @@ reportsRouter.get('/net-worth', (req, res) => {
       q.from > q.to ||
       Date.parse(q.to) - Date.parse(q.from) > MAX_DAYS * DAY_MS
     ) {
-      return res.status(400).json({ error: 'Expected `from` and `to` as YYYY-MM-DD' });
+      return res.status(400).json({ error: '`from` ve `to` YYYY-AA-GG biçiminde olmalı' });
     }
     ({ from, to } = q as { from: string; to: string });
   } else {
@@ -502,9 +502,9 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       maxDays = 7;
       todayDay = mondayOffset + 1;
-      periodLabel = 'this week';
-      currentLabel = 'This week';
-      comparisonLabel = 'Last week';
+      periodLabel = 'bu hafta';
+      currentLabel = 'Bu hafta';
+      comparisonLabel = 'Geçen hafta';
 
       const curDaily = getDailyExpenses(fmtDate(monday), todayStr);
       const compDaily = getDailyExpenses(fmtDate(lastMonday), fmtDate(lastSunday));
@@ -525,21 +525,21 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       maxDays = Math.max(daysInCur, daysInComp);
       todayDay = today.getDate();
-      periodLabel = 'this month';
-      currentLabel = 'This month';
+      periodLabel = 'bu ay';
+      currentLabel = 'Bu ay';
       const monthNames = [
-        'Jan',
-        'Feb',
+        'Oca',
+        'Şub',
         'Mar',
-        'Apr',
+        'Nis',
         'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        'Haz',
+        'Tem',
+        'Ağu',
+        'Eyl',
+        'Eki',
+        'Kas',
+        'Ara',
       ];
       comparisonLabel = `${monthNames[month]} ${lastYear}`;
 
@@ -587,9 +587,9 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       maxDays = Math.max(daysInCur, 31);
       todayDay = today.getDate();
-      periodLabel = 'this month';
-      currentLabel = 'This month';
-      comparisonLabel = 'Average month (last 12 months)';
+      periodLabel = 'bu ay';
+      currentLabel = 'Bu ay';
+      comparisonLabel = 'Ortalama ay (son 12 ay)';
 
       comparisonSeries = [];
       let cum = 0;
@@ -615,9 +615,9 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       const jan1 = new Date(year, 0, 1);
       todayDay = Math.floor((today.getTime() - jan1.getTime()) / DAY_MS) + 1;
-      periodLabel = 'this year';
-      currentLabel = 'This year';
-      comparisonLabel = 'Last year';
+      periodLabel = 'bu yıl';
+      currentLabel = 'Bu yıl';
+      comparisonLabel = 'Geçen yıl';
 
       const curDaily = getDailyExpenses(`${year}-01-01`, todayStr);
       const compDaily = getDailyExpenses(`${year - 1}-01-01`, `${year - 1}-12-31`);
@@ -641,9 +641,9 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       maxDays = Math.max(daysInCur, daysInPrev);
       todayDay = today.getDate();
-      periodLabel = 'this month';
-      currentLabel = 'This month';
-      comparisonLabel = 'Last month';
+      periodLabel = 'bu ay';
+      currentLabel = 'Bu ay';
+      comparisonLabel = 'Geçen ay';
 
       const curDaily = getDailyExpenses(`${year}-${mm}-01`, todayStr);
       const compDaily = getDailyExpenses(
@@ -721,7 +721,7 @@ reportsRouter.get('/custom', (req, res) => {
       groupCol: categories.groupId,
     },
     payee: {
-      name: sql<string>`coalesce(${payees.name}, ${transactions.payeeName}, 'Unknown')`,
+      name: sql<string>`coalesce(${payees.name}, ${transactions.payeeName}, 'Bilinmeyen alıcı')`,
       id: transactions.payeeId,
       groupCol: transactions.payeeId,
     },
@@ -759,14 +759,14 @@ reportsRouter.get('/custom', (req, res) => {
 
     const months = monthRange(from, to);
     const groupSet = new Set<string>();
-    for (const r of rows) groupSet.add(r.name || 'Uncategorized');
+    for (const r of rows) groupSet.add(r.name || 'Kategorisiz');
     const groups = Array.from(groupSet).sort();
 
     const dataMap = new Map<string, Record<string, number>>();
     for (const m of months) dataMap.set(m, {});
 
     for (const r of rows) {
-      const label = r.name || 'Uncategorized';
+      const label = r.name || 'Kategorisiz';
       const bucket = dataMap.get(r.month);
       if (bucket) {
         const val = balance_type === 'expense' ? Math.abs(r.value) : r.value;
@@ -790,7 +790,7 @@ reportsRouter.get('/custom', (req, res) => {
     const data = rows
       .filter((r) => r.value !== 0)
       .map((r) => ({
-        name: r.name || 'Uncategorized',
+        name: r.name || 'Kategorisiz',
         id: r.id,
         value: balance_type === 'expense' ? Math.abs(r.value) : r.value,
       }));

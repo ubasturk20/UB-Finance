@@ -329,7 +329,7 @@ export function findSchedules(): DiscoveredSchedule[] {
       accountId: c.accountId,
       accountName: accountName.get(c.accountId) ?? '',
       payeeId: sample?.payeeId ?? null,
-      payeeName: sample?.payeeName ?? 'Unknown payee',
+      payeeName: sample?.payeeName ?? 'Bilinmeyen alıcı',
       amount: c.amount,
       amountType: c.exactAmount ? 'exact' : 'approximate',
       recurrenceType: c.pattern.recurrenceType,

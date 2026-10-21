@@ -32,7 +32,7 @@ async function expectBottomSheet(page: Page, dialog: Locator) {
 
 async function seedAccount(api: Api) {
   const checking = await api.createAccount('Everyday Checking', 100_000);
-  const groceries = await api.category('Groceries');
+  const groceries = await api.category('Market alışverişi');
   await api.createTransaction({
     accountId: checking.id,
     date: isoDay(),
@@ -74,9 +74,9 @@ test.describe('register', () => {
     await expectTouchSize(details.getByRole('button', { name: 'Ayrıntıları kapat' }));
 
     await details.getByRole('button', { name: 'Kategorisiz' }).click();
-    await page.getByPlaceholder('Kategori ara…').fill('stream');
-    await page.getByRole('button', { name: /Streaming Services/ }).click();
-    const streaming = await api.category('Streaming Services');
+    await page.getByPlaceholder('Kategori ara…').fill('dijital');
+    await page.getByRole('button', { name: /Dijital abonelikler/ }).click();
+    const streaming = await api.category('Dijital abonelikler');
     await expect
       .poll(
         async () =>
@@ -88,7 +88,7 @@ test.describe('register', () => {
 
     await details.getByRole('button', { name: 'Ayrıntıları kapat' }).click();
     await expect(details).toBeHidden();
-    await expect(card).toContainText('Streaming Services');
+    await expect(card).toContainText('Dijital abonelikler');
   });
 
   test('adds a split transaction from a bottom sheet', async ({ page, api }) => {
@@ -114,7 +114,7 @@ test.describe('register', () => {
     await form.getByRole('button', { name: 'İşlemi böl' }).click();
     await form
       .getByRole('combobox', { name: 'Parça 1 kategorisi' })
-      .selectOption({ label: '🛒 Groceries' });
+      .selectOption({ label: '🛒 Market alışverişi' });
     await form.getByRole('textbox', { name: 'Parça 1 tutarı' }).fill('60,50');
     await form.getByRole('textbox', { name: 'Parça 2 tutarı' }).fill('39.50');
     await expect(form.getByText('Dengede')).toBeVisible();
@@ -138,27 +138,27 @@ test.describe('budget', () => {
     await api.call('PUT', `/budget/${thisMonth()}/${groceries.id}`, { budgeted: 50_000 });
     await open(page, '/budget');
 
-    const card = page.getByTestId('budget-card').filter({ hasText: 'Groceries' });
+    const card = page.getByTestId('budget-card').filter({ hasText: 'Market alışverişi' });
     await expect(card).toContainText('457,50 ₺ kalan');
     await expect(card).toContainText('42,50 ₺');
     await expect(page.getByRole('table')).toHaveCount(0);
     await expectTouchSize(page.getByRole('button', { name: 'Önceki ay' }));
     await expectTouchSize(page.getByRole('button', { name: 'Sonraki ay' }));
 
-    const planned = card.getByRole('button', { name: 'Groceries için planlanan: 500 ₺' });
+    const planned = card.getByRole('button', { name: 'Market alışverişi için planlanan: 500 ₺' });
     await expectTouchSize(planned);
     await planned.click();
-    const sheet = page.getByRole('dialog', { name: 'Groceries planı' });
+    const sheet = page.getByRole('dialog', { name: 'Market alışverişi planı' });
     await expectBottomSheet(page, sheet);
-    await sheet.getByRole('textbox', { name: 'Groceries için planlanan' }).fill('425');
+    await sheet.getByRole('textbox', { name: 'Market alışverişi için planlanan' }).fill('425');
     await sheet.getByRole('button', { name: 'Kaydet' }).click();
     await expect(sheet).toBeHidden();
     await expect(card).toContainText('382,50 ₺ kalan');
 
     // Enter saves too, and the amount can be used for the next 12 months
-    await card.getByRole('button', { name: /^Groceries için planlanan/ }).click();
+    await card.getByRole('button', { name: /^Market alışverişi için planlanan/ }).click();
     await sheet.getByRole('checkbox', { name: 'Bu tutarı sonraki 12 ay için kullan' }).check();
-    const input = sheet.getByRole('textbox', { name: 'Groceries için planlanan' });
+    const input = sheet.getByRole('textbox', { name: 'Market alışverişi için planlanan' });
     await input.fill('300');
     await input.press('Enter');
     await expect(sheet).toBeHidden();
@@ -190,7 +190,7 @@ test.describe('budget', () => {
 
     // Once something is planned, categories with nothing going on are tucked away, but a
     // section still lists a few (never empty)
-    const groceries = await api.category('Groceries');
+    const groceries = await api.category('Market alışverişi');
     await api.call('PUT', `/budget/${thisMonth()}/${groceries.id}`, { budgeted: 50_000 });
     await page.reload();
     await expect(fixed.getByTestId('budget-card')).toHaveCount(3);
@@ -217,7 +217,7 @@ test.describe('payees', () => {
     await expect(cards.filter({ hasText: 'Streamflix Premium' })).toBeVisible();
 
     // Default category
-    const groceries = await api.category('Groceries');
+    const groceries = await api.category('Market alışverişi');
     await page
       .getByRole('combobox', { name: 'Corner Grocery için varsayılan kategori' })
       .selectOption(groceries.id);
@@ -399,8 +399,8 @@ test.describe('cash flow', () => {
     const group = list.getByRole('button', { expanded: false }).first();
     await expectTouchSize(group);
     await group.click();
-    await list.getByRole('button', { name: /Groceries/ }).click();
-    await expect(page.getByText(/İşlemler: .*Groceries/)).toBeVisible();
+    await list.getByRole('button', { name: /Market alışverişi/ }).click();
+    await expect(page.getByText(/İşlemler: .*Market alışverişi/)).toBeVisible();
     await expect(page.getByText('Corner Grocery').first()).toBeVisible();
 
     await page.getByRole('button', { name: 'Diyagram' }).click();

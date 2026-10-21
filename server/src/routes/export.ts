@@ -51,7 +51,7 @@ exportRouter.get('/transactions/csv', (req, res) => {
   const { from, to } = req.query;
   const decimalFormat = csvFormatSchema.safeParse(req.query.decimal);
   if (!decimalFormat.success) {
-    return res.status(400).json({ error: 'Expected `decimal` to be dot or comma' });
+    return res.status(400).json({ error: '`decimal` dot ya da comma olmalı' });
   }
   const [sep, decimal] =
     decimalFormat.data === 'comma' ? ([';', ','] as const) : ([',', '.'] as const);
@@ -59,7 +59,7 @@ exportRouter.get('/transactions/csv', (req, res) => {
     (from !== undefined && !isRealDate(String(from))) ||
     (to !== undefined && !isRealDate(String(to)))
   ) {
-    return res.status(400).json({ error: 'Expected `from` and `to` as YYYY-MM-DD' });
+    return res.status(400).json({ error: '`from` ve `to` YYYY-AA-GG biçiminde olmalı' });
   }
   // A split is exported as its parts (which carry the categories), so amounts add up
   const filters = [eq(transactions.isParent, 0)];
@@ -97,9 +97,9 @@ exportRouter.get('/transactions/csv', (req, res) => {
       .map((c) => [c.id, c.name]),
   );
 
-  const columns = ['Date', 'Account', 'Payee', 'Category', 'Notes', 'Amount'];
-  if (multi) columns.push('Currency', `Amount (${budget})`);
-  const header = `${[...columns, 'Reconciled'].join(sep)}\n`;
+  const columns = ['Tarih', 'Hesap', 'Alıcı', 'Kategori', 'Notlar', 'Tutar'];
+  if (multi) columns.push('Para birimi', `Tutar (${budget})`);
+  const header = `${[...columns, 'Mutabık'].join(sep)}\n`;
   const body = rows
     .map((r) => {
       const currency = currencyOf[r.accountId] ?? null;
@@ -114,7 +114,7 @@ exportRouter.get('/transactions/csv', (req, res) => {
         ...(multi
           ? [currency ?? '', value === null ? '' : csvAmount(value, decimal, minorUnits(budget))]
           : []),
-        r.reconciled ? 'Yes' : 'No',
+        r.reconciled ? 'Evet' : 'Hayır',
       ].join(sep);
     })
     .join('\n');
@@ -149,6 +149,6 @@ exportRouter.post('/restore', express.json({ limit: RESTORE_BODY_LIMIT }), async
   } catch (err) {
     // e.g. a row pointing at an account that isn't in the file: nothing was changed
     console.error('Restore failed:', err);
-    res.status(400).json({ error: 'The backup is inconsistent, so nothing was restored' });
+    res.status(400).json({ error: 'Yedek tutarsız olduğu için hiçbir şey geri yüklenmedi' });
   }
 });

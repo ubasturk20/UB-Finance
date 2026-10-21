@@ -37,6 +37,7 @@ import type {
 } from '../../types';
 import { formatDay } from '../../utils/dates';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 const fieldClass =
   'text-sm border border-border rounded-lg px-2 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-400';
@@ -343,7 +344,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (v: string[]
   const [draft, setDraft] = useState('');
   const add = () => {
     const text = draft.trim();
-    if (text && !value.some((v) => v.toLowerCase() === text.toLowerCase())) {
+    if (text && !value.some((v) => foldText(v) === foldText(text))) {
       onChange([...value, text]);
     }
     setDraft('');

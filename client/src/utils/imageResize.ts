@@ -5,7 +5,7 @@
 export function fileToSquareDataUrl(file: File, size = 128): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
-      reject(new Error('Please choose an image file.'));
+      reject(new Error('Lütfen bir resim dosyası seçin.'));
       return;
     }
     const url = URL.createObjectURL(file);
@@ -18,7 +18,7 @@ export function fileToSquareDataUrl(file: File, size = 128): Promise<string> {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         URL.revokeObjectURL(url);
-        reject(new Error('Could not process image.'));
+        reject(new Error('Resim işlenemedi.'));
         return;
       }
       ctx.imageSmoothingQuality = 'high';
@@ -38,7 +38,7 @@ export function fileToSquareDataUrl(file: File, size = 128): Promise<string> {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Could not read that image.'));
+      reject(new Error('Bu resim okunamadı.'));
     };
     img.src = url;
   });

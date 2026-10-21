@@ -32,6 +32,7 @@ import { useIsPhone } from '../hooks/useIsPhone';
 import { actionText, conditionText, ruleSearchText, type RuleLookups } from '../utils/ruleFormat';
 import type { Rule, RuleInput } from '../types';
 import { t } from '../i18n';
+import { foldText } from '../utils/textFold';
 
 type Editing = { key: string; rule?: Rule; initial?: RuleInput; title?: string };
 type Applying = { key: string; ruleIds?: string[]; title: string; scope: 'uncategorized' | 'all' };
@@ -228,7 +229,7 @@ export default function RulesPage() {
   useEffect(() => setLocalRules(rulesData), [rulesData]);
 
   const shown = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = foldText(search.trim());
     return q ? localRules.filter((r) => ruleSearchText(r, lookups).includes(q)) : localRules;
   }, [localRules, search, lookups]);
   const enabledCount = localRules.filter((r) => r.enabled).length;

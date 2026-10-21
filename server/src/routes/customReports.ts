@@ -44,7 +44,7 @@ customReportsRouter.get('/', (_req, res) => {
 
 customReportsRouter.get('/:id', (req, res) => {
   const row = db.select().from(customReports).where(eq(customReports.id, req.params.id)).get();
-  if (!row) return res.status(404).json({ error: 'Not found' });
+  if (!row) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(parseRow(row));
 });
 
@@ -80,7 +80,7 @@ customReportsRouter.put('/:id', (req, res) => {
 
   db.update(customReports).set(update).where(eq(customReports.id, req.params.id)).run();
   const updated = db.select().from(customReports).where(eq(customReports.id, req.params.id)).get();
-  if (!updated) return res.status(404).json({ error: 'Not found' });
+  if (!updated) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(parseRow(updated));
 });
 

@@ -4,6 +4,7 @@ import { useCreateCategory } from '../../hooks/useCategories';
 import { usePreferencesStore } from '../../store/preferencesStore';
 import type { BudgetType, CategoryGroup } from '../../types';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 interface Props {
   value: string | null;
@@ -57,11 +58,11 @@ export function CategoryPicker({
   const filtered = groups
     .map((g) => ({
       ...g,
-      categories: g.categories.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())),
+      categories: g.categories.filter((c) => foldText(c.name).includes(foldText(query))),
     }))
     .filter((g) => g.categories.length > 0);
   const filteredTransfers = transferAccounts.filter((a) =>
-    t('txd.transferTo', { name: a.name }).toLowerCase().includes(query.toLowerCase()),
+    foldText(t('txd.transferTo', { name: a.name })).includes(foldText(query)),
   );
 
   const selectedGroup = groups.find((g) => g.id === newGroupId);

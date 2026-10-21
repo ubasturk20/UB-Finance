@@ -4,12 +4,19 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 
 ## Durum
 
-- **Aktif faz:** F3c tamamlandı, CI tamamen yeşil (PR #6, dal `tr/f3c-sayfalar`) — birleştirme onayı bekliyor. Arayüz çevirisi (F2–F3) bitti. Sıradaki: F4 (sunucu tarafı Türkçe).
+- **Aktif faz:** F5 (banka senkronunu gizleme). F4 birleştirildi (PR #7).
+- **Kullanıcı talimatı (2026-10-21):** F4→F11 sırayla, onay beklemeden otomatik ilerle; CI yeşil olunca PR'ı birleştir ve sonraki faza geç. Yalnızca çok önemli kararlar için sor.
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Her faz kendi dalında (`tr/fN-…`), PR ile `main`'e.
 - **Çalışma düzeni (önemli):**
   - Oturum ortamı npm'e erişemiyor → test/tsc yerelde çalışmaz; **CI tek doğrulama**. Her PR'da CI (client, server, e2e, electron, website) + `Format report` çalışır.
   - CI loglarına erişim yok; yalnızca **annotation**'lar okunur (`gh api repos/ubasturk20/UB-Finance/check-runs/<job>/annotations`). Playwright hataları ve `Format report` (Prettier'ın değiştireceği dosyalar) annotation olarak gelir.
   - Yerel Prettier 3.8 (`/opt/node-tools/node_modules/prettier/bin/prettier.cjs`), repo 3.9 kullanıyor: **mevcut dosyalara `--write` yapma** (union tiplerini farklı biçimliyor); yalnızca yeni/küçük değişiklikler, sonra `Format report`'a bak.
+
+## F4 — Sunucu metinleri ve Türkçe kategoriler (2026-10-21, PR #7)
+
+- `server/src/db/defaultCategories.ts`: kişisel finans için Türkçe gruplar (Gelir, Konut, Faturalar, Market ve yeme-içme, Ulaşım, Sağlık, Eğitim ve çocuk, Alışveriş ve kişisel, Eğlence ve seyahat, Finans, Bağış ve hediyeler, Diğer); iş grubu ve "Uncategorized" kategorisi yok. E2E kategori adları: Market alışverişi, Maaş, Dijital abonelikler, Restoran, Kafe, Otopark, Toplu taşıma, Kira, Faiz ve getiri.
+- API hata iletileri (routes/services), CSV başlıkları (`Tarih;Hesap;Alıcı;Kategori;Notlar;Tutar;Mutabık`, Evet/Hayır), ilk pano "Genel Bakış", harcama karşılaştırma etiketleri Türkçe. Çevrilmedi: `middleware/security.ts` ve `utils/validation.ts` iletileri (nadiren görünür), demo bütçe, banka entegrasyonları.
+- **Hata düzeltmesi:** `utils/textFold.ts` (istemci+sunucu özdeş kopya): Türkçe küçük harf + aksan/ı-i katlama. Kural metin koşulları ve tüm arama kutuları kullanır → "migros" = "MİGROS" = "MIGROS". Sunucu tarafı işlem arama (SQL LIKE) hâlâ ASCII duyarsız; ileride.
 
 ## F3c — Raporlar, özel rapor, Nakit Akışı, Kurallar, Alıcılar, demo (2026-10-21, PR #6)
 

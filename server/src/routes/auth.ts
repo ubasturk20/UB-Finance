@@ -49,7 +49,7 @@ const authRateLimit = rateLimit({
   },
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { error: 'Too many attempts. Wait 15 minutes and try again.' },
+  message: { error: 'Çok fazla deneme yapıldı. 15 dakika bekleyip tekrar deneyin.' },
 });
 
 const sessionToken = (req: Request) => readCookie(req.headers.cookie, SESSION_COOKIE);
@@ -93,18 +93,18 @@ authRouter.get('/status', (req, res) => {
 });
 
 authRouter.post('/setup', authRateLimit, async (req, res) => {
-  if (!serverMode) return res.status(404).json({ error: 'Not found' });
+  if (!serverMode) return res.status(404).json({ error: 'Bulunamadı' });
   const parsed = z
     .object({ password, setupCode: z.string().max(100).optional() })
     .safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({
-      error: `Password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters`,
+      error: `Parola ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} karakter olmalı`,
     });
   }
   if (isPasswordSet()) return res.status(409).json({ error: 'A password has already been set' });
   if (!checkSetupCode(parsed.data.setupCode)) {
-    return res.status(403).json({ error: 'Incorrect setup code' });
+    return res.status(403).json({ error: 'Kurulum kodu yanlış' });
   }
   if (!(await setInitialPassword(parsed.data.password))) {
     return res.status(409).json({ error: 'A password has already been set' });
@@ -115,10 +115,10 @@ authRouter.post('/setup', authRateLimit, async (req, res) => {
 });
 
 authRouter.post('/login', authRateLimit, async (req, res) => {
-  if (!serverMode) return res.status(404).json({ error: 'Not found' });
+  if (!serverMode) return res.status(404).json({ error: 'Bulunamadı' });
   const parsed = z.object({ password: z.string().max(MAX_PASSWORD_LENGTH) }).safeParse(req.body);
   if (!parsed.success || !(await checkPassword(parsed.data.password))) {
-    return res.status(401).json({ error: 'Incorrect password' });
+    return res.status(401).json({ error: 'Parola yanlış' });
   }
   startSession(req, res);
   res.status(204).send();
@@ -131,19 +131,19 @@ authRouter.post('/logout', (req, res) => {
 });
 
 authRouter.post('/change-password', authRateLimit, async (req, res) => {
-  if (!serverMode) return res.status(404).json({ error: 'Not found' });
+  if (!serverMode) return res.status(404).json({ error: 'Bulunamadı' });
   const token = sessionToken(req);
-  if (!isValidSession(token)) return res.status(401).json({ error: 'Login required' });
+  if (!isValidSession(token)) return res.status(401).json({ error: 'Giriş yapmanız gerekiyor' });
   const parsed = z
     .object({ currentPassword: z.string().max(MAX_PASSWORD_LENGTH), newPassword: password })
     .safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({
-      error: `New password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters`,
+      error: `Yeni parola ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} karakter olmalı`,
     });
   }
   if (!(await checkPassword(parsed.data.currentPassword))) {
-    return res.status(401).json({ error: 'Current password is incorrect' });
+    return res.status(401).json({ error: 'Mevcut parola yanlış' });
   }
   await changePassword(parsed.data.newPassword, token);
   // The new password voids every device cookie; this browser gets a fresh one
@@ -158,12 +158,12 @@ authRouter.post('/change-password', authRateLimit, async (req, res) => {
 /** The caller's session token, or null after answering 404 / 401. */
 function signedIn(req: Request, res: Response): string | null {
   if (!serverMode) {
-    res.status(404).json({ error: 'Not found' });
+    res.status(404).json({ error: 'Bulunamadı' });
     return null;
   }
   const token = sessionToken(req);
   if (!token || !isValidSession(token)) {
-    res.status(401).json({ error: 'Login required' });
+    res.status(401).json({ error: 'Giriş yapmanız gerekiyor' });
     return null;
   }
   return token;
@@ -183,9 +183,9 @@ authRouter.delete('/sessions/:id', (req, res) => {
   const token = signedIn(req, res);
   if (!token) return;
   const id = req.params.id;
-  if (!/^[0-9a-f]{12}$/.test(id)) return res.status(400).json({ error: 'Invalid session id' });
+  if (!/^[0-9a-f]{12}$/.test(id)) return res.status(400).json({ error: 'Geçersiz oturum kimliği' });
   const current = listSessions(token).find((s) => s.current)?.id === id;
-  if (!deleteSessionByPublicId(id)) return res.status(404).json({ error: 'Not found' });
+  if (!deleteSessionByPublicId(id)) return res.status(404).json({ error: 'Bulunamadı' });
   if (current) res.clearCookie(SESSION_COOKIE, { path: '/' });
   res.status(204).send();
 });
@@ -198,5 +198,5 @@ export const requireSession: RequestHandler = (req, res, next) => {
     touchSession(token);
     return next();
   }
-  res.status(401).json({ error: 'Login required' });
+  res.status(401).json({ error: 'Giriş yapmanız gerekiyor' });
 };

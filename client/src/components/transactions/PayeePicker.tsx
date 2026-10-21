@@ -4,6 +4,7 @@ import { useCreatePayee } from '../../hooks/usePayees';
 import { PayeeIcon } from '../payees/PayeeIcon';
 import type { PayeeWithCount } from '../../types';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 interface Props {
   value: string | null;
@@ -46,10 +47,10 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
   );
 
   const filtered = query
-    ? sorted.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+    ? sorted.filter((p) => foldText(p.name).includes(foldText(query)))
     : sorted;
 
-  const exactMatch = payees.find((p) => p.name.toLowerCase() === query.toLowerCase());
+  const exactMatch = payees.find((p) => foldText(p.name) === foldText(query));
 
   function handleCreate() {
     if (!query.trim()) return;

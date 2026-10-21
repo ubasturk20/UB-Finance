@@ -9,7 +9,7 @@ type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export const DATE_PRESETS = ['1m', '3m', '6m', '12m', 'ytd', 'last-year', 'all', 'custom'] as const;
 
-const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Expected YYYY-MM');
+const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'YYYY-AA biçiminde olmalı');
 
 // Shared by widgets and custom reports. `preset: 'custom'` is a frozen range: `from`/`to`
 // are used as-is. Any other preset is live and the client recomputes it from today.
@@ -115,7 +115,12 @@ export function ensureDefaultDashboard() {
     const thisMonth = format(new Date(), 'yyyy-MM');
     const dateRange: DateRange = { preset: '1m', from: thisMonth, to: thisMonth };
     tx.insert(dashboardPages)
-      .values({ id: pageId, name: 'Overview', sortOrder: 0, dateRange: JSON.stringify(dateRange) })
+      .values({
+        id: pageId,
+        name: 'Genel Bakış',
+        sortOrder: 0,
+        dateRange: JSON.stringify(dateRange),
+      })
       .run();
     for (const type of [
       'summary',

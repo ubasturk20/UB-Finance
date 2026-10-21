@@ -103,19 +103,19 @@ dashboardsRouter.put('/:id', (req, res) => {
     db.update(dashboardPages).set(update).where(eq(dashboardPages.id, req.params.id)).run();
   }
   const page = getPage(req.params.id);
-  if (!page) return res.status(404).json({ error: 'Not found' });
+  if (!page) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(parsePage(page));
 });
 
 dashboardsRouter.delete('/:id', (req, res) => {
   const total = db.select({ value: count() }).from(dashboardPages).get()?.value ?? 0;
-  if (total <= 1) return res.status(400).json({ error: 'Cannot delete the last dashboard' });
+  if (total <= 1) return res.status(400).json({ error: 'Son pano silinemez' });
   db.delete(dashboardPages).where(eq(dashboardPages.id, req.params.id)).run();
   res.status(204).send();
 });
 
 dashboardsRouter.get('/:id/widgets', (req, res) => {
-  if (!getPage(req.params.id)) return res.status(404).json({ error: 'Not found' });
+  if (!getPage(req.params.id)) return res.status(404).json({ error: 'Bulunamadı' });
   const rows = db
     .select()
     .from(dashboardWidgets)
@@ -131,16 +131,16 @@ dashboardsRouter.post('/:id/widgets', (req, res) => {
   const { type, customReportId } = parsed.data;
   const meta = metaSchemaFor(type).safeParse(parsed.data.meta ?? {});
   if (!meta.success) return res.status(400).json({ error: meta.error.flatten() });
-  if (!getPage(req.params.id)) return res.status(404).json({ error: 'Not found' });
+  if (!getPage(req.params.id)) return res.status(404).json({ error: 'Bulunamadı' });
 
   if (type === 'custom-report') {
-    if (!customReportId) return res.status(400).json({ error: 'customReportId is required' });
+    if (!customReportId) return res.status(400).json({ error: 'customReportId gerekli' });
     const report = db
       .select({ id: customReports.id })
       .from(customReports)
       .where(eq(customReports.id, customReportId))
       .get();
-    if (!report) return res.status(400).json({ error: 'Unknown custom report' });
+    if (!report) return res.status(400).json({ error: 'Bilinmeyen özel rapor' });
   }
 
   const row = db.transaction((tx) =>
@@ -176,7 +176,7 @@ dashboardsRouter.get('/widgets/:widgetId', (req, res) => {
     .from(dashboardWidgets)
     .where(eq(dashboardWidgets.id, req.params.widgetId))
     .get();
-  if (!widget) return res.status(404).json({ error: 'Not found' });
+  if (!widget) return res.status(404).json({ error: 'Bulunamadı' });
   res.json(parseWidget(widget));
 });
 
@@ -188,7 +188,7 @@ dashboardsRouter.patch('/widgets/:widgetId', (req, res) => {
     .from(dashboardWidgets)
     .where(eq(dashboardWidgets.id, req.params.widgetId))
     .get();
-  if (!widget) return res.status(404).json({ error: 'Not found' });
+  if (!widget) return res.status(404).json({ error: 'Bulunamadı' });
 
   const update: Partial<typeof dashboardWidgets.$inferInsert> = {};
   if (parsed.data.meta !== undefined) {
@@ -199,7 +199,7 @@ dashboardsRouter.patch('/widgets/:widgetId', (req, res) => {
     update.meta = JSON.stringify(meta.data);
   }
   if (parsed.data.pageId && parsed.data.pageId !== widget.pageId) {
-    if (!getPage(parsed.data.pageId)) return res.status(400).json({ error: 'Unknown dashboard' });
+    if (!getPage(parsed.data.pageId)) return res.status(400).json({ error: 'Bilinmeyen pano' });
     const existing = db
       .select()
       .from(dashboardWidgets)

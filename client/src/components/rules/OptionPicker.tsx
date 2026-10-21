@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search } from 'lucide-react';
 import { t } from '../../i18n';
+import { foldText } from '../../utils/textFold';
 
 export interface PickerOption {
   id: string;
@@ -49,10 +50,8 @@ export function OptionPicker(props: Props) {
 
   const byId = useMemo(() => new Map(options.map((o) => [o.id, o])), [options]);
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return q
-      ? options.filter((o) => `${o.group ?? ''} ${o.label}`.toLowerCase().includes(q))
-      : options;
+    const q = foldText(query.trim());
+    return q ? options.filter((o) => foldText(`${o.group ?? ''} ${o.label}`).includes(q)) : options;
   }, [options, query]);
 
   function pick(id: string) {

@@ -264,7 +264,7 @@ describe('multiple currencies', () => {
     // Euro amounts have two decimals: as yen (none) they'd mean a hundred times more
     const yen = await call('PUT', '/currency', { currency: 'JPY' });
     expect(yen.status).toBe(409);
-    expect(yen.body.error).toMatch(/different number of decimals/);
+    expect(yen.body.error).toMatch(/farklı sayıda ondalık basamak/);
   });
 
   it('values net worth at the rate of the day', async () => {
@@ -310,8 +310,8 @@ describe('multiple currencies', () => {
   it('exports the currency and the value with each transaction', async () => {
     const csv = (await call('GET', '/export/transactions/csv')).body as string;
     const [header] = csv.split('\n');
-    expect(header).toContain('Currency');
-    expect(header).toContain('Amount (EUR)');
+    expect(header).toContain('Para birimi');
+    expect(header).toContain('Tutar (EUR)');
     expect(csv).toContain('JPY');
   });
 

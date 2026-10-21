@@ -37,7 +37,7 @@ test('a new server asks for a password and the setup code', async ({ baseURL }) 
   await owner.getByLabel('Yeni parola').fill(PASSWORD);
   await owner.getByLabel('Parolayı onayla').fill(PASSWORD);
   await owner.getByRole('button', { name: 'Parola oluştur' }).click();
-  await expect(owner.getByText('Incorrect setup code')).toBeVisible();
+  await expect(owner.getByText('Kurulum kodu yanlış')).toBeVisible();
 
   await owner.getByLabel('Parolayı onayla').fill('something else');
   await owner.getByLabel('Kurulum kodu').fill(process.env.E2E_SETUP_CODE!.toLowerCase());
@@ -74,7 +74,7 @@ test('another browser sees only the login screen', async ({ page, baseURL }) => 
   await expect(page.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await expect(page.getByText('Credit Union')).toBeHidden();
   await signIn(page, 'not the password');
-  await expect(page.getByText('Incorrect password')).toBeVisible();
+  await expect(page.getByText('Parola yanlış')).toBeVisible();
   await signIn(page, PASSWORD);
   await expect(page.getByRole('heading', { level: 1, name: 'Hesaplar' })).toBeVisible();
   await expect(page.getByRole('main')).toContainText('Credit Union');
@@ -99,7 +99,7 @@ test('changing the password signs out other browsers', async ({ browser, baseURL
   await other.reload();
   await expect(other.getByText("UB-Finance'a giriş yapın")).toBeVisible();
   await signIn(other, PASSWORD);
-  await expect(other.getByText('Incorrect password')).toBeVisible();
+  await expect(other.getByText('Parola yanlış')).toBeVisible();
   await signIn(other, NEW_PASSWORD);
   await expect(other.getByRole('complementary')).toBeVisible();
   await other.context().close();
