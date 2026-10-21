@@ -1,0 +1,208 @@
+// Recurring transactions (bills, subscriptions, income on a schedule).
+export const recurring = {
+  // Page
+  'rec.page.title': 'Düzenli İşlemler',
+  'rec.tab.monthly': 'Aylık',
+  'rec.tab.all': 'Tüm düzenli işlemler',
+  'rec.find': 'Düzenli işlemleri bul',
+  'rec.add': 'Düzenli işlem ekle',
+
+  // Frequencies
+  'rec.freq.once': 'Bir kez',
+  'rec.freq.weekly': 'Haftalık',
+  'rec.freq.biweekly': '2 haftada bir',
+  'rec.freq.semimonthly': 'Ayda iki kez',
+  'rec.freq.monthly': 'Aylık',
+  'rec.freq.quarterly': '3 ayda bir',
+  'rec.freq.semiannually': '6 ayda bir',
+  'rec.freq.yearly': 'Yıllık',
+
+  // Status badges
+  'rec.status.missed': 'Kaçırıldı',
+  'rec.status.due': 'Vadesi geldi',
+  'rec.status.upcoming': 'Yaklaşan',
+  'rec.status.paid': 'Ödendi',
+  'rec.status.skipped': 'Atlandı',
+  'rec.status.canceled': 'İptal edildi',
+  'rec.status.paused': 'Duraklatıldı',
+  'rec.status.scheduled': 'Planlandı',
+
+  // Upcoming length
+  'rec.upcoming.preset.day': '1 gün',
+  'rec.upcoming.preset.week': '1 hafta',
+  'rec.upcoming.preset.twoWeeks': '2 hafta',
+  'rec.upcoming.preset.month': '1 ay',
+  'rec.upcoming.preset.currentMonth': 'İçinde bulunulan ayın sonu',
+  'rec.upcoming.n.day': '{n} gün',
+  'rec.upcoming.n.week': '{n} hafta',
+  'rec.upcoming.n.month': '{n} ay',
+  'rec.upcoming.n.year': '{n} yıl',
+  'rec.upcoming.unit.day': 'Gün',
+  'rec.upcoming.unit.week': 'Hafta',
+  'rec.upcoming.unit.month': 'Ay',
+  'rec.upcoming.unit.year': 'Yıl',
+  'rec.upcoming.title': 'Yaklaşan süresini değiştir',
+  // The intro is three pieces around the bold status names: Yaklaşan, Planlandı
+  'rec.upcoming.intro1': 'Düzenli bir işlemin, tarihinden kaç gün önce',
+  'rec.upcoming.intro2': 'olarak görüneceğini değiştirin. Daha sonrakiler',
+  'rec.upcoming.intro3': 'olarak görünür.',
+  'rec.upcoming.note':
+    'Bu yalnızca düzenli işlemlerin nasıl gösterildiğini etkiler. ' +
+    'İstediğiniz zaman değiştirilebilir.',
+  'rec.upcoming.custom': 'Özel süre',
+  'rec.upcoming.summary1': 'Önümüzdeki',
+  'rec.upcoming.days': '{count} gün',
+  'rec.upcoming.summary2': 'içinde vadesi gelenler Yaklaşan olarak görünür.',
+  'rec.upcoming.button': 'Yaklaşan: {length}',
+
+  // All recurring table
+  'rec.all.markNextPaid': 'Sıradakini ödendi olarak işaretle',
+  'rec.all.skipNext': 'Sıradaki tarihi atla',
+  'rec.all.pause': 'Duraklat',
+  'rec.all.resume': 'Sürdür',
+  'rec.all.restart': 'Yeniden başlat',
+  'rec.all.cancel': 'Düzenli işlemi iptal et',
+  'rec.all.deletePermanently': 'Kalıcı olarak sil',
+  'rec.all.next': 'Sıradaki: {date}',
+  'rec.all.actionsFor': '{name} için diğer işlemler',
+  'rec.all.filter': 'Düzenli işlemlerde ara…',
+  'rec.col.name': 'Ad',
+  'rec.col.payee': 'Alıcı',
+  'rec.col.account': 'Hesap',
+  'rec.col.nextDate': 'Sıradaki tarih',
+  'rec.col.status': 'Durum',
+  'rec.col.amount': 'Tutar',
+  'rec.col.frequency': 'Sıklık',
+  'rec.col.date': 'Tarih',
+  'rec.col.when': 'Ne zaman',
+  'rec.all.noMatches': 'Eşleşen düzenli işlem yok',
+  'rec.all.noActive': 'Etkin düzenli işlem yok',
+  'rec.all.empty.title': 'Henüz düzenli işlem yok',
+  'rec.all.empty.description':
+    'Neyin ne zaman ödeneceğini görmek için faturaları, abonelikleri ve maaşları ekleyin ' +
+    'ya da UB-Finance’in onları mevcut işlemlerinizde bulmasına izin verin.',
+  'rec.all.showCanceled': 'İptal edilen düzenli işlemleri göster ({count})',
+  'rec.all.confirm.deleteTitle': 'Düzenli işlem silinsin mi?',
+  'rec.all.confirm.cancelTitle': 'Düzenli işlem iptal edilsin mi?',
+  'rec.all.confirm.deleteMessage': '"{name}" kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+  'rec.all.confirm.cancelMessage':
+    '"{name}" artık yeni tekrar oluşturmayacak. İptal edilenler listesinden yeniden ' +
+    'başlatabilirsiniz.',
+  'rec.all.confirm.cancelItem': 'İptal et',
+
+  // Monthly tab
+  'rec.month.remaining': 'kalan',
+  'rec.month.receivedOf': '{done} / {total} alındı',
+  'rec.month.paidOf': '{done} / {total} ödendi',
+  'rec.month.noneThisMonth': 'Bu ay yok',
+  'rec.month.previous': 'Önceki ay',
+  'rec.month.next': 'Sonraki ay',
+  'rec.month.list': 'Liste',
+  'rec.month.calendar': 'Takvim',
+  'rec.month.income': 'Gelir',
+  'rec.month.expenses': 'Gider',
+  'rec.month.empty.firstTitle': 'Faturalarınızı, aboneliklerinizi ve maaşlarınızı takip edin',
+  'rec.month.empty.firstDescription':
+    'Her ay neyin vadesinin geldiğini ve neyin ödendiğini görün. Tek tek ekleyin ya da ' +
+    'UB-Finance’in onları mevcut işlemlerinizde bulmasına izin verin.',
+  'rec.month.empty.title': 'Bu ay düzenli işlem yok',
+  'rec.month.empty.description': 'Bu ay için planlanmış bir şey yok.',
+  'rec.calendar.more': '+{count} daha',
+
+  // Occurrence row
+  'rec.row.overdue': '{count} gün gecikti',
+  'rec.row.tomorrow': 'Yarın',
+  'rec.row.inDays': '{count} gün sonra',
+  'rec.row.markPaid': 'Ödendi olarak işaretle',
+  'rec.row.match': 'İşlemle eşleştir',
+  'rec.row.skip': 'Atla',
+  'rec.row.unlink': 'İşlem bağlantısını kaldır',
+  'rec.row.edit': 'Düzenli işlemi düzenle',
+  'rec.row.actualPaid': 'Gerçekte ödenen tutar',
+  'rec.row.paidAmount': '{amount} ödendi',
+
+  // Discover
+  'rec.discover.title': 'Düzenli işlemleri ara',
+  'rec.discover.intro':
+    'İşlem geçmişiniz; aynı alıcıya, benzer tutarda, haftalık, 2 haftalık ya da aylık ' +
+    'düzenle yapılan ödemeler için tarandı. Takip etmek istediklerinizi seçin. Eşleşen ' +
+    'geçmiş işlemler her yeni düzenli işleme bağlanacak.',
+  'rec.discover.hint':
+    'Eksik bir şey mi var? İşlemler yalnızca aynı alıcıyı paylaşıyorsa gruplanır; ' +
+    'alıcıları birbirine uyacak şekilde yeniden adlandırmak işe yarayabilir. Zaten takip ' +
+    'ettiğiniz alıcılar listelenmez.',
+  'rec.discover.selectAll': 'Tümünü seç',
+  'rec.discover.scanning': 'İşlemleriniz taranıyor…',
+  'rec.discover.none': 'Düzenli işlem bulunamadı',
+  'rec.discover.track': 'Takip et: {name}',
+  'rec.discover.pastSince': '{count} geçmiş işlem · {month} itibarıyla',
+  'rec.discover.selected': '{count} seçildi',
+  'rec.discover.shiftHint': 'Bir aralık seçmek için Shift+tıklayın',
+  'rec.discover.creating': 'Oluşturuluyor…',
+  'rec.discover.createCount': '{count} düzenli işlem oluştur',
+  'rec.discover.create': 'Düzenli işlem oluştur',
+  'rec.discover.approx': ' (yaklaşık)',
+  'rec.discover.weekly': 'Her hafta {day}{approx}',
+  'rec.discover.biweekly': '2 haftada bir {day}{approx}',
+  'rec.discover.monthlyDay': 'Her ayın {day}. günü{approx}',
+  'rec.discover.monthlyLast': 'Her ayın son günü{approx}',
+  'rec.weekday.0': 'Pazar',
+  'rec.weekday.1': 'Pazartesi',
+  'rec.weekday.2': 'Salı',
+  'rec.weekday.3': 'Çarşamba',
+  'rec.weekday.4': 'Perşembe',
+  'rec.weekday.5': 'Cuma',
+  'rec.weekday.6': 'Cumartesi',
+
+  // Match suggestions
+  'rec.suggest.banner': '{count} işlem düzenli işlemlerinizle eşleşebilir',
+  'rec.suggest.hide': 'Gizle',
+  'rec.suggest.review': 'Şimdi incele',
+  'rec.suggest.score': '({score} eşleşme)',
+  'rec.suggest.accept': 'Eşleşmeyi kabul et',
+  'rec.suggest.dismiss': 'Yoksay',
+
+  // Match to transaction
+  'rec.match.title': 'İşlemle eşleştir',
+  'rec.match.expected': 'Beklenen: {date} · {amount}',
+  'rec.match.filter': 'Alıcıya ya da notlara göre ara…',
+  'rec.match.none': 'Eşleşen işlem bulunamadı.',
+  'rec.match.match': 'Eşleştir',
+
+  // Form
+  'rec.form.editTitle': 'Düzenli işlemi düzenle',
+  'rec.form.addTitle': 'Düzenli işlem ekle',
+  'rec.form.name': 'Ad',
+  'rec.form.namePlaceholder': 'ör. Netflix, Kira, Maaş…',
+  'rec.form.amount': 'Tutar',
+  'rec.form.estimatedAmount': 'Tahmini tutar',
+  'rec.form.type': 'Tür',
+  'rec.form.expense': 'Gider',
+  'rec.form.income': 'Gelir',
+  'rec.form.precision': 'Tutar kesinliği',
+  'rec.form.exact': 'Kesin',
+  'rec.form.approx': 'Yaklaşık',
+  'rec.form.variable': 'Değişken',
+  'rec.form.variableHint':
+    'Tutar tahminidir: tahmin ve eşleştirme için kullanılır, kesin bir beklenti değildir.',
+  'rec.form.frequency': 'Sıklık',
+  'rec.form.account': 'Hesap',
+  'rec.form.noAccount': 'Hesap yok',
+  'rec.form.startDate': 'Başlangıç tarihi',
+  'rec.form.endDate': 'Bitiş tarihi',
+  'rec.form.optional': '(isteğe bağlı)',
+  'rec.form.payee': 'Alıcı',
+  'rec.form.category': 'Kategori',
+  'rec.form.notes': 'Notlar',
+  'rec.form.notesPlaceholder': 'İsteğe bağlı notlar…',
+  'rec.form.autoCreate': 'İşlemleri otomatik oluştur',
+  'rec.form.advanced': 'Gelişmiş',
+  'rec.form.weekendAdjust': 'Hafta sonu ayarı',
+  'rec.form.weekend.none': 'Yok',
+  'rec.form.weekend.before': 'Hafta sonundan önce',
+  'rec.form.weekend.after': 'Hafta sonundan sonra',
+  'rec.form.weekend.closest': 'En yakın iş günü',
+  'rec.form.dateFlexibility': 'Tarih esnekliği',
+  'rec.form.dateFlexibilityHint': '(eşleştirme için ± gün)',
+  'rec.form.saveChanges': 'Değişiklikleri kaydet',
+} as const;

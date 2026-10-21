@@ -1,4 +1,5 @@
 import { formatCurrency } from '../../utils/currency';
+import { t } from '../../i18n';
 import {
   addMonths,
   addYears,
@@ -24,11 +25,11 @@ export function formatScheduleAmount(amount: number, amountType: AmountType): st
 export const DEFAULT_UPCOMING_LENGTH = '7';
 
 export const UPCOMING_PRESETS: { value: string; label: string }[] = [
-  { value: '1', label: '1 day' },
-  { value: '7', label: '1 week' },
-  { value: '14', label: '2 weeks' },
-  { value: 'oneMonth', label: '1 month' },
-  { value: 'currentMonth', label: 'End of the current month' },
+  { value: '1', label: t('rec.upcoming.preset.day') },
+  { value: '7', label: t('rec.upcoming.preset.week') },
+  { value: '14', label: t('rec.upcoming.preset.twoWeeks') },
+  { value: 'oneMonth', label: t('rec.upcoming.preset.month') },
+  { value: 'currentMonth', label: t('rec.upcoming.preset.currentMonth') },
 ];
 
 export const isCustomUpcomingLength = (v: string) => !UPCOMING_PRESETS.some((p) => p.value === v);
@@ -68,7 +69,16 @@ export function describeUpcomingLength(length: string): string {
   if (preset) return preset.label;
   const [num, unit] = length.split('-');
   const n = Math.max(1, parseInt(num, 10) || 1);
-  return `${n} ${unit}${n === 1 ? '' : 's'}`;
+  switch (unit) {
+    case 'week':
+      return t('rec.upcoming.n.week', { n });
+    case 'month':
+      return t('rec.upcoming.n.month', { n });
+    case 'year':
+      return t('rec.upcoming.n.year', { n });
+    default:
+      return t('rec.upcoming.n.day', { n });
+  }
 }
 
 /**

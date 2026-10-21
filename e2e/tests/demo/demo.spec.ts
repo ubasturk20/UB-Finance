@@ -147,10 +147,10 @@ test("bank connections can't be set up in the demo", async ({ page }) => {
 
 test('the payment waiting to be matched can be confirmed', async ({ page }) => {
   await openDemo(page, '/recurring');
-  await page.getByRole('button', { name: 'Review now' }).click();
+  await page.getByRole('button', { name: 'Şimdi incele' }).click();
   await expect(page.getByText('Kindred Food Bank').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Accept match' }).click();
-  await expect(page.getByRole('button', { name: 'Review now' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Eşleşmeyi kabul et' }).click();
+  await expect(page.getByRole('button', { name: 'Şimdi incele' })).toHaveCount(0);
 });
 
 /** The accounts in this tab's demo, from its API */

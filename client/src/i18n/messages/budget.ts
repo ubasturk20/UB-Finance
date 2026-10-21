@@ -1,0 +1,110 @@
+// Budget page, one category's page and savings goals.
+export const budget = {
+  // Budget page: month navigation and first-run hint
+  'budget.month.previous': 'Önceki ay',
+  'budget.month.next': 'Sonraki ay',
+  'budget.empty.nothingPlanned': '{month} için henüz bir şey planlanmadı.',
+  'budget.empty.hintBefore':
+    'Her kategoride ne kazanmayı ve harcamayı beklediğinizi belirlemek için',
+  'budget.empty.hintAfterTap': 'sütunundaki bir tutara dokunun.',
+  'budget.empty.hintAfterClick': 'sütunundaki bir tutara tıklayın.',
+  'budget.empty.tuckedAway': 'Boş bıraktığınız kategoriler, bir şey planladıktan sonra gizlenir.',
+  'budget.empty.howItWorks': 'Bütçeleme nasıl işler',
+  'budget.empty.noCategories': 'Henüz kategori yok.',
+  'budget.empty.addInSettings': "Ayarlar'dan ekleyin",
+
+  // Budget table
+  'budget.col.income': 'Gelir',
+  'budget.col.expenses': 'Gider',
+  'budget.col.planned': 'Planlanan',
+  'budget.col.actual': 'Gerçekleşen',
+  'budget.col.remaining': 'Kalan',
+  'budget.col.spent': 'Harcanan',
+  'budget.col.received': 'Alınan',
+  'budget.totalIncome': 'Toplam Gelir',
+  'budget.totalExpenses': 'Toplam Gider',
+  'budget.plannedFor': '{name} için planlanan',
+  'budget.plannedForAmount': '{name} için planlanan: {amount}',
+  'budget.showInactive': '{count} etkin olmayan kategoriyi göster',
+  'budget.hideInactive': '{count} etkin olmayan kategoriyi gizle',
+
+  // Summary beside the table
+  'budget.summary.toBeBudgeted': 'Bütçelenecek',
+  'budget.summary.overBudget': 'Bütçe aşıldı',
+  'budget.summary.fullyBudgeted': 'Tamamen bütçelendi',
+  'budget.summary.almostBudgeted': 'Neredeyse bütçelendi',
+  'budget.summary.leftToBudget': 'Bütçelenecek',
+  'budget.summary.planned': '{amount} planlandı',
+  'budget.summary.remaining': 'kalan',
+  'budget.summary.earned': 'kazanılan',
+  'budget.summary.spent': 'harcanan',
+  'budget.summary.contributed': 'biriktirilen',
+  'budget.summary.saveUp': 'Birikim',
+  'budget.summary.tab.summary': 'Özet',
+
+  // Phone cards and the planning sheet
+  'budget.phone.actualOfPlanned': '{actual} / {planned}',
+  'budget.phone.remaining': ' kalan',
+  'budget.sheet.title': '{name} planı',
+  'budget.sheet.titleEmpty': 'Plan',
+  'budget.sheet.allYear': 'Bu tutarı sonraki 12 ay için kullan',
+
+  // Planned amount history (popover and sheet)
+  'budget.history.title': 'Geçmiş',
+  'budget.history.earnedLastMonth': 'Geçen ay kazanılan',
+  'budget.history.spentLastMonth': 'Geçen ay harcanan',
+  'budget.history.monthlyAverage': 'Aylık ortalama',
+  'budget.history.none': 'Geçmiş verisi yok',
+  'budget.history.applyAll': '{amount} tutarını sonraki tüm aylara uygula',
+
+  // One category's page
+  'budget.category.fallbackName': 'Kategori',
+  'budget.category.spendingHistory': 'Harcama Geçmişi',
+  'budget.category.summary': 'Özet',
+  'budget.category.noData': 'Veri yok',
+  'budget.category.totalTransactions': 'Toplam işlem',
+  'budget.category.largest': 'En büyük işlem',
+  'budget.category.average': 'Ortalama işlem',
+  'budget.category.totalIncome': 'Toplam gelir',
+  'budget.category.totalSpending': 'Toplam harcama',
+  'budget.category.first': 'İlk işlem',
+  'budget.category.last': 'Son işlem',
+
+  // Goals page
+  'goals.add': 'Hedef ekle',
+  'goals.edit': 'Hedefi düzenle',
+  'goals.delete': 'Hedefi sil',
+  'goals.deleteMessage': '"{name}" silinsin mi? Bu işlem geri alınamaz.',
+  'goals.empty.title': 'Önemli olan için biriktirin',
+  'goals.empty.description':
+    'Acil durum fonu, bir seyahat ya da yeni bir araba gibi bir hedef belirleyin; ne kadar ' +
+    'yaklaştığınızı ve her ay ne kadar ayırmanız gerektiğini görün.',
+  'goals.stats.saved': 'Biriken',
+  'goals.stats.ofTarget': 'Hedefin {percent} kadarı',
+  'goals.stats.target': 'Hedef',
+  'goals.stats.leftToSave': 'Biriktirilecek',
+  'goals.stats.reached': 'Ulaşılan hedef',
+  'goals.stats.reachedOf': '{done} / {total}',
+  'goals.group.inProgress': 'Devam eden',
+  'goals.group.completed': 'Tamamlanan',
+  'goals.group.count': '{count} hedef',
+  'goals.row.targetDate': 'Hedef tarih: {date}',
+  'goals.row.ofTarget': 'hedef {amount}',
+  'goals.row.reached': 'Hedefe ulaşıldı',
+  'goals.row.pastTarget': 'Hedef tarihi geçti · {amount} kaldı',
+  'goals.row.toGo': '{amount} kaldı',
+  'goals.row.perMonth': ' · zamanında ulaşmak için ayda {amount}',
+
+  // Goal form
+  'goals.form.name': 'Ad',
+  'goals.form.namePlaceholder': 'ör. Acil durum fonu',
+  'goals.form.target': 'Hedef',
+  'goals.form.savedSoFar': 'Şu ana kadar biriken',
+  'goals.form.targetDate': 'Hedef tarih',
+  'goals.form.targetDateOptional': 'Hedef tarih (isteğe bağlı)',
+  'goals.form.linkedAccount': 'Bağlı hesap',
+  'goals.form.linkedAccountOptional': 'Bağlı hesap (isteğe bağlı)',
+  'goals.form.icon': 'Simge',
+  'goals.form.color': 'Renk',
+  'goals.form.colorOption': 'Renk {color}',
+} as const;

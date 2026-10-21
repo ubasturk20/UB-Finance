@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { t } from '../../i18n';
 import {
   DEFAULT_UPCOMING_LENGTH,
   UPCOMING_PRESETS,
@@ -10,10 +11,10 @@ import {
 } from './scheduleFormat';
 
 const UNITS = [
-  { value: 'day', label: 'Days' },
-  { value: 'week', label: 'Weeks' },
-  { value: 'month', label: 'Months' },
-  { value: 'year', label: 'Years' },
+  { value: 'day', label: t('rec.upcoming.unit.day') },
+  { value: 'week', label: t('rec.upcoming.unit.week') },
+  { value: 'month', label: t('rec.upcoming.unit.month') },
+  { value: 'year', label: t('rec.upcoming.unit.year') },
 ];
 
 const selectCls =
@@ -42,15 +43,14 @@ export default function UpcomingLengthModal({ isOpen, onClose }: Props) {
   const days = getUpcomingDays(temp);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Change upcoming length" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('rec.upcoming.title')} size="md">
       <div className="space-y-3 text-sm text-text-secondary">
         <p>
-          Change how many days before its date a recurring item shows as <strong>Upcoming</strong>.
-          Later items show as <strong>Scheduled</strong>.
+          {t('rec.upcoming.intro1')} <strong>{t('rec.status.upcoming')}</strong>{' '}
+          {t('rec.upcoming.intro2')} <strong>{t('rec.status.scheduled')}</strong>{' '}
+          {t('rec.upcoming.intro3')}
         </p>
-        <p className="text-xs text-text-tertiary">
-          This only affects how recurring items are displayed. It can be changed at any time.
-        </p>
+        <p className="text-xs text-text-tertiary">{t('rec.upcoming.note')}</p>
       </div>
 
       <div className="mt-4 space-y-3">
@@ -73,7 +73,7 @@ export default function UpcomingLengthModal({ isOpen, onClose }: Props) {
               {p.label}
             </option>
           ))}
-          <option value="custom">Custom length</option>
+          <option value="custom">{t('rec.upcoming.custom')}</option>
         </select>
 
         {custom && (
@@ -100,17 +100,17 @@ export default function UpcomingLengthModal({ isOpen, onClose }: Props) {
         )}
 
         <p className="text-xs text-text-tertiary">
-          Items due within the next{' '}
+          {t('rec.upcoming.summary1')}{' '}
           <span className="font-medium text-text-secondary">
-            {days} {days === 1 ? 'day' : 'days'}
+            {t('rec.upcoming.days', { count: days })}
           </span>{' '}
-          will show as Upcoming.
+          {t('rec.upcoming.summary2')}
         </p>
       </div>
 
       <div className="flex justify-end gap-2 mt-5">
         <Button variant="secondary" size="sm" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           size="sm"
@@ -120,7 +120,7 @@ export default function UpcomingLengthModal({ isOpen, onClose }: Props) {
             onClose();
           }}
         >
-          Save
+          {t('common.save')}
         </Button>
       </div>
     </Modal>

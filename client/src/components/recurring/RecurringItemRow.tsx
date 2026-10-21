@@ -6,6 +6,7 @@ import RowMenu, { type RowMenuItem } from '../ui/RowMenu';
 import { useIsPhone } from '../../hooks/useIsPhone';
 import { FREQ_LABEL, formatScheduleAmount, occurrenceBadgeStatus } from './scheduleFormat';
 import { formatShortDay } from '../../utils/dates';
+import { t } from '../../i18n';
 
 /** Shared with the section header in MonthlyTab so columns line up. */
 export const OCCURRENCE_GRID =
@@ -48,32 +49,37 @@ export default function RecurringItemRow({
   let relative: { text: string; tone: string } | null = null;
   if (occ.displayStatus === 'waiting') {
     const n = Math.abs(daysUntil);
-    relative = { text: `${n} ${n === 1 ? 'day' : 'days'} overdue`, tone: 'text-negative' };
+    relative = { text: t('rec.row.overdue', { count: n }), tone: 'text-negative' };
   } else if (isPending) {
     relative = {
-      text: daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `in ${daysUntil} days`,
+      text:
+        daysUntil === 0
+          ? t('common.today')
+          : daysUntil === 1
+            ? t('rec.row.tomorrow')
+            : t('rec.row.inDays', { count: daysUntil }),
       tone: 'text-text-tertiary',
     };
   }
 
   const menu: RowMenuItem[] = [
     {
-      label: 'Mark as paid',
+      label: t('rec.row.markPaid'),
       onClick: () => onMarkPaid?.(),
       hidden: !isPending || !onMarkPaid,
     },
     {
-      label: 'Match to transaction',
+      label: t('rec.row.match'),
       onClick: () => onMatch?.(),
       hidden: !isPending || !onMatch,
     },
-    { label: 'Skip', onClick: () => onSkip?.(), hidden: !isPending || !onSkip },
+    { label: t('rec.row.skip'), onClick: () => onSkip?.(), hidden: !isPending || !onSkip },
     {
-      label: 'Unlink transaction',
+      label: t('rec.row.unlink'),
       onClick: () => onUnmatch?.(),
       hidden: !isPaid || !onUnmatch,
     },
-    { label: 'Edit recurring', onClick: () => onEdit?.(), hidden: !onEdit },
+    { label: t('rec.row.edit'), onClick: () => onEdit?.(), hidden: !onEdit },
   ];
   const amount = (
     <p
@@ -113,14 +119,14 @@ export default function RecurringItemRow({
           <div className="mt-1.5 flex items-center gap-2">
             <StatusBadge status={occurrenceBadgeStatus(occ, upcomingDays)} />
             {hasDifferentAmount && (
-              <span className="text-xs text-caution tabular-nums" title="Actual paid amount">
-                Paid {formatCurrency(occ.matchedAmount!)}
+              <span className="text-xs text-caution tabular-nums" title={t('rec.row.actualPaid')}>
+                {t('rec.row.paidAmount', { amount: formatCurrency(occ.matchedAmount!) })}
               </span>
             )}
           </div>
         </div>
         <div onClick={(e) => e.stopPropagation()}>
-          <RowMenu label={`Actions for ${occ.scheduleName}`} items={menu} />
+          <RowMenu label={t('rec.all.actionsFor', { name: occ.scheduleName })} items={menu} />
         </div>
       </div>
     );
@@ -159,14 +165,14 @@ export default function RecurringItemRow({
       <div className="text-right">
         {amount}
         {hasDifferentAmount && (
-          <p className="text-xs text-caution tabular-nums" title="Actual paid amount">
+          <p className="text-xs text-caution tabular-nums" title={t('rec.row.actualPaid')}>
             {formatCurrency(occ.matchedAmount!)}
           </p>
         )}
       </div>
 
       <div onClick={(e) => e.stopPropagation()}>
-        <RowMenu label={`Actions for ${occ.scheduleName}`} items={menu} />
+        <RowMenu label={t('rec.all.actionsFor', { name: occ.scheduleName })} items={menu} />
       </div>
     </div>
   );

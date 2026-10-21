@@ -24,6 +24,7 @@ import { ExternalLink } from '../components/ui/ExternalLink';
 import { docsUrl } from '../utils/project';
 import { splitCategories } from '../utils/budgetFigures';
 import type { BudgetCategory, BudgetGroup, BudgetType } from '../types';
+import { t } from '../i18n';
 
 function AmountInput({
   cents,
@@ -136,7 +137,7 @@ function CategoryRow({
             <>
               <AmountInput
                 cents={cat.budgeted}
-                label={`Planned for ${cat.name}`}
+                label={t('budget.plannedFor', { name: cat.name })}
                 onSave={onSave}
                 onCancel={onCancel}
               />
@@ -152,8 +153,11 @@ function CategoryRow({
             <button
               onClick={() => onStartEdit(cat.id)}
               disabled={!canSave}
-              title={canSave ? undefined : 'Saving is paused until FlyBudget reconnects'}
-              aria-label={`Planned for ${cat.name}: ${formatCurrency(cat.budgeted)}`}
+              title={canSave ? undefined : t('shell.hint.savingPaused')}
+              aria-label={t('budget.plannedForAmount', {
+                name: cat.name,
+                amount: formatCurrency(cat.budgeted),
+              })}
               className="tabular-nums text-sm rounded px-2 py-0.5 min-w-[5.5rem] text-right border border-border bg-surface transition-colors hover:border-text-tertiary cursor-text disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="text-text-secondary">{formatCurrency(cat.budgeted)}</span>
@@ -273,8 +277,9 @@ function IncomeGroupSection({
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive{' '}
-                  {inactive.length === 1 ? 'category' : 'categories'}
+                  {t(showUnbudgeted ? 'budget.hideInactive' : 'budget.showInactive', {
+                    count: inactive.length,
+                  })}
                 </button>
               </td>
             </tr>
@@ -386,8 +391,9 @@ function BudgetTypeSection({
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive{' '}
-                  {inactive.length === 1 ? 'category' : 'categories'}
+                  {t(showUnbudgeted ? 'budget.hideInactive' : 'budget.showInactive', {
+                    count: inactive.length,
+                  })}
                 </button>
               </td>
             </tr>
@@ -399,10 +405,10 @@ function BudgetTypeSection({
 }
 
 const BUDGET_TYPES: { key: BudgetType; label: string }[] = [
-  { key: 'fixed', label: 'Fixed' },
-  { key: 'flexible', label: 'Flexible' },
-  { key: 'non_monthly', label: 'Non-Monthly' },
-  { key: 'savings', label: 'Savings/Investments' },
+  { key: 'fixed', label: t('settings.categories.type.fixed') },
+  { key: 'flexible', label: t('settings.categories.type.flexible') },
+  { key: 'non_monthly', label: t('settings.categories.type.nonMonthly') },
+  { key: 'savings', label: t('settings.categories.type.savings') },
 ];
 
 export default function BudgetPage() {
@@ -427,9 +433,9 @@ export default function BudgetPage() {
 
   const expensesByType = useMemo(
     () =>
-      BUDGET_TYPES.map((t) => ({
-        ...t,
-        categories: allExpenseCats.filter((c) => c.budgetType === t.key),
+      BUDGET_TYPES.map((bt) => ({
+        ...bt,
+        categories: allExpenseCats.filter((c) => c.budgetType === bt.key),
       })).filter((bt) => bt.categories.length > 0),
     [allExpenseCats],
   );
@@ -503,20 +509,20 @@ export default function BudgetPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedMonth(format(subMonths(monthDate, 1), 'yyyy-MM'))}
-              aria-label="Previous month"
+              aria-label={t('budget.month.previous')}
               className="p-1.5 max-md:min-w-11 max-md:min-h-11 flex items-center justify-center rounded-md hover:bg-surface-alt text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={() => setSelectedMonth(format(addMonths(monthDate, 1), 'yyyy-MM'))}
-              aria-label="Next month"
+              aria-label={t('budget.month.next')}
               className="p-1.5 max-md:min-w-11 max-md:min-h-11 flex items-center justify-center rounded-md hover:bg-surface-alt text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <ChevronRight size={18} />
             </button>
             <Button variant="secondary" size="sm" onClick={goToToday}>
-              Today
+              {t('common.today')}
             </Button>
           </div>
         </div>
@@ -526,15 +532,16 @@ export default function BudgetPage() {
         <div className="flex items-start gap-3 px-6 py-3 bg-brand-50 border-b border-border-light text-sm text-text-secondary shrink-0">
           <Lightbulb size={16} className="text-brand-600 shrink-0 mt-0.5" aria-hidden />
           <p>
-            Nothing is planned for {format(monthDate, 'MMMM')} yet. {isPhone ? 'Tap' : 'Click'} an
-            amount in the <strong className="font-medium text-text">Planned</strong> column to set
-            what you expect to earn and spend in each category. Categories you leave empty are
-            tucked away once you've planned something.{' '}
+            {t('budget.empty.nothingPlanned', { month: format(monthDate, 'MMMM') })}{' '}
+            {t('budget.empty.hintBefore')}{' '}
+            <strong className="font-medium text-text">{t('budget.col.planned')}</strong>{' '}
+            {t(isPhone ? 'budget.empty.hintAfterTap' : 'budget.empty.hintAfterClick')}{' '}
+            {t('budget.empty.tuckedAway')}{' '}
             <ExternalLink
               href={docsUrl('budgeting')}
               className="font-medium text-brand-600 hover:text-brand-700"
             >
-              How budgeting works
+              {t('budget.empty.howItWorks')}
             </ExternalLink>
           </p>
         </div>
@@ -590,18 +597,18 @@ export default function BudgetPage() {
                         {incomeCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                       </span>
                       <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">
-                        Income
+                        {t('budget.col.income')}
                       </span>
                     </div>
                   </td>
                   <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
-                    Planned
+                    {t('budget.col.planned')}
                   </td>
                   <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
-                    Actual
+                    {t('budget.col.actual')}
                   </td>
                   <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">
-                    Remaining
+                    {t('budget.col.remaining')}
                   </td>
                 </tr>
 
@@ -623,7 +630,9 @@ export default function BudgetPage() {
 
                     {/* Total Income row */}
                     <tr className="bg-surface border-y border-border">
-                      <td className="py-2 px-4 text-sm font-bold text-text">Total Income</td>
+                      <td className="py-2 px-4 text-sm font-bold text-text">
+                        {t('budget.totalIncome')}
+                      </td>
                       <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
                         {formatCurrency(incomeTotals.budgeted)}
                       </td>
@@ -646,18 +655,18 @@ export default function BudgetPage() {
                         {expensesCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                       </span>
                       <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">
-                        Expenses
+                        {t('budget.col.expenses')}
                       </span>
                     </div>
                   </td>
                   <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
-                    Planned
+                    {t('budget.col.planned')}
                   </td>
                   <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
-                    Actual
+                    {t('budget.col.actual')}
                   </td>
                   <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">
-                    Remaining
+                    {t('budget.col.remaining')}
                   </td>
                 </tr>
 
@@ -681,7 +690,9 @@ export default function BudgetPage() {
 
                     {/* Total Expenses row */}
                     <tr className="bg-surface border-y border-border">
-                      <td className="py-2 px-4 text-sm font-bold text-text">Total Expenses</td>
+                      <td className="py-2 px-4 text-sm font-bold text-text">
+                        {t('budget.totalExpenses')}
+                      </td>
                       <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
                         {formatCurrency(expenseTotals.budgeted)}
                       </td>
@@ -700,12 +711,12 @@ export default function BudgetPage() {
                 {groups.length === 0 && (
                   <tr>
                     <td colSpan={4} className="py-16 text-center text-sm text-text-tertiary">
-                      No categories yet.{' '}
+                      {t('budget.empty.noCategories')}{' '}
                       <Link
                         to="/settings?tab=categories"
                         className="font-medium text-brand-600 hover:text-brand-700"
                       >
-                        Add some in Settings
+                        {t('budget.empty.addInSettings')}
                       </Link>
                     </td>
                   </tr>

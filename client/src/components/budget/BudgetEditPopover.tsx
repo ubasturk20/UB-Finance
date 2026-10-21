@@ -5,6 +5,7 @@ import { useCategoryHistory } from '../../hooks/useBudget';
 import { formatCentsAxis, formatCurrency } from '../../utils/currency';
 import { chartColors } from '../../utils/chartColors';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
+import { t } from '../../i18n';
 
 interface BudgetEditPopoverProps {
   categoryId: string;
@@ -57,20 +58,22 @@ export function BudgetEditPopover({
       className="absolute right-0 top-full mt-1 z-50 w-72 rounded-lg shadow-card border border-border-light bg-surface p-4 origin-top-right animate-menu-in"
       onMouseDown={(e) => e.preventDefault()}
     >
-      <p className="text-sm font-semibold text-text mb-2">History</p>
+      <p className="text-sm font-semibold text-text mb-2">{t('budget.history.title')}</p>
 
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-surface-alt rounded-lg p-2.5">
           <p className="text-sm font-semibold tabular-nums text-text">
             {formatCurrency(data?.lastMonth ?? 0)}
           </p>
-          <p className="text-xs text-text-tertiary">{isIncome ? 'Earned' : 'Spent'} last month</p>
+          <p className="text-xs text-text-tertiary">
+            {t(isIncome ? 'budget.history.earnedLastMonth' : 'budget.history.spentLastMonth')}
+          </p>
         </div>
         <div className="bg-surface-alt rounded-lg p-2.5">
           <p className="text-sm font-semibold tabular-nums text-text">
             {formatCurrency(data?.average ?? 0)}
           </p>
-          <p className="text-xs text-text-tertiary">Monthly average</p>
+          <p className="text-xs text-text-tertiary">{t('budget.history.monthlyAverage')}</p>
         </div>
       </div>
 
@@ -100,7 +103,7 @@ export function BudgetEditPopover({
             </ResponsiveContainer>
           </div>
         ) : (
-          <p className="text-xs text-text-disabled text-center py-6">No history available</p>
+          <p className="text-xs text-text-disabled text-center py-6">{t('budget.history.none')}</p>
         )}
       </div>
 
@@ -128,7 +131,7 @@ export function BudgetEditPopover({
             </svg>
           )}
         </span>
-        Apply {formatCurrency(currentAmount)} to all future months
+        {t('budget.history.applyAll', { amount: formatCurrency(currentAmount) })}
       </button>
     </div>
   );

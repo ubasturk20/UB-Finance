@@ -12,6 +12,7 @@ import {
 } from 'date-fns';
 import type { ScheduleOccurrence, OccurrenceDisplayStatus } from '../../types';
 import { WEEK_STARTS_ON, WEEKDAYS_SHORT } from '../../utils/locale';
+import { t } from '../../i18n';
 
 const DAY_HEADERS = WEEKDAYS_SHORT;
 const MAX_CHIPS = 3;
@@ -115,7 +116,7 @@ export default function Calendar({ month, occurrences, onDateClick }: Props) {
             ))}
             {dayOccs.length > MAX_CHIPS && (
               <span className="max-md:hidden text-[11px] text-text-tertiary px-1">
-                +{dayOccs.length - MAX_CHIPS} more
+                {t('rec.calendar.more', { count: dayOccs.length - MAX_CHIPS })}
               </span>
             )}
           </div>

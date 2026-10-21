@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatCurrency } from '../../utils/currency';
+import { t } from '../../i18n';
 
 interface ExpenseBreakdown {
   planned: number;
@@ -21,13 +22,33 @@ interface BudgetSummaryWidgetProps {
 }
 
 function getHeroStyle(tbb: number, incomePlanned: number) {
-  if (tbb < 0) return { bg: 'bg-negative-subtle', text: 'text-negative', label: 'Over budget' };
-  if (tbb === 0)
-    return { bg: 'bg-positive-subtle', text: 'text-positive', label: 'Fully budgeted' };
+  if (tbb < 0) {
+    return {
+      bg: 'bg-negative-subtle',
+      text: 'text-negative',
+      label: t('budget.summary.overBudget'),
+    };
+  }
+  if (tbb === 0) {
+    return {
+      bg: 'bg-positive-subtle',
+      text: 'text-positive',
+      label: t('budget.summary.fullyBudgeted'),
+    };
+  }
   const threshold = Math.max(incomePlanned * 0.02, 500);
-  if (tbb <= threshold)
-    return { bg: 'bg-caution-subtle', text: 'text-caution', label: 'Almost budgeted' };
-  return { bg: 'bg-positive-subtle', text: 'text-positive', label: 'Left to budget' };
+  if (tbb <= threshold) {
+    return {
+      bg: 'bg-caution-subtle',
+      text: 'text-caution',
+      label: t('budget.summary.almostBudgeted'),
+    };
+  }
+  return {
+    bg: 'bg-positive-subtle',
+    text: 'text-positive',
+    label: t('budget.summary.leftToBudget'),
+  };
 }
 
 function getBarColor(actual: number, planned: number, type: 'income' | 'expenses' | 'savings') {
@@ -64,7 +85,7 @@ function SummarySection({ label, planned, actual, actualLabel, type }: SummarySe
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold text-text">{label}</span>
         <span className="text-sm tabular-nums text-text-tertiary">
-          {formatCurrency(planned)} planned
+          {t('budget.summary.planned', { amount: formatCurrency(planned) })}
         </span>
       </div>
 
@@ -84,9 +105,9 @@ function SummarySection({ label, planned, actual, actualLabel, type }: SummarySe
         </div>
         <div className="flex flex-col items-end">
           <span className={`text-sm font-medium tabular-nums ${remainingColor}`}>
-            {displayRemaining === 0 ? '$0' : formatCurrency(displayRemaining)}
+            {formatCurrency(displayRemaining)}
           </span>
-          <span className="text-xs text-text-tertiary">remaining</span>
+          <span className="text-xs text-text-tertiary">{t('budget.summary.remaining')}</span>
         </div>
       </div>
     </div>
@@ -96,9 +117,9 @@ function SummarySection({ label, planned, actual, actualLabel, type }: SummarySe
 type Tab = 'summary' | 'income' | 'expenses';
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: 'summary', label: 'Summary' },
-  { key: 'income', label: 'Income' },
-  { key: 'expenses', label: 'Expenses' },
+  { key: 'summary', label: t('budget.summary.tab.summary') },
+  { key: 'income', label: t('budget.col.income') },
+  { key: 'expenses', label: t('budget.col.expenses') },
 ];
 
 export function BudgetSummaryWidget({
@@ -122,7 +143,7 @@ export function BudgetSummaryWidget({
       <div className="p-3">
         <div
           role="status"
-          aria-label="To be budgeted"
+          aria-label={t('budget.summary.toBeBudgeted')}
           className={`${hero.bg} rounded-lg px-4 py-3 text-center`}
         >
           <p className={`text-lg font-semibold tabular-nums ${hero.text}`}>
@@ -152,28 +173,28 @@ export function BudgetSummaryWidget({
         {activeTab === 'summary' && (
           <div>
             <SummarySection
-              label="Income"
+              label={t('budget.col.income')}
               planned={incomePlanned}
               actual={incomeEarned}
-              actualLabel="earned"
+              actualLabel={t('budget.summary.earned')}
               type="income"
             />
             <div className="border-t border-border-light" />
             <SummarySection
-              label="Expenses"
+              label={t('budget.col.expenses')}
               planned={expensesPlanned}
               actual={expensesSpent}
-              actualLabel="spent"
+              actualLabel={t('budget.summary.spent')}
               type="expenses"
             />
             {savingsPlanned > 0 && (
               <>
                 <div className="border-t border-border-light" />
                 <SummarySection
-                  label="Save up"
+                  label={t('budget.summary.saveUp')}
                   planned={savingsPlanned}
                   actual={savingsContributed}
-                  actualLabel="contributed"
+                  actualLabel={t('budget.summary.contributed')}
                   type="savings"
                 />
               </>
@@ -182,10 +203,10 @@ export function BudgetSummaryWidget({
         )}
         {activeTab === 'income' && (
           <SummarySection
-            label="Income"
+            label={t('budget.col.income')}
             planned={incomePlanned}
             actual={incomeEarned}
-            actualLabel="earned"
+            actualLabel={t('budget.summary.earned')}
             type="income"
           />
         )}
@@ -193,10 +214,10 @@ export function BudgetSummaryWidget({
           <div>
             {fixedExpenses && (fixedExpenses.planned > 0 || fixedExpenses.spent > 0) && (
               <SummarySection
-                label="Fixed"
+                label={t('settings.categories.type.fixed')}
                 planned={fixedExpenses.planned}
                 actual={fixedExpenses.spent}
-                actualLabel="spent"
+                actualLabel={t('budget.summary.spent')}
                 type="expenses"
               />
             )}
@@ -206,10 +227,10 @@ export function BudgetSummaryWidget({
                   <div className="border-t border-border-light" />
                 )}
                 <SummarySection
-                  label="Flexible"
+                  label={t('settings.categories.type.flexible')}
                   planned={flexibleExpenses.planned}
                   actual={flexibleExpenses.spent}
-                  actualLabel="spent"
+                  actualLabel={t('budget.summary.spent')}
                   type="expenses"
                 />
               </>
@@ -219,10 +240,10 @@ export function BudgetSummaryWidget({
                 <>
                   <div className="border-t border-border-light" />
                   <SummarySection
-                    label="Non-Monthly"
+                    label={t('settings.categories.type.nonMonthly')}
                     planned={nonMonthlyExpenses.planned}
                     actual={nonMonthlyExpenses.spent}
-                    actualLabel="spent"
+                    actualLabel={t('budget.summary.spent')}
                     type="expenses"
                   />
                 </>

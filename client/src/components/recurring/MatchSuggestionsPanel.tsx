@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Check, X } from 'lucide-react';
 import { useMatchSuggestions, useMatchOccurrence, useDismissMatch } from '../../hooks/useSchedules';
 import { formatCurrency } from '../../utils/currency';
 import { formatShortDay } from '../../utils/dates';
+import { formatPercent, t } from '../../i18n';
 
 export default function MatchSuggestionsPanel() {
   const { data: suggestions = [] } = useMatchSuggestions();
@@ -17,15 +18,12 @@ export default function MatchSuggestionsPanel() {
   return (
     <div className="shrink-0 bg-brand-600 text-white">
       <div className="flex items-center justify-between px-6 py-2 text-sm font-medium">
-        <span>
-          {totalCandidates} transaction{totalCandidates !== 1 ? 's' : ''} may match your recurring
-          items
-        </span>
+        <span>{t('rec.suggest.banner', { count: totalCandidates })}</span>
         <button
           onClick={() => setExpanded(!expanded)}
           className="flex items-center gap-1 underline underline-offset-2 hover:opacity-80 cursor-pointer"
         >
-          {expanded ? 'Hide' : 'Review now'}
+          {expanded ? t('rec.suggest.hide') : t('rec.suggest.review')}
           {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </button>
       </div>
@@ -49,7 +47,9 @@ export default function MatchSuggestionsPanel() {
                       <span className="text-text-tertiary ml-2 text-xs">
                         {formatShortDay(c.date)} · {formatCurrency(c.amount)}
                       </span>
-                      <span className="text-text-tertiary ml-2 text-xs">({c.score}% match)</span>
+                      <span className="text-text-tertiary ml-2 text-xs">
+                        {t('rec.suggest.score', { score: formatPercent(c.score / 100, 0) })}
+                      </span>
                     </div>
                     <button
                       onClick={() =>
@@ -59,7 +59,7 @@ export default function MatchSuggestionsPanel() {
                         })
                       }
                       className="p-1 rounded text-positive hover:bg-positive-subtle transition-colors"
-                      title="Accept match"
+                      title={t('rec.suggest.accept')}
                     >
                       <Check size={14} />
                     </button>
@@ -71,7 +71,7 @@ export default function MatchSuggestionsPanel() {
                         })
                       }
                       className="p-1 rounded text-text-tertiary hover:text-negative hover:bg-negative-subtle transition-colors"
-                      title="Dismiss"
+                      title={t('rec.suggest.dismiss')}
                     >
                       <X size={14} />
                     </button>

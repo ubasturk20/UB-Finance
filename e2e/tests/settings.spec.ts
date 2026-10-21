@@ -220,26 +220,24 @@ test.describe('goals', () => {
   test('adds a savings goal and shows its progress', async ({ page, api }) => {
     const savings = await api.createAccount('Savings', 0, 'savings');
     await open(page, '/goals');
-    await page.getByRole('main').getByRole('button', { name: 'Add Goal' }).first().click();
+    await page.getByRole('main').getByRole('button', { name: 'Hedef ekle' }).first().click();
 
-    const dialog = page.getByRole('dialog', { name: 'Add Goal' });
-    await dialog.getByRole('textbox', { name: 'Name' }).fill('Emergency Fund');
-    await dialog.getByRole('textbox', { name: 'Target', exact: true }).fill('10000');
-    await dialog.getByRole('textbox', { name: 'Saved so far' }).fill('2500');
-    await dialog
-      .getByRole('combobox', { name: 'Linked account' })
-      .selectOption({ label: 'Savings' });
+    const dialog = page.getByRole('dialog', { name: 'Hedef ekle' });
+    await dialog.getByRole('textbox', { name: 'Ad' }).fill('Emergency Fund');
+    await dialog.getByRole('textbox', { name: 'Hedef', exact: true }).fill('10000');
+    await dialog.getByRole('textbox', { name: 'Şu ana kadar biriken' }).fill('2500');
+    await dialog.getByRole('combobox', { name: 'Bağlı hesap' }).selectOption({ label: 'Savings' });
     await dialog.getByRole('button', { name: '🛡️' }).click();
     await expect(dialog.getByRole('button', { name: '🛡️' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await dialog.getByRole('button', { name: 'Color #059669' }).click();
-    await dialog.getByRole('button', { name: 'Add Goal' }).click();
+    await dialog.getByRole('button', { name: 'Renk #059669' }).click();
+    await dialog.getByRole('button', { name: 'Hedef ekle' }).click();
     await expect(dialog).toBeHidden();
 
     await expect(page.getByRole('main')).toContainText('Emergency Fund');
-    await expect(page.getByRole('main')).toContainText('25%');
+    await expect(page.getByRole('main')).toContainText('%25');
     const [goal] = await api.call<any[]>('GET', '/goals');
     expect(goal).toMatchObject({
       name: 'Emergency Fund',

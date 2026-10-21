@@ -16,6 +16,7 @@ import { formatCurrency } from '../utils/currency';
 import { usePreferencesStore } from '../store/preferencesStore';
 import type { Goal } from '../types';
 import { formatDay } from '../utils/dates';
+import { formatPercent, t } from '../i18n';
 
 function progressOf(goal: Goal) {
   const pct =
@@ -64,7 +65,9 @@ function GoalRow({
   const { pct, remaining } = progressOf(goal);
   const complete = remaining === 0 && goal.targetAmount > 0;
   const schedule = scheduleOf(goal, remaining);
-  const details = [schedule && `Target ${schedule.date}`, accountName].filter(Boolean).join(' · ');
+  const details = [schedule && t('goals.row.targetDate', { date: schedule.date }), accountName]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div
@@ -82,14 +85,14 @@ function GoalRow({
             {formatCurrency(goal.currentAmount)}
           </span>
           <span className="text-xs text-text-tertiary tabular-nums block mt-0.5">
-            of {formatCurrency(goal.targetAmount)}
+            {t('goals.row.ofTarget', { amount: formatCurrency(goal.targetAmount) })}
           </span>
         </div>
         <div onClick={(e) => e.stopPropagation()}>
           <RowMenu
             items={[
-              { label: 'Edit goal', onClick: onEdit },
-              { label: 'Delete goal', onClick: onDelete, danger: true },
+              { label: t('goals.edit'), onClick: onEdit },
+              { label: t('goals.delete'), onClick: onDelete, danger: true },
             ]}
           />
         </div>
@@ -105,24 +108,25 @@ function GoalRow({
         <div className="flex items-center justify-between mt-1.5 text-xs">
           <span className={complete ? 'text-positive font-medium' : 'text-text-secondary'}>
             {complete ? (
-              'Goal reached'
+              t('goals.row.reached')
             ) : schedule?.overdue ? (
               <span className="text-negative">
-                Past target date · {formatCurrency(remaining)} to go
+                {t('goals.row.pastTarget', { amount: formatCurrency(remaining) })}
               </span>
             ) : (
               <>
-                {formatCurrency(remaining)} to go
+                {t('goals.row.toGo', { amount: formatCurrency(remaining) })}
                 {schedule?.perMonth != null && (
                   <span className="text-text-tertiary">
-                    {' '}
-                    · {formatCurrency(schedule.perMonth)}/mo to reach it on time
+                    {t('goals.row.perMonth', { amount: formatCurrency(schedule.perMonth) })}
                   </span>
                 )}
               </>
             )}
           </span>
-          <span className="tabular-nums text-text-tertiary">{Math.floor(pct)}%</span>
+          <span className="tabular-nums text-text-tertiary">
+            {formatPercent(Math.floor(pct) / 100, 0)}
+          </span>
         </div>
       </div>
     </div>
@@ -161,7 +165,7 @@ function GoalGroup({
           </span>
           <span className="text-base font-semibold text-text">{label}</span>
           <span className="text-xs text-text-tertiary">
-            {goals.length} goal{goals.length !== 1 ? 's' : ''}
+            {t('goals.group.count', { count: goals.length })}
           </span>
         </div>
         <span className="text-base font-semibold tabular-nums text-text">
@@ -224,9 +228,9 @@ export default function GoalsPage() {
   return (
     <div className="flex flex-col h-full bg-surface">
       <div className="px-6 py-4 border-b border-border shrink-0 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-text">Goals</h1>
+        <h1 className="text-lg font-semibold text-text">{t('shell.nav.goals')}</h1>
         <Button size="sm" onClick={() => setAddOpen(true)}>
-          <Plus size={14} /> Add Goal
+          <Plus size={14} /> {t('goals.add')}
         </Button>
       </div>
 
@@ -234,12 +238,12 @@ export default function GoalsPage() {
         <div className="flex-1 flex items-center justify-center overflow-y-auto">
           <EmptyState
             icon={<Target size={26} />}
-            title="Save for what matters"
-            description="Set a target like an emergency fund, a trip or a new car, and see how close you are and how much to set aside each month."
+            title={t('goals.empty.title')}
+            description={t('goals.empty.description')}
             learnMoreHref={docsUrl('goals')}
             actions={
               <Button onClick={() => setAddOpen(true)}>
-                <Plus size={14} /> Add Goal
+                <Plus size={14} /> {t('goals.add')}
               </Button>
             }
           />
@@ -251,22 +255,25 @@ export default function GoalsPage() {
               variant="hero"
               cards={[
                 {
-                  label: 'Saved',
+                  label: t('goals.stats.saved'),
                   value: formatCurrency(totalSaved),
-                  sub: `${overallPct}% of target`,
+                  sub: t('goals.stats.ofTarget', { percent: formatPercent(overallPct / 100, 0) }),
                 },
-                { label: 'Target', value: formatCurrency(totalTarget) },
-                { label: 'Left to save', value: formatCurrency(leftToSave) },
+                { label: t('goals.stats.target'), value: formatCurrency(totalTarget) },
+                { label: t('goals.stats.leftToSave'), value: formatCurrency(leftToSave) },
                 {
-                  label: 'Goals reached',
-                  value: `${completed.length} of ${goals.length}`,
+                  label: t('goals.stats.reached'),
+                  value: t('goals.stats.reachedOf', {
+                    done: completed.length,
+                    total: goals.length,
+                  }),
                   tone: completed.length > 0 ? 'positive' : undefined,
                 },
               ]}
             />
             {inProgress.length > 0 && (
               <GoalGroup
-                label="In progress"
+                label={t('goals.group.inProgress')}
                 goals={inProgress}
                 accountNames={accountNames}
                 onEdit={setEditGoal}
@@ -275,7 +282,7 @@ export default function GoalsPage() {
             )}
             {completed.length > 0 && (
               <GoalGroup
-                label="Completed"
+                label={t('goals.group.completed')}
                 goals={completed}
                 accountNames={accountNames}
                 onEdit={setEditGoal}
@@ -308,9 +315,9 @@ export default function GoalsPage() {
         onConfirm={() => {
           if (deleting) deleteGoal.mutate(deleting.id);
         }}
-        title="Delete Goal"
-        message={`Delete "${deleting?.name ?? ''}"? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('goals.delete')}
+        message={t('goals.deleteMessage', { name: deleting?.name ?? '' })}
+        confirmLabel={t('common.delete')}
         danger
       />
     </div>

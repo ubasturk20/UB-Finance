@@ -14,6 +14,7 @@ import {
   UNREADABLE_AMOUNT,
 } from '../../utils/currency';
 import type { BudgetCategory } from '../../types';
+import { t } from '../../i18n';
 
 interface Props {
   category: BudgetCategory | null;
@@ -41,7 +42,9 @@ export function BudgetAmountSheet({
     <Modal
       isOpen={category !== null}
       onClose={onClose}
-      title={category ? `Plan ${category.name}` : 'Plan'}
+      title={
+        category ? t('budget.sheet.title', { name: category.name }) : t('budget.sheet.titleEmpty')
+      }
       size="sm"
     >
       {category && (
@@ -89,20 +92,23 @@ function SheetBody({
   }
 
   const suggestions = [
-    { label: isIncome ? 'Earned last month' : 'Spent last month', cents: history?.lastMonth },
-    { label: 'Monthly average', cents: history?.average },
+    {
+      label: t(isIncome ? 'budget.history.earnedLastMonth' : 'budget.history.spentLastMonth'),
+      cents: history?.lastMonth,
+    },
+    { label: t('budget.history.monthlyAverage'), cents: history?.average },
   ].filter((s): s is { label: string; cents: number } => !!s.cents);
 
   return (
     <form onSubmit={save} className="grid gap-4">
       <p className="text-sm text-text-secondary">{format(parseISO(`${month}-01`), 'MMMM yyyy')}</p>
       <label className="grid gap-1">
-        <span className="text-sm font-medium text-text-secondary">Planned</span>
+        <span className="text-sm font-medium text-text-secondary">{t('budget.col.planned')}</span>
         <input
           autoFocus
           type="text"
           inputMode="decimal"
-          aria-label={`Planned for ${category.name}`}
+          aria-label={t('budget.plannedFor', { name: category.name })}
           value={raw}
           onChange={(e) => {
             setRaw(e.target.value);
@@ -149,16 +155,16 @@ function SheetBody({
           onChange={(e) => setAllYear(e.target.checked)}
           className="h-5 w-5 accent-brand-600"
         />
-        Use this amount for the next 12 months
+        {t('budget.sheet.allYear')}
       </label>
 
       <SavingPausedHint />
       <div className="flex gap-2">
         <Button type="button" variant="secondary" className="min-h-11 flex-1" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" className="min-h-11 flex-1" disabled={!canSave}>
-          Save
+          {t('common.save')}
         </Button>
       </div>
     </form>

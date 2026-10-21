@@ -52,11 +52,13 @@ test('empty pages explain themselves and offer the first step', async ({ page, a
   await expect(page.getByText('Let rules do the sorting')).toBeVisible();
 
   await open(page, '/goals');
-  await expect(page.getByText('Save for what matters')).toBeVisible();
+  await expect(page.getByText('Önemli olan için biriktirin')).toBeVisible();
 
   await open(page, '/budget');
-  await expect(page.getByText(/Nothing is planned for/)).toBeVisible();
+  await expect(page.getByText(/için henüz bir şey planlanmadı/)).toBeVisible();
   // Every category is listed (none tucked away), so there's something to plan straight away
-  await expect(page.getByRole('button', { name: /^Planned for Groceries:/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Show \d+ inactive/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Groceries için planlanan:/ })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /^\d+ etkin olmayan kategoriyi göster/ }),
+  ).toHaveCount(0);
 });
