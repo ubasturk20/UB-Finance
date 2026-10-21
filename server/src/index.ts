@@ -109,7 +109,8 @@ app.use('/api/custom-reports', customReportsRouter);
 app.use('/api/dashboards', dashboardsRouter);
 app.use('/api/schedules', schedulesRouter);
 app.use('/api/goals', goalsRouter);
-// Card details, statement summary and installments (/api/accounts/:id/…, /api/installments/:id)
+// Card details, statement summary and installments (/api/accounts/:id/…, /api/installments/:id),
+// and the dashboard's upcoming card and loan payments (/api/dashboard/obligations)
 app.use('/api', creditCardsRouter);
 // Asset unit prices and net worth equivalents (/api/accounts/:id/asset-price, /api/net-worth/…)
 app.use('/api', assetsRouter);

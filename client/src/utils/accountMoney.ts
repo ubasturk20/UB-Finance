@@ -2,6 +2,7 @@
 // currency, at the latest rate (the server's `mainBalance`). An account without a rate
 // can't be counted honestly, so it's left out and named (see unconvertedCurrencies).
 import type { Account, Transaction } from '../types';
+import { isLiabilityType } from './accountTypes';
 import { convertMinor, impliedRate } from './money';
 
 /** An account's balance in the budget's currency, or null without a rate for its currency */
@@ -13,6 +14,23 @@ export function balanceValue(account: Pick<Account, 'balance' | 'mainBalance'>):
 /** The accounts' balances added up in the budget's currency, leaving out ones without a rate */
 export function totalValue(accounts: Pick<Account, 'balance' | 'mainBalance'>[]): number {
   return accounts.reduce((sum, a) => sum + (balanceValue(a) ?? 0), 0);
+}
+
+/**
+ * What the accounts own and owe in the budget's currency (the two sides of the Accounts page's
+ * balance sheet): liabilities are negative, and an overpaid card counts on its own side
+ */
+export function assetsAndLiabilities(
+  accounts: Pick<Account, 'balance' | 'mainBalance' | 'type'>[],
+): { assets: number; liabilities: number } {
+  let assets = 0;
+  let liabilities = 0;
+  for (const a of accounts) {
+    const value = balanceValue(a) ?? 0;
+    if (isLiabilityType(a.type)) liabilities += value;
+    else assets += value;
+  }
+  return { assets, liabilities };
 }
 
 /** Currencies of accounts a total had to leave out for want of a rate */

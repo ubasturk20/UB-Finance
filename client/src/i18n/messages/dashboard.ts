@@ -86,6 +86,9 @@ export const dashboard = {
   'dash.netWorth.empty': 'Tüm hesaplarınızda sahip olduklarınız eksi borçlarınız.',
   'dash.netWorth.addAccount': 'Hesap ekle',
   'dash.netWorth.range': 'Tarih aralığı',
+  'dash.netWorth.assets': 'Varlıklar',
+  'dash.netWorth.liabilities': 'Borçlar',
+  'dash.netWorth.split': 'Varlıklar ve borçlar',
   'dash.range.1m': '1 ay',
   'dash.range.3m': '3 ay',
   'dash.range.6m': '6 ay',
@@ -156,6 +159,28 @@ export const dashboard = {
   'dash.bills.overdue': '{days} gün gecikti',
   'dash.bills.tomorrow': 'Yarın',
   'dash.bills.inDays': '{days} gün içinde',
+
+  // Yaklaşan ödemeler (kredi kartları ve krediler)
+  'dash.obligations.title': 'Yaklaşan Ödemeler',
+  'dash.obligations.cards': 'Kredi kartları',
+  'dash.obligations.loans': 'Krediler',
+  'dash.obligations.daysLeft': '{days} gün kaldı',
+  'dash.obligations.today': 'Bugün',
+  'dash.obligations.overdue': 'Gecikti',
+  'dash.obligations.paid': 'Ödendi',
+  'dash.obligations.noStatementDebt': 'Ekstre borcu yok',
+  'dash.obligations.noDueDay': 'Son ödeme günü girilmedi',
+  'dash.obligations.statementDebt': 'Kalan ekstre borcu',
+  'dash.obligations.cardDebtNow': 'Kart borcu',
+  'dash.obligations.minimum': 'Asgari {amount}',
+  'dash.obligations.installments': '{paid}/{term} taksit ödendi',
+  'dash.obligations.cardDebt': 'Toplam kart borcu',
+  'dash.obligations.loanPrincipal': 'Kalan kredi anaparası',
+  'dash.obligations.emptyTitle': 'Kart ve kredi bilgileri girilmedi',
+  'dash.obligations.emptyDescription':
+    'Son ödeme tarihlerini, asgari ödemeleri ve taksitleri burada görmek için kredi kartı ve ' +
+    'kredi hesaplarınızın bilgilerini girin.',
+  'dash.obligations.goToAccounts': 'Hesaplara git',
 
   // Kategoriye göre harcama
   'dash.breakdown.title': 'Kategoriye Göre Harcama',

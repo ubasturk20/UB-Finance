@@ -5,11 +5,13 @@ import { useNetWorth } from '../../hooks/useReports';
 import { useAccounts } from '../../hooks/useAccounts';
 import { ButtonLink } from '../ui/Button';
 import { formatCurrency } from '../../utils/currency';
+import { assetsAndLiabilities } from '../../utils/accountMoney';
 import { chartColors } from '../../utils/chartColors';
 import { formatDateAxisLabels, formatDateLabel } from '../../utils/chartTicks';
 import { useXAxisLayout } from '../../hooks/useXAxisLayout';
 import { formatPercent, t } from '../../i18n';
 import { NetWorthEquivalents } from './NetWorthEquivalents';
+import type { Account } from '../../types';
 
 function MiniTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -22,6 +24,27 @@ function MiniTooltip({ active, payload, label }: any) {
         </p>
       ))}
     </div>
+  );
+}
+
+/** "Varlıklar X · Borçlar Y" under the net worth, as on the Accounts page */
+function AssetsAndLiabilities({ accounts }: { accounts: Account[] }) {
+  const { assets, liabilities } = useMemo(() => assetsAndLiabilities(accounts), [accounts]);
+  // Debts are negative balances: shown as what's owed (an overpaid card makes it negative)
+  const owed = 0 - liabilities;
+  return (
+    <p
+      aria-label={t('dash.netWorth.split')}
+      className="flex flex-wrap gap-x-2 text-sm tabular-nums text-text-secondary mt-0.5"
+    >
+      <span className="min-w-0 break-words">
+        {t('dash.netWorth.assets')} {formatCurrency(assets)}
+      </span>
+      <span aria-hidden>·</span>
+      <span className="min-w-0 break-words">
+        {t('dash.netWorth.liabilities')} {formatCurrency(owed)}
+      </span>
+    </p>
   );
 }
 
@@ -78,7 +101,12 @@ function computeRange(preset: Preset): {
   }
 }
 
-export default function NetWorthMini() {
+interface Props {
+  /** "Varlıklar X · Borçlar Y" under the figure (off where the full breakdown sits beside it) */
+  showSplit?: boolean;
+}
+
+export default function NetWorthMini({ showSplit = true }: Props) {
   const [preset, setPreset] = useState<Preset>('1m');
 
   const { from, to, granularity } = useMemo(() => computeRange(preset), [preset]);
@@ -135,6 +163,7 @@ export default function NetWorthMini() {
           >
             {formatCurrency(latest)}
           </p>
+          {showSplit && !noAccounts && accounts && <AssetsAndLiabilities accounts={accounts} />}
           {!noAccounts && <NetWorthEquivalents className="mt-0.5" />}
           {noAccounts && (
             <p className="text-sm text-text-tertiary mt-1">{t('dash.netWorth.empty')}</p>
