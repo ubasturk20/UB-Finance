@@ -4,12 +4,21 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 
 ## Durum
 
-- **Aktif faz:** F1 tamamlandı, CI tamamen yeşil (PR #2, dal `tr/f1-turk-bicimleri`) — birleştirme onayı bekliyor. Sıradaki: F2 çeviri altyapısı + kabuk.
+- **Aktif faz:** F2 tamamlandı, CI tamamen yeşil (PR #3, dal `tr/f2-ceviri-altyapisi`) — birleştirme onayı bekliyor. Sıradaki: F3a (Genel Bakış + Hesaplar + İşlemler çevirisi).
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Her faz kendi dalında (`tr/fN-…`), PR ile `main`'e.
 - **Çalışma düzeni (önemli):**
   - Oturum ortamı npm'e erişemiyor → test/tsc yerelde çalışmaz; **CI tek doğrulama**. Her PR'da CI (client, server, e2e, electron, website) + `Format report` çalışır.
   - CI loglarına erişim yok; yalnızca **annotation**'lar okunur (`gh api repos/ubasturk20/UB-Finance/check-runs/<job>/annotations`). Playwright hataları ve `Format report` (Prettier'ın değiştireceği dosyalar) annotation olarak gelir.
   - Yerel Prettier 3.8 (`/opt/node-tools/node_modules/prettier/bin/prettier.cjs`), repo 3.9 kullanıyor: **mevcut dosyalara `--write` yapma** (union tiplerini farklı biçimliyor); yalnızca yeni/küçük değişiklikler, sonra `Format report`'a bak.
+
+## F2 — Çeviri altyapısı, kabuk, Ayarlar (2026-10-21, PR #3)
+
+- `client/src/i18n/index.ts`: tipli `t(key, vars)` (`{ad}` yer tutucuları; sayılar `1.234`), `formatCount`, `formatPercent` (`%12,5`). Mesajlar alan bazlı: `messages/common.ts` (Kaydet, İptal…), `shell.ts` (`shell.*`, `ui.*`), `settings.ts` (`settings.*`). Yeni alan = yeni dosya + `index.ts`'e ekle.
+- `i18n/glossary.md`: terim sözlüğü — çeviride önce buna bak, yeni terimi ekle.
+- Çevrilenler: `components/layout|ui|auth|connection/*`, `pages/Settings.tsx`, `components/settings/*`. Görünen ad **UB-Finance** (`BrandName`: "UB-" + "Finance", `<title>`); cookie/env/Docker adları değişmedi.
+- `RowMenu` varsayılan erişilebilir adı "Diğer işlemler".
+- Yöntem: iki alt ajan paralel (dosya sahipliği ayrık, e2e yalnızca Edit ile), ortak brif `scratchpad/agent_brief.md` (oturuma özel; gerekirse yeniden yaz). F3'te aynı yöntem kullanılabilir.
+- F3'e kalanlar: sayfa başlıkları (`navigation.spec.ts` içindeki `heading` adları hâlâ İngilizce), Welcome ("Welcome to UB-Finance" e2e'de), `CurrencySelect` varsayılan adı 'Currency', `NotInDemo`, `WaitingTransactions`, `DiscoverSchedulesModal` gün adları, kur gösterimi (`1 GBP = 1.25 EUR` → `1,25`), sunucu hata iletileri (F4).
 
 ## F1 — Türk biçimleri (2026-10-21, PR #2)
 
