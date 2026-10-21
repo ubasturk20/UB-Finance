@@ -7,7 +7,9 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 - **Aktif faz:** F0 Hazırlık (devam ediyor).
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Çalışma dalı: `tr/f0-hazirlik`.
 - **F0 yapılanlar:** `SOURCE_CODE_URL` ve `ISSUES_URL` fork'a çevrildi (`client/src/utils/project.ts`); dal GitHub'da. Kaynaktan derleyen `docker-compose.ub.yml` (yalnızca 127.0.0.1) ve Türkçe `CALISTIRMA.md` eklendi.
-- **F0 kalan:** test tabanı. Claude oturum ortamı npm kayıt deposuna erişemiyor (proxy `registry.npmjs.org`'u reddediyor) → testler kullanıcının makinesinde Docker ile çalıştırılır (`CALISTIRMA.md` §5), sonuç buraya yazılır. Not: ortama npm erişimi açılırsa (claude.ai Ayarlar > Capabilities) Claude testleri kendisi çalıştırabilir.
+- **Test tabanı (CI, PR #1, 2026-10-21):** client ✓, server ✓, website ✓; e2e 158/159 — tek hata, kaynak kod bağlantısı değişikliğimizden (`e2e/tests/settings.spec.ts` güncellendi); electron işi `format:check`'te DEVELOPMENT_PLAN.md yüzünden düştü (Prettier ile düzeltildi). Yani orijinal kodda bilinen kırık test yok.
+- **Test nasıl çalıştırılır:** GitHub Actions açık; her PR'da CI (client, server, e2e, electron, website) çalışır. Oturumda Prettier yerel olarak var: `node /opt/node-tools/node_modules/prettier/bin/prettier.cjs --check <dosyalar>` — her commit öncesi çalıştır.
+- **Eski not:** test tabanı. Claude oturum ortamı npm kayıt deposuna erişemiyor (proxy `registry.npmjs.org`'u reddediyor) → testler kullanıcının makinesinde Docker ile çalıştırılır (`CALISTIRMA.md` §5), sonuç buraya yazılır. Not: ortama npm erişimi açılırsa (claude.ai Ayarlar > Capabilities) Claude testleri kendisi çalıştırabilir.
 - **Kararlar (2026-10-21):**
   1. Çeviri: tek tipli sözlük (`client/src/i18n/tr.ts` + `t()`), yeni bağımlılık yok.
   2. Banka senkronu (Plaid/SimpleFIN/Enable Banking): kod kalır, bayrakla arayüzden gizlenir.
