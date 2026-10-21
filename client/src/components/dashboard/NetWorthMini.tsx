@@ -124,7 +124,7 @@ export default function NetWorthMini() {
 
   return (
     <div>
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between max-md:flex-wrap max-md:gap-2">
         <div>
           <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide">
             {t('dash.netWorth.title')}
