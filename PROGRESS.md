@@ -6,7 +6,8 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 
 - **Aktif faz:** F0 Hazırlık (devam ediyor).
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Çalışma dalı: `tr/f0-hazirlik`.
-- **F0 yapılanlar:** `SOURCE_CODE_URL` ve `ISSUES_URL` fork'a çevrildi (`client/src/utils/project.ts`). Kalan: push, yerel/Docker test tabanı.
+- **F0 yapılanlar:** `SOURCE_CODE_URL` ve `ISSUES_URL` fork'a çevrildi (`client/src/utils/project.ts`); dal GitHub'da. Kaynaktan derleyen `docker-compose.ub.yml` (yalnızca 127.0.0.1) ve Türkçe `CALISTIRMA.md` eklendi.
+- **F0 kalan:** test tabanı. Claude oturum ortamı npm kayıt deposuna erişemiyor (proxy `registry.npmjs.org`'u reddediyor) → testler kullanıcının makinesinde Docker ile çalıştırılır (`CALISTIRMA.md` §5), sonuç buraya yazılır. Not: ortama npm erişimi açılırsa (claude.ai Ayarlar > Capabilities) Claude testleri kendisi çalıştırabilir.
 - **Kararlar (2026-10-21):**
   1. Çeviri: tek tipli sözlük (`client/src/i18n/tr.ts` + `t()`), yeni bağımlılık yok.
   2. Banka senkronu (Plaid/SimpleFIN/Enable Banking): kod kalır, bayrakla arayüzden gizlenir.
