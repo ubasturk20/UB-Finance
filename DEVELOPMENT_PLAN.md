@@ -35,6 +35,8 @@ Amaç: FlyBudget'ı (v0.2.0, AGPL-3.0) baştan yazmadan, tamamen Türkçe, ₺ v
 
 ## 4. Fazlar
 
+**Durum (2026-10-21): F0–F11 tamamlandı.** Ayrıntılar ve isteğe bağlı sonraki adımlar: `PROGRESS.md`.
+
 Her faz bağımsız, küçük ve kendi testleriyle kapanır. Bir faz onaylanmadan başlanmaz.
 
 | Faz                                        | Kapsam                                                                                                                                                                                                                                                | Çıktı / kabul ölçütü                                                          |

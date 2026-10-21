@@ -4,13 +4,52 @@ Gelecek oturumlar buradan devam eder; analiz tekrar yapılmaz. Plan: `DEVELOPMEN
 
 ## Durum
 
-- **Aktif faz:** F5 (banka senkronunu gizleme). F4 birleştirildi (PR #7).
+- **Durum:** F0–F11 tamamlandı (PR #1–#14). Planlanan tüm fazlar bitti; aşağıdaki "Sonraki adımlar" isteğe bağlı.
 - **Kullanıcı talimatı (2026-10-21):** F4→F11 sırayla, onay beklemeden otomatik ilerle; CI yeşil olunca PR'ı birleştir ve sonraki faza geç. Yalnızca çok önemli kararlar için sor.
 - **Depo:** https://github.com/ubasturk20/UB-Finance (fork). Her faz kendi dalında (`tr/fN-…`), PR ile `main`'e.
 - **Çalışma düzeni (önemli):**
   - Oturum ortamı npm'e erişemiyor → test/tsc yerelde çalışmaz; **CI tek doğrulama**. Her PR'da CI (client, server, e2e, electron, website) + `Format report` çalışır.
   - CI loglarına erişim yok; yalnızca **annotation**'lar okunur (`gh api repos/ubasturk20/UB-Finance/check-runs/<job>/annotations`). Playwright hataları ve `Format report` (Prettier'ın değiştireceği dosyalar) annotation olarak gelir.
   - Yerel Prettier 3.8 (`/opt/node-tools/node_modules/prettier/bin/prettier.cjs`), repo 3.9 kullanıyor: **mevcut dosyalara `--write` yapma** (union tiplerini farklı biçimliyor); yalnızca yeni/küçük değişiklikler, sonra `Format report`'a bak.
+
+## Sonraki adımlar (isteğe bağlı, plan dışı)
+
+- `e2e/screenshots.ts` (web sitesi ekran görüntüleri, CI'da çalışmaz) bazı İngilizce seçiciler içeriyor; web sitesi kullanılırsa güncelle.
+- Demo bütçe (`server/src/demo/demoBudget.ts`) ABD verisi ve İngilizce adlarla; Docker kullanıcısını etkilemez.
+- Sunucu işlem araması (SQL `LIKE`) Türkçe katlama yapmıyor (istemci aramaları yapıyor).
+- TCMB kurları (şimdilik ECB/Frankfurter isteğe bağlı indirme veya elle kur).
+- Banka senkron bileşenleri (`components/plaid|simplefin|enablebanking`) İngilizce; varsayılan kapalı.
+
+## F10 — Güvenlik (PR #13)
+
+- Parolalı yedek tamamen istemcide: `client/src/utils/backupCrypto.ts` (PBKDF2-SHA256 600k + AES-256-GCM, biçim `ub-finance-encrypted-backup` v1, uzantı `.ubfbackup`). Ayarlar → Veriler'de indir/geri yükle. WebCrypto yalnızca HTTPS/localhost'ta çalışır.
+- DB dosyası `0600`, `DB_PATH` verilmişse klasör `0700` (`restrictToOwner`, `server/src/db/index.ts`); geri yükleme güvenlik kopyası ve `docker/backup.cjs` kopyası da `0600`.
+- `middleware/security.ts` ve `utils/validation.ts` iletileri Türkçe (`/api/health` değişmedi).
+- `CALISTIRMA.md` §7 HTTPS (Caddy, Tailscale/Cloudflare Tunnel), §8 güvenlik kontrol listesi; compose'da yorumlu Caddy servisi.
+
+## F9 — Genel Bakış (PR #12)
+
+- `GET /api/dashboard/obligations` (`services/obligationsService.ts`): kart son ödemeleri + kredi taksitleri, bütçe para biriminde toplamlar.
+- `components/dashboard/UpcomingPayments.tsx` (kart/kredi hesabı yoksa gizli); `NetWorthMini`'de "Varlıklar · Borçlar" satırı (`utils/accountMoney.ts` `assetsAndLiabilities`).
+
+## F8 — Varlıklar ve net değer (PR #11)
+
+- `account_details` varlık sütunları (0027): `asset_quantity` (ondalık metin), `asset_unit`, `asset_unit_price`, `asset_price_date`. Saf `services/assets.ts` (istemcide özdeş kopya, test kontrol eder).
+- `POST /api/accounts/:id/asset-price`: bakiye = miktar × birim fiyatı (düzeltme işlemi). `GET /api/net-worth/equivalents`: USD/EUR (kur defteri) ve gram altın (birimi "gram altın" olan hesabın fiyatı). Net değer toplamı `services/netWorth.ts`'te tek yerde.
+
+## F7 — Krediler (PR #10)
+
+- `account_details` kredi sütunları (0026): anapara, aylık faiz (baz puan), vade, ilk taksit, BSMV, KKDF (boşsa türe göre: konut %0, diğer %15).
+- Saf `services/loan.ts`: anüite, efektif oran `r·(1+BSMV+KKDF)`, anapara parçaları tam toplamı verir. `GET /api/accounts/:id/loan-schedule`. Kredi sayfasında özet, ödeme planı, "Bakiyeyi kalan anaparaya eşitle".
+
+## F6 — Kredi kartları (PR #9)
+
+- `account_details` (0025: limit, kesim günü, son ödeme günü, asgari ödeme oranı, aylık faiz) + `installment_plans`; ikisi de yedekte.
+- Saf `services/creditCard.ts`; `creditCardService.ts`; `routes/creditCards.ts` (details, card-summary, installments). Kart sayfasında özet ve taksitli alışveriş. Hesap düzenlemede açılış bakiyesi alanı bilerek kaydetmeyi engellemez (e2e).
+
+## F5 — Banka senkronu kapalı (PR #8)
+
+- Sunucu `FLYBUDGET_BANK_SYNC=true`, istemci `VITE_BANK_SYNC=true` (Docker build arg) olmadıkça Plaid/SimpleFIN/Enable Banking yok. E2E ve demo bayrak açık çalışır.
 
 ## F4 — Sunucu metinleri ve Türkçe kategoriler (2026-10-21, PR #7)
 
