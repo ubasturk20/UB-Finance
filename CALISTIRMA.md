@@ -43,6 +43,18 @@ Tarayıcıda http://localhost:3001 → parola belirleyin → günlükteki kurulu
 
 Durdurma: `docker compose -f docker-compose.ub.yml down` (veriler `ub-finance-data` biriminde kalır).
 
+### Banka senkronu (varsayılan: kapalı)
+
+Plaid, SimpleFIN ve Enable Banking Türk bankalarını kapsamadığı için kapalıdır: menülerde
+görünmez, sunucu bu API'leri hiç açmaz ve açılışta senkron yapmaz. CSV/CAMT içe aktarma ve elle
+ekleme her zaman çalışır. Yine de açmak isterseniz **ikisi birden** gerekir:
+
+- istemci derlemesi: `VITE_BANK_SYNC=true` (Docker'da build argümanı:
+  `docker-compose.ub.yml` içindeki `args: VITE_BANK_SYNC: 'true'` satırlarını açın),
+- sunucu: `FLYBUDGET_BANK_SYNC=true` ortam değişkeni (aynı dosyadaki `environment` satırı).
+
+Ardından `docker compose -f docker-compose.ub.yml up -d --build`.
+
 ## 5. Testler (Node kurmadan, Docker ile)
 
 ```bash

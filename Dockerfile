@@ -25,6 +25,11 @@ COPY server/ server/
 # Only for the version number, which is built into the server (Settings → Server)
 COPY package.json ./
 
+# UB-Finance: bank sync (Plaid, SimpleFIN, Enable Banking) is hidden in the client unless
+# built with --build-arg VITE_BANK_SYNC=true (the server also needs FLYBUDGET_BANK_SYNC=true
+# at runtime). Empty = off. Vite reads it from the environment of the build below.
+ARG VITE_BANK_SYNC=
+
 RUN VERSION=$(node -p "require('./package.json').version") \
  && npm run build --prefix client \
  && server/node_modules/.bin/esbuild server/src/index.ts --bundle --platform=node --target=node24 \

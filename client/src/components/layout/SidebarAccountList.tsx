@@ -6,6 +6,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { usePlaidStatus } from '../../hooks/usePlaid';
 import { formatCurrency, formatMoney } from '../../utils/currency';
 import { totalValue, unconvertedCurrencies } from '../../utils/accountMoney';
+import { BANK_SYNC_ENABLED } from '../../utils/features';
 import { AddAccountModal } from '../accounts/AddAccountModal';
 import { ConnectBankModal } from '../plaid/ConnectBankModal';
 import { PlaidSetupModal } from '../plaid/PlaidSetupModal';
@@ -172,7 +173,8 @@ export function SidebarAccountList() {
         <div className="mt-3">
           <button
             ref={buttonRef}
-            onClick={() => setMenuOpen(!menuOpen)}
+            // Without bank sync the only choice is a manual account: open it straight away
+            onClick={() => (BANK_SYNC_ENABLED ? setMenuOpen(!menuOpen) : setAddOpen(true))}
             className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-sidebar-text hover:text-sidebar-text-hi transition-colors"
           >
             <Plus size={14} />
@@ -235,17 +237,21 @@ export function SidebarAccountList() {
       </div>
 
       <AddAccountModal isOpen={addOpen} onClose={() => setAddOpen(false)} />
-      <ConnectBankModal isOpen={connectOpen} onClose={() => setConnectOpen(false)} />
-      <PlaidSetupModal
-        isOpen={plaidSetupOpen}
-        onClose={() => setPlaidSetupOpen(false)}
-        onConfigured={() => setConnectOpen(true)}
-      />
-      <SimplefinConnectModal isOpen={simplefinOpen} onClose={() => setSimplefinOpen(false)} />
-      <ConnectEnableBankingModal
-        isOpen={enableBankingOpen}
-        onClose={() => setEnableBankingOpen(false)}
-      />
+      {BANK_SYNC_ENABLED && (
+        <>
+          <ConnectBankModal isOpen={connectOpen} onClose={() => setConnectOpen(false)} />
+          <PlaidSetupModal
+            isOpen={plaidSetupOpen}
+            onClose={() => setPlaidSetupOpen(false)}
+            onConfigured={() => setConnectOpen(true)}
+          />
+          <SimplefinConnectModal isOpen={simplefinOpen} onClose={() => setSimplefinOpen(false)} />
+          <ConnectEnableBankingModal
+            isOpen={enableBankingOpen}
+            onClose={() => setEnableBankingOpen(false)}
+          />
+        </>
+      )}
     </>
   );
 }

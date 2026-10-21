@@ -34,6 +34,14 @@ export const dashboard = {
     'dosyalarını indirip kendiniz içe aktarın ya da her birini tek tek girin. Hiçbir şey ' +
     'kendiliğinden güncellenmez.',
   'welcome.manual.action': 'Elle ekle',
+  // Banka senkronu kapalıyken (VITE_BANK_SYNC) banka seçeneklerinin yerine
+  'welcome.csv.title': 'Banka ekstresini içe aktar',
+  'welcome.csv.tag': 'CSV veya CAMT',
+  'welcome.csv.time': '~3 dk',
+  'welcome.csv.description':
+    'Hesabınızı ekleyin, ardından bankanızın internet şubesinden indirdiğiniz CSV ya da ' +
+    'CAMT.053 ekstresini içe aktarın. Yeni işlemler için dosyayı arada bir yeniden yükleyin.',
+  'welcome.csv.action': 'Hesap ekle ve içe aktar',
   'welcome.privacy.server':
     'Bütçeniz kendi sunucunuzda saklanır. UB-Finance hesabı yok, izleme yok.',
   'welcome.privacy.local': 'Bütçeniz bu bilgisayarda kalır. UB-Finance hesabı yok, izleme yok.',
@@ -58,6 +66,9 @@ export const dashboard = {
     'Bankanızdan bir CSV dosyası içe aktarın, bir banka bağlayın ya da işlemleri elle ekleyin.',
   'dash.start.transactions.import': 'İçe aktar veya ekle',
   'dash.start.transactions.connect': 'Banka bağla',
+  'dash.start.transactions.descriptionNoBank':
+    'Bankanızdan bir CSV ya da CAMT dosyası içe aktarın veya işlemleri elle ekleyin.',
+  'dash.start.transactions.addManual': 'İşlem ekle',
   'dash.start.recurring.title': 'Faturalarınızı ve maaşlarınızı ekleyin',
   'dash.start.recurring.description': 'Sırada ne olduğunu görün, hiçbir ödemeyi kaçırmayın.',
   'dash.start.recurring.action': 'Düzenli işlem ekle',

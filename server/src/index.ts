@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { listenHost, serverMode, trustProxy } from './config.js';
+import { bankSyncEnabled, listenHost, serverMode, trustProxy } from './config.js';
 import { secretCipher } from './db/secretCrypto.js';
 import { deleteExpiredSessions, isPasswordSet } from './auth/sessions.js';
 import { setupCode } from './auth/setupCode.js';
@@ -82,8 +82,11 @@ app.use(cors({ origin: DEV_CLIENT_ORIGINS }));
 const jsonBody = express.json({ limit: '10mb' });
 app.use((req, res, next) => (req.path === RESTORE_PATH ? next() : jsonBody(req, res, next)));
 
-// The bank's redirect after an Enable Banking login: no session or token, only its state
-app.get(BANK_CALLBACK_PATH, bankCallbackRateLimit, enableBankingCallback);
+// The bank's redirect after an Enable Banking login: no session or token, only its state.
+// With bank sync off (FLYBUDGET_BANK_SYNC unset) it isn't mounted and answers the JSON 404.
+if (bankSyncEnabled) {
+  app.get(BANK_CALLBACK_PATH, bankCallbackRateLimit, enableBankingCallback);
+}
 
 // Server mode: login routes, then a valid session is required for the rest of the API
 app.use('/api/auth', authRouter);
@@ -106,9 +109,11 @@ app.use('/api/schedules', schedulesRouter);
 app.use('/api/goals', goalsRouter);
 setRateDownloader({ download: fetchRates, checkUrl: assertSafeUrl, defaultUrl: DEFAULT_RATES_URL });
 app.use('/api/currency', currencyRouter);
-app.use('/api/plaid', bankRateLimit, plaidRouter);
-app.use('/api/simplefin', bankRateLimit, simplefinRouter);
-app.use('/api/enable-banking', bankRateLimit, enableBankingRouter);
+if (bankSyncEnabled) {
+  app.use('/api/plaid', bankRateLimit, plaidRouter);
+  app.use('/api/simplefin', bankRateLimit, simplefinRouter);
+  app.use('/api/enable-banking', bankRateLimit, enableBankingRouter);
+}
 app.use('/api', apiNotFound);
 
 export async function startServer(port: number | string): Promise<void> {
@@ -210,8 +215,21 @@ function runStartupTasks() {
     if (ensured > 0) console.log(`Ensured ${ensured} new occurrence(s)`);
   });
 
-  // Bank sync BEFORE schedule auto-create (so real txns get matched first)
-  const bankSyncDone = Promise.all([
+  // Bank sync BEFORE schedule auto-create (so real txns get matched first); off unless
+  // FLYBUDGET_BANK_SYNC=true
+  const bankSyncDone = bankSyncEnabled ? syncAllBanks() : Promise.resolve();
+
+  bankSyncDone.then(() =>
+    runStartupTask('Scheduled transactions', () => {
+      const scheduled = autoCreateDueScheduled();
+      if (scheduled > 0) console.log(`Auto-created ${scheduled} scheduled transaction(s)`);
+    }),
+  );
+}
+
+/** Startup sync of every connected bank (Plaid, SimpleFIN, Enable Banking). */
+function syncAllBanks(): Promise<unknown> {
+  return Promise.all([
     isPlaidConfigured()
       ? syncAllItems()
           .then((results) => {
@@ -234,13 +252,6 @@ function runStartupTasks() {
       })
       .catch((err) => console.error('Enable Banking sync error:', err.message)),
   ]);
-
-  bankSyncDone.then(() =>
-    runStartupTask('Scheduled transactions', () => {
-      const scheduled = autoCreateDueScheduled();
-      if (scheduled > 0) console.log(`Auto-created ${scheduled} scheduled transaction(s)`);
-    }),
-  );
 }
 
 // Auto-start unless bundled for Electron production (where main.ts calls startServer directly)

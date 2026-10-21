@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { PencilLine, Loader2, ShieldCheck, ChevronRight, Clock, Euro } from 'lucide-react';
+import { PencilLine, Loader2, ShieldCheck, ChevronRight, Clock, Euro, Upload } from 'lucide-react';
 import logoUrl from '/logo.png';
 import { useAccounts } from '../hooks/useAccounts';
 import { usePlaidStatus } from '../hooks/usePlaid';
@@ -16,6 +16,7 @@ import { ExternalLink } from '../components/ui/ExternalLink';
 import { PlaidLogo, SimplefinLogo } from '../components/ui/BankLogos';
 import { BrandName } from '../components/ui/BrandName';
 import { docsUrl } from '../utils/project';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 import { t } from '../i18n';
 
 interface OptionProps {
@@ -74,6 +75,8 @@ export default function WelcomePage() {
   const [showSimplefin, setShowSimplefin] = useState(false);
   const [showEnableBanking, setShowEnableBanking] = useState(false);
   const [showManual, setShowManual] = useState(false);
+  // Without bank sync: after adding the account, open its page with the CSV import dialog
+  const [importAfterAdd, setImportAfterAdd] = useState(false);
 
   if (isLoading) {
     return (
@@ -102,33 +105,51 @@ export default function WelcomePage() {
           </p>
 
           <div className="grid gap-4 mt-8 grid-cols-1 sm:grid-cols-2">
-            <SetupOption
-              icon={<PlaidLogo size={24} className="text-text" />}
-              title={t('welcome.plaid.title')}
-              tag={t('welcome.free')}
-              time={t('welcome.plaid.time')}
-              description={t('welcome.plaid.description')}
-              action={t('welcome.plaid.action')}
-              onClick={() => (plaidConfigured ? setShowPlaid(true) : setShowPlaidSetup(true))}
-            />
-            <SetupOption
-              icon={<SimplefinLogo size={26} />}
-              title={t('welcome.simplefin.title')}
-              tag={t('welcome.simplefin.tag')}
-              time={t('welcome.simplefin.time')}
-              description={t('welcome.simplefin.description')}
-              action={t('welcome.simplefin.action')}
-              onClick={() => setShowSimplefin(true)}
-            />
-            <SetupOption
-              icon={<Euro size={20} className="text-brand-600" />}
-              title={t('welcome.europe.title')}
-              tag={t('welcome.free')}
-              time={t('welcome.europe.time')}
-              description={t('welcome.europe.description')}
-              action={t('welcome.europe.action')}
-              onClick={() => setShowEnableBanking(true)}
-            />
+            {BANK_SYNC_ENABLED && (
+              <>
+                <SetupOption
+                  icon={<PlaidLogo size={24} className="text-text" />}
+                  title={t('welcome.plaid.title')}
+                  tag={t('welcome.free')}
+                  time={t('welcome.plaid.time')}
+                  description={t('welcome.plaid.description')}
+                  action={t('welcome.plaid.action')}
+                  onClick={() => (plaidConfigured ? setShowPlaid(true) : setShowPlaidSetup(true))}
+                />
+                <SetupOption
+                  icon={<SimplefinLogo size={26} />}
+                  title={t('welcome.simplefin.title')}
+                  tag={t('welcome.simplefin.tag')}
+                  time={t('welcome.simplefin.time')}
+                  description={t('welcome.simplefin.description')}
+                  action={t('welcome.simplefin.action')}
+                  onClick={() => setShowSimplefin(true)}
+                />
+                <SetupOption
+                  icon={<Euro size={20} className="text-brand-600" />}
+                  title={t('welcome.europe.title')}
+                  tag={t('welcome.free')}
+                  time={t('welcome.europe.time')}
+                  description={t('welcome.europe.description')}
+                  action={t('welcome.europe.action')}
+                  onClick={() => setShowEnableBanking(true)}
+                />
+              </>
+            )}
+            {!BANK_SYNC_ENABLED && (
+              <SetupOption
+                icon={<Upload size={20} className="text-brand-600" />}
+                title={t('welcome.csv.title')}
+                tag={t('welcome.csv.tag')}
+                time={t('welcome.csv.time')}
+                description={t('welcome.csv.description')}
+                action={t('welcome.csv.action')}
+                onClick={() => {
+                  setImportAfterAdd(true);
+                  setShowManual(true);
+                }}
+              />
+            )}
             <SetupOption
               icon={<PencilLine size={20} className="text-text-secondary" />}
               title={t('welcome.manual.title')}
@@ -136,19 +157,27 @@ export default function WelcomePage() {
               time={t('welcome.manual.time')}
               description={t('welcome.manual.description')}
               action={t('welcome.manual.action')}
-              onClick={() => setShowManual(true)}
+              onClick={() => {
+                setImportAfterAdd(false);
+                setShowManual(true);
+              }}
             />
           </div>
 
           <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-text-tertiary">
             <ShieldCheck size={14} className="text-positive shrink-0" aria-hidden />
-            {mode === 'server' ? t('welcome.privacy.server') : t('welcome.privacy.local')}{' '}
-            <ExternalLink
-              href={docsUrl('bank-sync')}
-              className="font-medium text-brand-600 hover:text-brand-700"
-            >
-              {t('welcome.compareBanks')}
-            </ExternalLink>
+            {mode === 'server' ? t('welcome.privacy.server') : t('welcome.privacy.local')}
+            {BANK_SYNC_ENABLED && (
+              <>
+                {' '}
+                <ExternalLink
+                  href={docsUrl('bank-sync')}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  {t('welcome.compareBanks')}
+                </ExternalLink>
+              </>
+            )}
           </p>
 
           <button
@@ -165,18 +194,26 @@ export default function WelcomePage() {
         <HelpFooter className="w-full border-t border-border-light" />
       </div>
 
-      <ConnectBankModal isOpen={showPlaid} onClose={() => setShowPlaid(false)} />
-      <PlaidSetupModal
-        isOpen={showPlaidSetup}
-        onClose={() => setShowPlaidSetup(false)}
-        onConfigured={() => setShowPlaid(true)}
+      {BANK_SYNC_ENABLED && (
+        <>
+          <ConnectBankModal isOpen={showPlaid} onClose={() => setShowPlaid(false)} />
+          <PlaidSetupModal
+            isOpen={showPlaidSetup}
+            onClose={() => setShowPlaidSetup(false)}
+            onConfigured={() => setShowPlaid(true)}
+          />
+          <SimplefinConnectModal isOpen={showSimplefin} onClose={() => setShowSimplefin(false)} />
+          <ConnectEnableBankingModal
+            isOpen={showEnableBanking}
+            onClose={() => setShowEnableBanking(false)}
+          />
+        </>
+      )}
+      <AddAccountModal
+        isOpen={showManual}
+        onClose={() => setShowManual(false)}
+        onCreated={importAfterAdd ? (id) => navigate(`/accounts/${id}?import=1`) : undefined}
       />
-      <SimplefinConnectModal isOpen={showSimplefin} onClose={() => setShowSimplefin(false)} />
-      <ConnectEnableBankingModal
-        isOpen={showEnableBanking}
-        onClose={() => setShowEnableBanking(false)}
-      />
-      <AddAccountModal isOpen={showManual} onClose={() => setShowManual(false)} />
     </div>
   );
 }

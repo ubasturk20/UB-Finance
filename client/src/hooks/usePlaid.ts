@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as plaidApi from '../api/plaid';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 
 export function usePlaidStatus() {
   return useQuery({
     queryKey: ['plaid-status'],
     queryFn: plaidApi.getPlaidStatus,
+    enabled: BANK_SYNC_ENABLED,
     staleTime: Infinity,
   });
 }
@@ -13,6 +15,7 @@ export function usePlaidItems() {
   return useQuery({
     queryKey: ['plaid-items'],
     queryFn: plaidApi.getPlaidItems,
+    enabled: BANK_SYNC_ENABLED,
   });
 }
 

@@ -4,7 +4,13 @@
 # İlk kurulum ve komutlar: CALISTIRMA.md
 services:
   ub-finance:
-    build: .
+    # Banka senkronu (Plaid, SimpleFIN, Enable Banking) Türk bankalarını kapsamadığı için
+    # kapalıdır. Açmak için ikisi birden gerekir: aşağıdaki build argümanı (istemci) ve
+    # environment'ta FLYBUDGET_BANK_SYNC=true (sunucu). Bkz. CALISTIRMA.md.
+    build:
+      context: .
+      # args:
+      #   VITE_BANK_SYNC: 'true'
     image: ub-finance:local
     container_name: ub-finance
     ports:
@@ -13,6 +19,7 @@ services:
       - '127.0.0.1:3001:3001'
     environment:
       - FLYBUDGET_DATA_KEY_FILE=/run/secrets/flybudget_data_key
+      # - FLYBUDGET_BANK_SYNC=true
     secrets:
       - flybudget_data_key
     volumes:

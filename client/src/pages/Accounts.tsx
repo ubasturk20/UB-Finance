@@ -17,6 +17,7 @@ import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useOpenFromLink } from '../hooks/useOpenFromLink';
 import { docsUrl } from '../utils/project';
+import { BANK_SYNC_ENABLED } from '../utils/features';
 import { formatCurrency, formatMoney } from '../utils/currency';
 import {
   balanceValue,
@@ -185,9 +186,11 @@ export default function AccountsPage() {
                 <Button onClick={() => setAddOpen(true)}>
                   <Plus size={14} /> {t('acc.empty.addFirst')}
                 </Button>
-                <ButtonLink variant="secondary" to="/settings?tab=connections">
-                  <Link2 size={14} /> {t('acc.empty.connectBank')}
-                </ButtonLink>
+                {BANK_SYNC_ENABLED && (
+                  <ButtonLink variant="secondary" to="/settings?tab=connections">
+                    <Link2 size={14} /> {t('acc.empty.connectBank')}
+                  </ButtonLink>
+                )}
               </>
             }
           />

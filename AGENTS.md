@@ -327,6 +327,8 @@ Every card has an empty state with a button to where its data comes from.
 
 ### Bank Sync (Plaid, SimpleFin, Enable Banking)
 
+**Off by default in UB-Finance** (none of them covers Turkish banks; the code stays). The server mounts `/api/plaid`, `/api/simplefin`, `/api/enable-banking` and the bank callback, and syncs on startup, only with `FLYBUDGET_BANK_SYNC=true` (`bankSyncEnabled` in `server/src/config.ts`; otherwise those paths get the JSON 404). The client shows bank options (sidebar add menu, welcome page, Settings → Connected Banks, "Connect a bank" links) and calls bank APIs (queries use `enabled: BANK_SYNC_ENABLED`) only when built with `VITE_BANK_SYNC=true` (`client/src/utils/features.ts`; Docker: `--build-arg VITE_BANK_SYNC=true`). Both are needed. The e2e setup turns both on, so the bank tests keep running; the website demo (`--mode demo`) counts as on and is unaffected.
+
 The app integrates with **Plaid** for automatic bank transaction import. Plaid credentials are stored in the `plaid_config` SQLite table (entered via Settings → Connected Banks), not in environment variables.
 
 We also integrate with **SimpleFin**, and with **Enable Banking** for European banks (below).

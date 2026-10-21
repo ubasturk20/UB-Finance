@@ -19,6 +19,7 @@ import { Button, ButtonLink } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import { useOpenFromLink } from '../../hooks/useOpenFromLink';
 import { docsUrl } from '../../utils/project';
+import { BANK_SYNC_ENABLED } from '../../utils/features';
 import { useAddTransaction } from '../../hooks/useOffline';
 import { formatCurrency } from '../../utils/currency';
 import { transactionValue } from '../../utils/accountMoney';
@@ -327,7 +328,11 @@ export function TransactionTable({
                 icon={<Receipt size={26} />}
                 title={t('tx.empty.title')}
                 description={
-                  accountId ? t('tx.empty.accountDescription') : t('tx.empty.allDescription')
+                  accountId
+                    ? t('tx.empty.accountDescription')
+                    : BANK_SYNC_ENABLED
+                      ? t('tx.empty.allDescription')
+                      : t('tx.empty.allDescriptionNoBank')
                 }
                 learnMoreHref={docsUrl('transactions')}
                 actions={
@@ -342,9 +347,11 @@ export function TransactionTable({
                     </>
                   ) : (
                     <>
-                      <ButtonLink variant="secondary" to="/settings?tab=connections">
-                        <Link2 size={14} /> {t('tx.empty.connectBank')}
-                      </ButtonLink>
+                      {BANK_SYNC_ENABLED && (
+                        <ButtonLink variant="secondary" to="/settings?tab=connections">
+                          <Link2 size={14} /> {t('tx.empty.connectBank')}
+                        </ButtonLink>
+                      )}
                       {onAddTransaction && (
                         <Button disabled={!newTx.allowed} onClick={onAddTransaction}>
                           <Plus size={14} /> {t('tx.empty.addFirst')}
