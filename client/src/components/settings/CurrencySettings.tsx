@@ -231,6 +231,7 @@ function Rates() {
             value={currency}
             onChange={setCurrency}
             first={foreign}
+            aria-label={t('settings.currency.currency')}
             className="w-48"
           />
         </div>
