@@ -64,7 +64,7 @@ export default function AccountTransactionsPage() {
             )}
             <CurrencyDifference account={account} />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
               <Pencil size={13} /> {t('common.edit')}
             </Button>
