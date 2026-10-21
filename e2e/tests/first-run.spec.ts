@@ -22,7 +22,7 @@ test('the getting started checklist tracks progress and can be hidden', async ({
   await page.getByRole('button', { name: 'Başlarken listesini gizle' }).click();
   await expect(checklist).toBeHidden();
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Budget', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bütçe', exact: true })).toBeVisible();
   await expect(checklist).toBeHidden();
 });
 

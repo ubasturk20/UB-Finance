@@ -191,7 +191,7 @@ test.describe('accounts', () => {
     await api.createAccount('Car Loan', -1_200_000, 'auto_loan');
     await open(page, '/accounts');
     const main = page.getByRole('main');
-    await expect(main).toContainText(/Net Worth\s*-9\.450\s₺/);
+    await expect(main).toContainText(/Net Değer\s*-9\.450\s₺/);
     await expect(main).toContainText(/Varlıklar\s*3\.000\s₺/);
     await expect(main).toContainText(/Borçlar\s*-12\.450\s₺/);
     await expect(main).toContainText(/Krediler\s*-12\.000\s₺/);

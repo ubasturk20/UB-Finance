@@ -40,10 +40,10 @@ test.describe('CSV import', () => {
 
     await expect(dialog).toContainText('4 satır bulundu');
     // Columns are recognized from their headers, the BOM notwithstanding
-    await expect(dialog.getByRole('combobox', { name: 'SütunDate' })).toHaveValue('date');
-    await expect(dialog.getByRole('combobox', { name: 'SütunDescription' })).toHaveValue('payee');
-    await expect(dialog.getByRole('combobox', { name: 'SütunAmount' })).toHaveValue('amount');
-    await expect(dialog.getByRole('combobox', { name: 'SütunMemo' })).toHaveValue('notes');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Date' })).toHaveValue('date');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Description' })).toHaveValue('payee');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Amount' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Memo' })).toHaveValue('notes');
 
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await expect(dialog).toContainText('4 işlem bulundu. 0 yinelenen işlem algılandı.');
@@ -95,11 +95,11 @@ test.describe('CSV import', () => {
     await expect(dialog.getByRole('combobox', { name: 'Ayırıcı' })).toHaveValue(';');
     await expect(dialog.getByRole('combobox', { name: 'Tarihler' })).toHaveValue('dmy');
     await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
-    await expect(dialog.getByRole('combobox', { name: 'SütunBuchungstag' })).toHaveValue('date');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Buchungstag' })).toHaveValue('date');
     await expect(
-      dialog.getByRole('combobox', { name: 'SütunAuftraggeber / Empfänger' }),
+      dialog.getByRole('combobox', { name: 'Sütun Auftraggeber / Empfänger' }),
     ).toHaveValue('payee');
-    await expect(dialog.getByRole('combobox', { name: 'SütunBetrag' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Betrag' })).toHaveValue('amount');
 
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '3 işlemi içe aktar' }).click();
@@ -130,8 +130,8 @@ test.describe('CSV import', () => {
         '"20250125","Werkgever BV","NL01INGB0001234567","Bij","2500,00","Salaris"\r\n',
     );
 
-    await expect(dialog.getByRole('combobox', { name: 'SütunAf Bij' })).toHaveValue('direction');
-    await expect(dialog.getByRole('combobox', { name: 'SütunBedrag (EUR)' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Af Bij' })).toHaveValue('direction');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Bedrag (EUR)' })).toHaveValue('amount');
     await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
@@ -176,7 +176,7 @@ test.describe('CSV import', () => {
     let dialog = await importCsv(page, csv('01.02.2025;Miete;-1.234\r\n'));
     await dialog.getByRole('combobox', { name: 'Tarihler' }).selectOption('dmy');
     await dialog.getByRole('combobox', { name: 'Tutarlar' }).selectOption('comma');
-    await dialog.getByRole('combobox', { name: 'SütunEmpfänger' }).selectOption('notes');
+    await dialog.getByRole('combobox', { name: 'Sütun Empfänger' }).selectOption('notes');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
     await dialog.getByRole('button', { name: 'Bitti' }).click();
@@ -191,7 +191,7 @@ test.describe('CSV import', () => {
     );
     await expect(dialog.getByRole('combobox', { name: 'Tarihler' })).toHaveValue('dmy');
     await expect(dialog.getByRole('combobox', { name: 'Tutarlar' })).toHaveValue('comma');
-    await expect(dialog.getByRole('combobox', { name: 'SütunEmpfänger' })).toHaveValue('notes');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Empfänger' })).toHaveValue('notes');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
     await expect(dialog).toContainText('1 içe aktarıldı, 0 atlandı');
@@ -222,7 +222,7 @@ test.describe('CSV import', () => {
       dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }),
     ).toHaveValue('3');
     await expect(dialog).toContainText('2 satır bulundu');
-    await expect(dialog.getByRole('combobox', { name: 'SütunBetrag' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Betrag' })).toHaveValue('amount');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
     await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
@@ -244,10 +244,10 @@ test.describe('CSV import', () => {
       buffer: Buffer.concat([header, lodz, rest]),
     });
 
-    await dialog.getByRole('combobox', { name: 'SütunOpis' }).selectOption('payee');
+    await dialog.getByRole('combobox', { name: 'Sütun Opis' }).selectOption('payee');
     await dialog.getByRole('combobox', { name: 'Karakter kodlaması' }).selectOption('windows-1250');
     // Reading the file again in another encoding keeps the mapping
-    await expect(dialog.getByRole('combobox', { name: 'SütunOpis' })).toHaveValue('payee');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Opis' })).toHaveValue('payee');
     await expect(dialog.getByRole('cell', { name: 'Łódź' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
@@ -266,7 +266,7 @@ test.describe('CSV import', () => {
         '2025-01-15,Albert Heijn,Uit,"12,50"\r\n' +
         '2025-01-25,Werkgever,In,"2500,00"\r\n',
     );
-    await dialog.getByRole('combobox', { name: 'SütunRichting' }).selectOption('direction');
+    await dialog.getByRole('combobox', { name: 'Sütun Richting' }).selectOption('direction');
     await expect(dialog).toContainText('anlamını bilmiyor: "Uit"');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await expect(dialog).toContainText('Bankanızın para çıkışı için kullandığı kelimeyi yazın');
@@ -405,7 +405,7 @@ test.describe('CSV import', () => {
       page,
       'Datum,Omschrijving,Richting,Bedrag\r\n2025-01-15,Albert Heijn,Uit,"12,50"\r\n',
     );
-    await dialog.getByRole('combobox', { name: 'SütunRichting' }).selectOption('direction');
+    await dialog.getByRole('combobox', { name: 'Sütun Richting' }).selectOption('direction');
     await dialog.getByRole('textbox', { name: 'Para çıkışını belirten kelime' }).fill('Uit');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '1 işlemi içe aktar' }).click();
@@ -498,14 +498,14 @@ test.describe('CSV import', () => {
     await expect(
       dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }),
     ).toHaveValue('0');
-    await dialog.getByRole('combobox', { name: 'SütunExport' }).selectOption('date');
-    await dialog.getByRole('combobox', { name: 'Sütunof' }).selectOption('notes');
-    await dialog.getByRole('combobox', { name: 'Sütuntransactions' }).selectOption('amount');
+    await dialog.getByRole('combobox', { name: 'Sütun Export' }).selectOption('date');
+    await dialog.getByRole('combobox', { name: 'Sütun of' }).selectOption('notes');
+    await dialog.getByRole('combobox', { name: 'Sütun transactions' }).selectOption('amount');
 
     await dialog.getByRole('spinbutton', { name: 'Başlığın üstündeki satırlar' }).fill('1');
-    await expect(dialog.getByRole('combobox', { name: 'SütunWhen' })).toHaveValue('date');
-    await expect(dialog.getByRole('combobox', { name: 'SütunText' })).toHaveValue('notes');
-    await expect(dialog.getByRole('combobox', { name: 'SütunValue' })).toHaveValue('amount');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun When' })).toHaveValue('date');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Text' })).toHaveValue('notes');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Value' })).toHaveValue('amount');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
     await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
@@ -521,8 +521,8 @@ test.describe('CSV import', () => {
       page,
       'Date,Description,Debit,Credit\r\n2026-03-01,Coffee,4.50,-\r\n2026-03-02,Refund,n/a,10.00\r\n',
     );
-    await expect(dialog.getByRole('combobox', { name: 'SütunDebit' })).toHaveValue('outflow');
-    await expect(dialog.getByRole('combobox', { name: 'SütunCredit' })).toHaveValue('inflow');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Debit' })).toHaveValue('outflow');
+    await expect(dialog.getByRole('combobox', { name: 'Sütun Credit' })).toHaveValue('inflow');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await dialog.getByRole('button', { name: '2 işlemi içe aktar' }).click();
     await expect(dialog).toContainText('2 içe aktarıldı, 0 atlandı');
@@ -553,7 +553,7 @@ test.describe('CSV import', () => {
     const checking = await api.createAccount('Checking', 0);
     await open(page, `/accounts/${checking.id}`);
     const dialog = await importCsv(page, 'Name,Notes\r\nfoo,bar\r\n');
-    await dialog.getByRole('combobox', { name: 'SütunName' }).selectOption('payee');
+    await dialog.getByRole('combobox', { name: 'Sütun Name' }).selectOption('payee');
     await dialog.getByRole('button', { name: 'Önizle' }).click();
     await expect(dialog).toContainText('Tarih sütunu gerekli');
     expect(await api.transactions(`?account_id=${checking.id}`)).toHaveLength(0);
